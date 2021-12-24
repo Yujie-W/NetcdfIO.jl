@@ -29,11 +29,13 @@ data = read_nc("test.nc", "test");
 read_nc(file::String, var::String) = (
     _dset = Dataset(file, "r");
     _dvar = _dset[var][:,:];
-    _nvar = replace(_dvar, missing=>NaN);
-    _dvar = nothing;
     close(_dset);
 
-    return _nvar
+    if sum(ismissing.(_dvar)) == 0
+        return _dvar
+    end;
+
+    return replace(_dvar, missing=>NaN)
 );
 
 
@@ -79,11 +81,13 @@ data = read_nc("test.nc", "test", 1);
 read_nc(file::String, var::String, indz::Int) = (
     _dset = Dataset(file, "r");
     _dvar = _dset[var][:,:,indz];
-    _data = replace(_dvar, missing=>NaN);
-    _dvar = nothing;
     close(_dset);
 
-    return _data
+    if sum(ismissing.(_dvar)) == 0
+        return _dvar
+    end;
+
+    return replace(_dvar, missing=>NaN)
 );
 
 
@@ -128,11 +132,13 @@ data = read_nc("test.nc", "test", 1, 1);
 read_nc(file::String, var::String, indx::Int, indy::Int) = (
     _dset = Dataset(file, "r");
     _dvar = _dset[var][indx,indy,:];
-    _data = replace(_dvar, missing=>NaN);
-    _dvar = nothing;
     close(_dset);
 
-    return _data
+    if sum(ismissing.(_dvar)) == 0
+        return _dvar
+    end;
+
+    return replace(_dvar, missing=>NaN)
 );
 
 
@@ -178,11 +184,9 @@ data = read_nc("test.nc", "test", 1, 1, 1);
 read_nc(file::String, var::String, indx::Int, indy::Int, indz::Int) = (
     _dset = Dataset(file, "r");
     _dvar = _dset[var][indx,indy,indz];
-    _data = ismissing(_dvar) ? NaN : _dvar;
-    _dvar = nothing;
     close(_dset);
 
-    return _data
+    return ismissing(_dvar) ? NaN : _dvar
 );
 
 
