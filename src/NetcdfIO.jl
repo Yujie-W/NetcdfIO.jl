@@ -1,5 +1,6 @@
 module NetcdfIO
 
+using DataFrames: DataFrame
 using DocStringExtensions: METHODLIST
 using NCDatasets: Dataset, defDim, defVar, listVar
 
@@ -12,8 +13,8 @@ export size_nc
 const ATTR_LAT   = Dict("description" => "Latitude", "unit" => "°");
 const ATTR_LON   = Dict("description" => "Longitude", "unit" => "°");
 const ATTR_CYC   = Dict("description" => "Cycle index", "unit" => "-");
-const ATTR_ABOUT = Dict("about" => "This is a file generated using PkgUtility.jl",
-                        "notes" => "PkgUtility.jl uses NCDatasets.jl to create NC files");
+const ATTR_ABOUT = Dict("about" => "This is a file generated using NetcdfIO.jl",
+                        "notes" => "NetcdfIO.jl uses NCDatasets.jl to read and write NC files");
 
 
 # include the files

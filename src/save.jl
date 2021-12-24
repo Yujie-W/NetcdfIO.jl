@@ -12,13 +12,14 @@ This method is a case if one wants to save both variable and attributes into the
 
     save_nc!(file::String,
              var_name::String,
-             var_attr::Dict,
-             var_data::Array{FT,N},
+             var_attr::Dict{String,String},
+             var_data::Array{T,N},
              atts_name::Vector{String},
-             atts_attr::Vector{Dict},
-             atts_data::Vector{Vector{FT}},
-             notes::Dict{String,String}
-    ) where {FT<:AbstractFloat,N}
+             atts_attr::Vector{Dict{String,String}},
+             atts_data::Vector{Vector},
+             notes::Dict{String,String};
+             compress::Int = 4
+    ) where {T<:Union{AbstractFloat,Int,String},N}
 
 Save dataset as NC file, given
 - `file` Path to save the dataset
@@ -69,13 +70,13 @@ save_nc!("data3.nc", "data3", attrn, data3, atts_name3, atts_attr3, atts_data3, 
 save_nc!(file::String,
          var_name::String,
          var_attr::Dict{String,String},
-         var_data::Array{FT,N},
+         var_data::Array{T,N},
          atts_name::Vector{String},
          atts_attr::Vector{Dict{String,String}},
-         atts_data::Vector,
+         atts_data::Vector{Vector},
          notes::Dict{String,String};
          compress::Int = 4
-) where {FT<:AbstractFloat,N} = (
+) where {T<:Union{AbstractFloat,Int,String},N} = (
     # make sure the data provided match in dimensions and ranges
     @assert length(atts_attr) == length(atts_data) == length(atts_name) == N;
     @assert 0 <= compress <= 9;
@@ -96,7 +97,7 @@ save_nc!(file::String,
     end;
 
     # define variable with attribute units and copy data into it
-    _data = defVar(_dset, var_name, FT, atts_name; attrib=var_attr, deflatelevel=compress);
+    _data = defVar(_dset, var_name, T, atts_name; attrib=var_attr, deflatelevel=compress);
     _data[:,:] = var_data;
 
     # close dataset file
@@ -112,10 +113,10 @@ To save the code and effort to redefine the common attributes like latitude, lon
     save_nc!(file::String,
              var_name::String,
              var_attr::Dict{String,String},
-             var_data::Array{FT,N};
-             notes::Dict{String,String} = DEFAULT_DICT,
+             var_data::Array{T,N};
+             notes::Dict{String,String} = ATTR_ABOUT,
              compress::Int = 4
-    ) where {FT<:AbstractFloat,N}
+    ) where {T<:Union{AbstractFloat,Int,String},N}
 
 Save the 2D or 3D data as NC file, given
 - `file` Path to save the dataset
@@ -146,37 +147,111 @@ save_nc!("data3.nc", "data3", attrn, data3; notes=notes);
 save_nc!(file::String,
          var_name::String,
          var_attr::Dict{String,String},
-         var_data::Array{FT,N};
+         var_data::Array{T,N};
          notes::Dict{String,String} = ATTR_ABOUT,
          compress::Int = 4
-) where {FT<:AbstractFloat,N} = (
-    @assert 2 <= N <= 3;
+) where {T<:Union{AbstractFloat,Int,String},N} = (
+    @assert 1 <= N <= 3;
     @assert 0 <= compress <= 9;
 
     # generate lat and lon information based on the dimensions of the data
-    _N_lat = size(var_data, 2);
-    _N_lon = size(var_data, 1);
-    _res_lat = FT(180) / _N_lat;
-    _res_lon = FT(360) / _N_lon;
-    _lats = collect(FT, _res_lat/2:_res_lat:180) .- 90;
-    _lons = collect(FT, _res_lon/2:_res_lon:360) .- 180;
-    if N==3
-        _inds = collect(Int,1:size(var_data,3));
+
+    # the case if the dimension is 1D
+    if N==1
+        _inds      = collect(Int, eachindex(var_data));
+        _atts_name = ["ind"];
+        _atts_attr = [ATTR_CYC];
+        _atts_data = Any[_inds];
+        save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress);
+
+        return nothing;
     end;
 
-    # define the attributes of the dimensions and data
+    # the case if the dimension is 2D or 3D
+    _N_lat   = size(var_data, 2);
+    _N_lon   = size(var_data, 1);
+    _res_lat = 180 / _N_lat;
+    _res_lon = 360 / _N_lon;
+    _lats    = collect(_res_lat/2:_res_lat:180) .- 90;
+    _lons    = collect(_res_lon/2:_res_lon:360) .- 180;
     if N==2
         _atts_name = ["lon", "lat"];
         _atts_attr = [ATTR_LON, ATTR_LAT];
         _atts_data = Any[_lons, _lats];
     else
+        _inds      = collect(Int, 1:size(var_data,3));
         _atts_name = ["lon", "lat", "ind"];
         _atts_attr = [ATTR_LON, ATTR_LAT, ATTR_CYC];
         _atts_data = Any[_lons, _lats, _inds];
     end;
-
-    # save the data to NC file
     save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress);
+
+    return nothing
+);
+
+
+"""
+This method saves DataFrame as a NetCDF file to save more space (compared to a CSV file).
+
+    save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4)
+
+Save DataFrame to NetCDF, given
+- `file` Path to save the data
+- `var_names` The label of data in DataFrame to save
+- `var_attrs` Variable attributes for the data to save
+- `df` DataFrame to save
+- `notes` Global attributes (notes)
+- `compress` Compression level fro NetCDF, default is 4
+
+---
+# Examples
+```julia
+df = DataFrame();
+df[!,"A"] = rand(5);
+df[!,"B"] = rand(5);
+df[!,"C"] = rand(5);
+save_nc!("test.nc", ["A","B"], [Dict("A" => "Attribute A"), Dict("B" => "Attribute B")], df);
+```
+"""
+save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4) = (
+    @assert 0 <= compress <= 9;
+
+    # save the data to the NetCDF file
+    save_nc!(file, var_names[1], var_attrs[1], df[:,var_names[1]]; notes = notes, compress = compress);
+    for _i in 2:length(var_names)
+        append_nc!(file, var_names[_i], var_attrs[_i], df[:,var_names[_i]], ["ind"], [ATTR_CYC], [collect(eachindex(df[:,var_names[_i]]))]; compress = compress);
+    end;
+
+    return nothing
+);
+
+
+"""
+This method is a simplified version of the method above, namely when users do not want to define the attributes.
+
+    save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4)
+
+Save DataFrame to NetCDF, given
+- `file` Path to save the data
+- `df` DataFrame to save
+- `notes` Global attributes (notes)
+- `compress` Compression level fro NetCDF, default is 4
+
+---
+# Examples
+```julia
+df = DataFrame();
+df[!,"A"] = rand(5);
+df[!,"B"] = rand(5);
+df[!,"C"] = rand(5);
+save_nc!("test.nc", df);
+```
+"""
+save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4) = (
+    _var_names = names(df);
+    _var_attrs = [Dict{String,String}(_vn => _vn) for _vn in _var_names];
+
+    save_nc!(file, _var_names, _var_attrs, df; notes=notes, compress=compress);
 
     return nothing
 );
