@@ -40,12 +40,12 @@ read_nc(file::String, var::String) = (
 
 
 """
-If a float type is given, the data will be converted to FT, namely the output will be an array of float numbers:
+If a float type is given, the data will be converted to T, namely the output will be an array of T type numbers:
 
-    read_nc(FT, file::String, var::String)
+    read_nc(T, file::String, var::String)
 
 Read data from nc file, given
-- `FT` Float number type
+- `T` Number type
 - `file` Dataset path
 - `var` Variable name
 
@@ -56,7 +56,7 @@ Examples
 data = read_nc(Float32, "test.nc", "test");
 ```
 """
-read_nc(FT, file::String, var::String) = FT.(read_nc(file, var));
+read_nc(T, file::String, var::String) = T.(read_nc(file, var));
 
 
 """
@@ -92,12 +92,12 @@ read_nc(file::String, var::String, indz::Int) = (
 
 
 """
-Similarly, one may want to read the subset as a certain float type using
+Similarly, one may want to read the subset as a certain type using
 
-    read_nc(FT, file::String, var::String, indz::Int)
+    read_nc(T, file::String, var::String, indz::Int)
 
 Read a subset from nc file, given
-- `FT` Float number type
+- `T` Number type
 - `file` Dataset path
 - `var` Variable name
 - `indz` The 3rd index of subset data to read
@@ -109,7 +109,7 @@ Examples
 data = read_nc(Float32, "test.nc", "test", 1);
 ```
 """
-read_nc(FT, file::String, var::String, indz::Int) = FT.(read_nc(file, var, indz));
+read_nc(T, file::String, var::String, indz::Int) = T.(read_nc(file, var, indz));
 
 
 """
@@ -143,12 +143,12 @@ read_nc(file::String, var::String, indx::Int, indy::Int) = (
 
 
 """
-Similarly, one may want to read the subset as a certain float type using
+Similarly, one may want to read the subset as a certain type using
 
-    read_nc(FT, file::String, var::String, indx::Int, indy::Int)
+    read_nc(T, file::String, var::String, indx::Int, indy::Int)
 
 Read the time series of data for a site, given
-- `FT` Float number type
+- `T` Number type
 - `file` Dataset path
 - `var` Variable name
 - `indx` The 1st index of subset data to read, typically longitude
@@ -160,7 +160,7 @@ Examples
 data = read_nc(Float32, "test.nc", "test", 1, 1);
 ```
 """
-read_nc(FT, file::String, var::String, indx::Int, indy::Int) = FT.(read_nc(file, var, indx, indy));
+read_nc(T, file::String, var::String, indx::Int, indy::Int) = T.(read_nc(file, var, indx, indy));
 
 
 """
@@ -191,12 +191,12 @@ read_nc(file::String, var::String, indx::Int, indy::Int, indz::Int) = (
 
 
 """
-Similarly, one may want to read the data as a certain float type using
+Similarly, one may want to read the data as a certain type using
 
-    read_nc(FT, file::String, var::String, indx::Int, indy::Int, indz::Int)
+    read_nc(T, file::String, var::String, indx::Int, indy::Int, indz::Int)
 
 Read the time series of data for a site, given
-- `FT` Float number type
+- `T` Number type
 - `file` Dataset path
 - `var` Variable name
 - `indx` The 1st index of subset data to read, typically longitude
@@ -209,4 +209,4 @@ Examples
 data = read_nc(Float32, "test.nc", "test", 1, 1, 1);
 ```
 """
-read_nc(FT, file::String, var::String, indx::Int, indy::Int, indz::Int) = FT.(read_nc(file, var, indx, indy, indz));
+read_nc(T, file::String, var::String, indx::Int, indy::Int, indz::Int) = T.(read_nc(file, var, indx, indy, indz));
