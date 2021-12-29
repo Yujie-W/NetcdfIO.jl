@@ -26,6 +26,17 @@ using Test
         @test size_nc("data3.nc", "data3") == (3, (36,18,12));
         @test size_nc("dataf.nc", "A"    ) == (1, (5,));
     end
+
+    @testset "Read" begin
+        read_nc(Float32, "data2.nc", "data2");
+        @test true;
+        read_nc(Float32, "data3.nc", "data3", 1);
+        @test true;
+        read_nc(Float32, "data2.nc", "data2", 1, 1);
+        @test true;
+        read_nc(Float32, "data3.nc", "data3", 1, 1, 1);
+        @test true;
+    end
 end
 
 
