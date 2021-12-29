@@ -18,6 +18,7 @@ read_nc(T, file::String, var::String)
 read_nc(file::String, var::String, indz::Int)
 read_nc(T, file::String, var::String, indz::Int)
 read_nc(file::String, var::String, indx::Int, indy::Int)
+read_nc(T, file::String, var::String, indx::Int, indy::Int)
 read_nc(file::String, var::String, indx::Int, indy::Int, indz::Int)
 read_nc(T, file::String, var::String, indx::Int, indy::Int, indz::Int)
 ```

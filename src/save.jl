@@ -161,7 +161,7 @@ save_nc!(file::String,
         _inds      = collect(Int, eachindex(var_data));
         _atts_name = ["ind"];
         _atts_attr = [ATTR_CYC];
-        _atts_data = Any[_inds];
+        _atts_data = Vector[_inds];
         save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress);
 
         return nothing;
@@ -177,12 +177,12 @@ save_nc!(file::String,
     if N==2
         _atts_name = ["lon", "lat"];
         _atts_attr = [ATTR_LON, ATTR_LAT];
-        _atts_data = Any[_lons, _lats];
+        _atts_data = Vector[_lons, _lats];
     else
         _inds      = collect(Int, 1:size(var_data,3));
         _atts_name = ["lon", "lat", "ind"];
         _atts_attr = [ATTR_LON, ATTR_LAT, ATTR_CYC];
-        _atts_data = Any[_lons, _lats, _inds];
+        _atts_data = Vector[_lons, _lats, _inds];
     end;
     save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress);
 
