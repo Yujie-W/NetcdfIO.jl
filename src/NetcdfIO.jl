@@ -6,7 +6,7 @@ using NCDatasets: Dataset, defDim, defVar, listVar
 
 
 # export public functions
-export append_nc!, read_nc, save_nc!, size_nc
+export append_nc!, dimname_nc, read_nc, save_nc!, size_nc, varname_nc
 
 
 # constants
@@ -19,6 +19,7 @@ const ATTR_ABOUT = Dict("about" => "This is a file generated using NetcdfIO.jl",
 
 # include the files
 include("append.jl")
+include("info.jl"  )
 include("read.jl"  )
 include("save.jl"  )
 include("size.jl"  )

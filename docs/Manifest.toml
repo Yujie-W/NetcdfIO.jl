@@ -37,9 +37,9 @@ version = "0.8.5"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "4c26b4e9e91ca528ea212927326ece5918a04b47"
+git-tree-sha1 = "d711603452231bad418bd5e0c91f1abd650cba71"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.11.2"
+version = "1.11.3"
 
 [[deps.ChangesOfVariables]]
 deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
@@ -58,9 +58,9 @@ deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 
 [[deps.Crayons]]
-git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
+git-tree-sha1 = "b618084b49e78985ffa8422f32b9838e397b9fc2"
 uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.0.4"
+version = "4.1.0"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
@@ -243,7 +243,7 @@ version = "400.702.400+0"
 deps = ["DataFrames", "DocStringExtensions", "NCDatasets", "Test"]
 path = ".."
 uuid = "6a36f34d-89cf-423a-87c4-84549e82f670"
-version = "0.1.0"
+version = "0.1.1"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"

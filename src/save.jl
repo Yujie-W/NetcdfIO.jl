@@ -33,7 +33,7 @@ Save dataset as NC file, given
 - `compress` Compression level fro NetCDF, default is 4
 
 ---
-Examples
+# Examples
 ```julia
 # generate data to write into NC file
 lats = collect(Float64, -85:10:85);
@@ -127,7 +127,7 @@ Save the 2D or 3D data as NC file, given
 - `compress` Compression level fro NetCDF, default is 4
 
 ---
-Examples
+# Examples
 ```julia
 # generate data to write into NC file
 data2 = rand(36,18) .+ 273.15;

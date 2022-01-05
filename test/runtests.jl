@@ -26,7 +26,7 @@ using Test
         lats = collect(Float64, -85:10:85);
         lons = collect(Float64, -175:10:175);
         inds = collect(Int, 1:5);
-        data1 = rand(18) .+ 273.15;
+        data1 = rand(36) .+ 273.15;
         data2 = rand(36,18) .+ 273.15;
         data3 = rand(36,18,5) .+ 273.15;
 
@@ -37,13 +37,13 @@ using Test
         indat = Dict("description" => "Cycle index", "unit" => "-");
 
         # define attributes names, information, and data
-        atts_name1 = ["lat"];
+        atts_name1 = ["lon"];
         atts_name2 = ["lon", "lat"];
         atts_name3 = ["lon", "lat", "ind"];
-        atts_attr1 = [latat];
+        atts_attr1 = [lonat];
         atts_attr2 = [lonat, latat];
         atts_attr3 = [lonat, latat, indat];
-        atts_data1 = Any[lats];
+        atts_data1 = Any[lons];
         atts_data2 = Any[lons, lats];
         atts_data3 = Any[lons, lats, inds];
 
@@ -62,6 +62,14 @@ using Test
         @test size_nc("dataf.nc", "A"    ) == (1, (5,));
     end
 
+    @testset "Info" begin
+        @test dimname_nc("data2.nc") == ["lon", "lat"];
+        @test dimname_nc("data3.nc") == ["lon", "lat", "ind"];
+        @test varname_nc("data2.nc") == ["data2"];
+        @test varname_nc("data3.nc") == ["data3"];
+        @test varname_nc("dataf.nc") == ["A", "B", "C", "data1", "data2", "data3"];
+    end
+
     @testset "Read" begin
         read_nc(Float32, "data2.nc", "data2");
         @test true;
@@ -70,6 +78,8 @@ using Test
         read_nc(Float32, "data2.nc", "data2", 1, 1);
         @test true;
         read_nc(Float32, "data3.nc", "data3", 1, 1, 1);
+        @test true;
+        read_nc("dataf.nc", ["A", "B", "C"]);
         @test true;
     end
 end

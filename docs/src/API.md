@@ -10,6 +10,13 @@ size_nc
 ```
 
 
+## Read the variable information from netcdf
+```@docs
+dimname_nc
+varname_nc
+```
+
+
 ## Read variable from netcdf
 ```@docs
 read_nc
@@ -21,6 +28,7 @@ read_nc(file::String, var::String, indx::Int, indy::Int)
 read_nc(T, file::String, var::String, indx::Int, indy::Int)
 read_nc(file::String, var::String, indx::Int, indy::Int, indz::Int)
 read_nc(T, file::String, var::String, indx::Int, indy::Int, indz::Int)
+read_nc(file::String, selections::Vector{String} = varname_nc(file))
 ```
 
 
