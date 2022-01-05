@@ -31,7 +31,7 @@ Append data to existing file, given
 - `compress` Compression level fro NetCDF, default is 4
 
 ---
-Examples
+# Examples
 ```julia
 # generate data to write into NC file
 lats = collect(Float64, -85:10:85);

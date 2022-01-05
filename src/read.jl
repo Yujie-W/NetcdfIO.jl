@@ -20,7 +20,7 @@ Read data from NC file, given
 Note that the missing data will be labeled as NaN.
 
 ---
-Examples
+# Examples
 ```julia
 # read data labeled as test from test.nc
 data = read_nc("test.nc", "test");
@@ -50,7 +50,7 @@ Read data from nc file, given
 - `var` Variable name
 
 ---
-Examples
+# Examples
 ```julia
 # read data labeled as test from test.nc as Float32
 data = read_nc(Float32, "test.nc", "test");
@@ -72,7 +72,7 @@ Read a subset from nc file, given
 Note that the dataset must be a 3D array to use this method.
 
 ---
-Examples
+# Examples
 ```julia
 # read 1st layer data labeled as test from test.nc
 data = read_nc("test.nc", "test", 1);
@@ -103,7 +103,7 @@ Read a subset from nc file, given
 - `indz` The 3rd index of subset data to read
 
 ---
-Examples
+# Examples
 ```julia
 # read 1st layer data labeled as test from test.nc as Float32
 data = read_nc(Float32, "test.nc", "test", 1);
@@ -124,7 +124,7 @@ Read the time series of data for a site, given
 - `indy` The 2nd index of subset data to read, typically latitude
 
 ---
-Examples
+# Examples
 ```julia
 data = read_nc("test.nc", "test", 1, 1);
 ```
@@ -155,7 +155,7 @@ Read the time series of data for a site, given
 - `indy` The 2nd index of subset data to read, typically latitude
 
 ---
-Examples
+# Examples
 ```julia
 data = read_nc(Float32, "test.nc", "test", 1, 1);
 ```
@@ -176,7 +176,7 @@ Read the time series of data for a site, given
 - `indz` The 3rd index of subset data to read, typically time
 
 ---
-Examples
+# Examples
 ```julia
 data = read_nc("test.nc", "test", 1, 1, 1);
 ```
@@ -204,9 +204,35 @@ Read the time series of data for a site, given
 - `indz` The 3rd index of subset data to read, typically time
 
 ---
-Examples
+# Examples
 ```julia
 data = read_nc(Float32, "test.nc", "test", 1, 1, 1);
 ```
 """
 read_nc(T, file::String, var::String, indx::Int, indy::Int, indz::Int) = T.(read_nc(file, var, indx, indy, indz));
+
+
+"""
+The method below reads all the 1D data (with the same length) into a DataFrame
+
+    read_nc(file::String, selections::Vector{String} = varname_nc(file))
+
+Read the selected variables from a netcdf file as a DataFrame, given
+- `file` Dataset path
+- `selections` Variables to read from the file
+
+---
+# Examples
+```julia
+df = read_nc("test.nc");
+df = read_nc("test.nc", ["A", "B"]);
+```
+"""
+read_nc(file::String, selections::Vector{String} = varname_nc(file)) = (
+    _dims = [size_nc(file, _var)[1] for _var in selections];
+    _lens = [size_nc(file, _var)[2][1] for _var in selections];
+    @assert all(_dims .== 1) "All variables need to be 1D!";
+    @assert all(_lens .== _lens[1]) "Dimensions of the variables need to be the same!";
+
+    return DataFrame( [Pair(_var, read_nc(file, _var)) for _var in selections] )
+);
