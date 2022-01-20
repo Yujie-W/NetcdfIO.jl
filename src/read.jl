@@ -79,6 +79,8 @@ data = read_nc("test.nc", "test", 1);
 ```
 """
 read_nc(file::String, var::String, indz::Int) = (
+    @assert size_nc(file, var)[1] == 3 "The dataset must be a 3D array to use this method!";
+
     _dset = Dataset(file, "r");
     _dvar = _dset[var][:,:,indz];
     close(_dset);
@@ -130,8 +132,11 @@ data = read_nc("test.nc", "test", 1, 1);
 ```
 """
 read_nc(file::String, var::String, indx::Int, indy::Int) = (
+    _ndim = size_nc(file, var)[1];
+    @assert 2 <= _ndim <= 3 "The dataset must be a 2D or 3D array to use this method!";
+
     _dset = Dataset(file, "r");
-    _dvar = _dset[var][indx,indy,:];
+    _dvar = (_ndim==2 ? _dset[var][indx,indy] : _dset[var][indx,indy,:]);
     close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
@@ -182,6 +187,8 @@ data = read_nc("test.nc", "test", 1, 1, 1);
 ```
 """
 read_nc(file::String, var::String, indx::Int, indy::Int, indz::Int) = (
+    @assert size_nc(file, var)[1] == 3 "The dataset must be a 3D array to use this method!";
+
     _dset = Dataset(file, "r");
     _dvar = _dset[var][indx,indy,indz];
     close(_dset);
