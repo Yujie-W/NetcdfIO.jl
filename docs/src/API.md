@@ -10,7 +10,7 @@ size_nc
 ```
 
 
-## Read the variable information from netcdf
+## Read variable information from netcdf
 ```@docs
 dimname_nc
 varname_nc
@@ -48,4 +48,10 @@ save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, c
 append_nc!
 append_nc!(file::String, var_name::String, var_attr::Dict{String,String}, var_data::Array{FT,N}, atts_name::Vector{String}, atts_attr::Vector{Dict{String,String}}, atts_data::Vector; compress::Int =
     4) where {FT<:AbstractFloat,N}
+```
+
+
+## Grow variables in netcdf
+```@docs
+growable_nc!
 ```

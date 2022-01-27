@@ -2,12 +2,24 @@
 #
 # Changes to the function
 # General
-#     2022-Jan-27: define the function to create grow netcdf file
+#     2022-Jan-27: define the function to create an empty growable netcdf file
+#     2022-Jan-27: add documentation and examples
 #
 #######################################################################################################################################################################################################
+"""
 
+    growable_nc!(file::String, dims::Vector{String})
 
+Create an empty netcdf file, given
+- `file` Path to save the netcdf dataset
+- `dims` Growable dimensions in the netcdf file
 
+---
+# Examples
+```julia
+growable_nc!("growable_nc.nc", ["time","ind"]);
+```
+"""
 function growable_nc!(file::String, dims::Vector{String})
     # create a dataset using "c" mode
     _dset = Dataset(file, "c");

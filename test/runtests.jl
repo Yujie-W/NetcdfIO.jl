@@ -4,6 +4,11 @@ using Test
 
 
 @testset verbose = true "NetcdfIO Test" begin
+    @testset "Grow" begin
+        growable_nc!("growable.nc", ["ind"]);
+        @test true;
+    end;
+
     @testset "Save" begin
         data2 = rand(36,18) .+ 273.15;
         data3 = rand(36,18,5) .+ 273.15;
@@ -11,6 +16,7 @@ using Test
         notes = Dict("description" => "This is a file generated using PkgUtility.jl", "notes" => "PkgUtility.jl uses NCDatasets.jl to create NC files");
         save_nc!("data2.nc", "data2", attrn, data2);
         save_nc!("data3.nc", "data3", attrn, data3; notes=notes);
+        save_nc!("data3_grow.nc", "data3", attrn, data3; notes=notes, growable=true);
         @test true;
 
         df = DataFrame();
@@ -18,8 +24,9 @@ using Test
         df[!,"B"] = rand(5);
         df[!,"C"] = rand(5);
         save_nc!("dataf.nc", df);
+        save_nc!("dataf_grow.nc", df; growable=true);
         @test true;
-    end
+    end;
 
     @testset "Append" begin
         # generate data to write into NC file
@@ -54,13 +61,9 @@ using Test
         @test true;
         append_nc!("dataf.nc", "data3", attrn, data3, atts_name3, atts_attr3, atts_data3);
         @test true;
-    end
-
-    @testset "Size" begin
-        @test size_nc("data2.nc", "data2") == (2, (36,18));
-        @test size_nc("data3.nc", "data3") == (3, (36,18,5));
-        @test size_nc("dataf.nc", "A"    ) == (1, (5,));
-    end
+        append_nc!("dataf_grow.nc", "data3", attrn, data3, atts_name3, atts_attr3, atts_data3);
+        @test true;
+    end;
 
     @testset "Info" begin
         @test dimname_nc("data2.nc") == ["lon", "lat"];
@@ -68,7 +71,7 @@ using Test
         @test varname_nc("data2.nc") == ["data2"];
         @test varname_nc("data3.nc") == ["data3"];
         @test varname_nc("dataf.nc") == ["A", "B", "C", "data1", "data2", "data3"];
-    end
+    end;
 
     @testset "Read" begin
         read_nc(Float32, "data2.nc", "data2");
@@ -81,11 +84,20 @@ using Test
         @test true;
         read_nc("dataf.nc", ["A", "B", "C"]);
         @test true;
-    end
-end
+    end;
+
+    @testset "Size" begin
+        @test size_nc("data2.nc", "data2") == (2, (36,18));
+        @test size_nc("data3.nc", "data3") == (3, (36,18,5));
+        @test size_nc("dataf.nc", "A"    ) == (1, (5,));
+    end;
+end;
 
 
 # remove the generated nc files
-rm("data2.nc"; force = true);
-rm("data3.nc"; force = true);
-rm("dataf.nc"; force = true);
+rm("data2.nc"     ; force = true);
+rm("data3.nc"     ; force = true);
+rm("data3_grow.nc"; force = true);
+rm("dataf.nc"     ; force = true);
+rm("dataf_grow.nc"; force = true);
+rm("growable.nc"  ; force = true);
