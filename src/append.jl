@@ -83,7 +83,7 @@ append_nc!(file::String,
 
     # dimensions for each attribute with their own sizes if not exisiting
     for _i in 1:N
-        if !(atts_name[_i] in listVar(_dset.ncid))
+        if !(atts_name[_i] in keys(_dset.dim))
             defDim(_dset, atts_name[_i], length(atts_data[_i]));
             _var = defVar(_dset, atts_name[_i], eltype(atts_data[_i]), atts_name[_i:_i]; attrib=atts_attr[_i], deflatelevel=compress);
             _var[:,:] = atts_data[_i];

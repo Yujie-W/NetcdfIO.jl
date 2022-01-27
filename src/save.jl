@@ -18,7 +18,8 @@ This method is a case if one wants to save both variable and attributes into the
              atts_attr::Vector{Dict{String,String}},
              atts_data::Vector{Vector},
              notes::Dict{String,String};
-             compress::Int = 4
+             compress::Int = 4,
+             growable::Bool = false
     ) where {T<:Union{AbstractFloat,Int,String},N}
 
 Save dataset as NC file, given
@@ -31,6 +32,7 @@ Save dataset as NC file, given
 - `atts_data` Vector of attributes data, such as the latitude range
 - `notes` Global attributes (notes)
 - `compress` Compression level fro NetCDF, default is 4
+- `growable` If true, make index growable, default is false
 
 ---
 # Examples
@@ -56,9 +58,9 @@ atts_name3 = ["lon", "lat", "ind"];
 atts_attr1 = [latat];
 atts_attr2 = [lonat, latat];
 atts_attr3 = [lonat, latat, indat];
-atts_data1 = Any[lats];
-atts_data2 = Any[lons, lats];
-atts_data3 = Any[lons, lats, inds];
+atts_data1 = Vector[lats];
+atts_data2 = Vector[lons, lats];
+atts_data3 = Vector[lons, lats, inds];
 notes = Dict("description" => "This is a file generated using PkgUtility.jl", "notes" => "PkgUtility.jl uses NCDatasets.jl to create NC files");
 
 # save data as NC files (1D, 2D, and 3D)
@@ -75,7 +77,8 @@ save_nc!(file::String,
          atts_attr::Vector{Dict{String,String}},
          atts_data::Vector{Vector},
          notes::Dict{String,String};
-         compress::Int = 4
+         compress::Int = 4,
+         growable::Bool = false
 ) where {T<:Union{AbstractFloat,Int,String},N} = (
     # make sure the data provided match in dimensions and ranges
     @assert length(atts_attr) == length(atts_data) == length(atts_name) == N;
@@ -91,9 +94,13 @@ save_nc!(file::String,
 
     # dimensions for each attribute with their own sizes
     for _i in 1:N
-        defDim(_dset, atts_name[_i], length(atts_data[_i]));
-        _var = defVar(_dset, atts_name[_i], eltype(atts_data[_i]), atts_name[_i:_i]; attrib=atts_attr[_i], deflatelevel=compress);
-        _var[:,:] = atts_data[_i];
+        if growable && atts_name[_i] == "ind"
+            defDim(_dset, atts_name[_i], Inf);
+        else
+            defDim(_dset, atts_name[_i], length(atts_data[_i]));
+            _var = defVar(_dset, atts_name[_i], eltype(atts_data[_i]), atts_name[_i:_i]; attrib=atts_attr[_i], deflatelevel=compress);
+            _var[:,:] = atts_data[_i];
+        end;
     end;
 
     # define variable with attribute units and copy data into it
@@ -115,7 +122,8 @@ To save the code and effort to redefine the common attributes like latitude, lon
              var_attr::Dict{String,String},
              var_data::Array{T,N};
              notes::Dict{String,String} = ATTR_ABOUT,
-             compress::Int = 4
+             compress::Int = 4,
+             growable::Bool = false
     ) where {T<:Union{AbstractFloat,Int,String},N}
 
 Save the 2D or 3D data as NC file, given
@@ -125,6 +133,7 @@ Save the 2D or 3D data as NC file, given
 - `var_data` Data to save
 - `notes` Global attributes (notes)
 - `compress` Compression level fro NetCDF, default is 4
+- `growable` If true, make index growable, default is false
 
 ---
 # Examples
@@ -149,7 +158,8 @@ save_nc!(file::String,
          var_attr::Dict{String,String},
          var_data::Array{T,N};
          notes::Dict{String,String} = ATTR_ABOUT,
-         compress::Int = 4
+         compress::Int = 4,
+         growable::Bool = false
 ) where {T<:Union{AbstractFloat,Int,String},N} = (
     @assert 1 <= N <= 3;
     @assert 0 <= compress <= 9;
@@ -184,7 +194,7 @@ save_nc!(file::String,
         _atts_attr = [ATTR_LON, ATTR_LAT, ATTR_CYC];
         _atts_data = Vector[_lons, _lats, _inds];
     end;
-    save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress);
+    save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress, growable = growable);
 
     return nothing
 );
@@ -193,7 +203,7 @@ save_nc!(file::String,
 """
 This method saves DataFrame as a NetCDF file to save more space (compared to a CSV file).
 
-    save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4)
+    save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4, growable::Bool = false)
 
 Save DataFrame to NetCDF, given
 - `file` Path to save the data
@@ -202,6 +212,7 @@ Save DataFrame to NetCDF, given
 - `df` DataFrame to save
 - `notes` Global attributes (notes)
 - `compress` Compression level fro NetCDF, default is 4
+- `growable` If true, make index growable, default is false
 
 ---
 # Examples
@@ -213,11 +224,11 @@ df[!,"C"] = rand(5);
 save_nc!("test.nc", ["A","B"], [Dict("A" => "Attribute A"), Dict("B" => "Attribute B")], df);
 ```
 """
-save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4) = (
+save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4, growable::Bool = false) = (
     @assert 0 <= compress <= 9;
 
     # save the data to the NetCDF file
-    save_nc!(file, var_names[1], var_attrs[1], df[:,var_names[1]]; notes = notes, compress = compress);
+    save_nc!(file, var_names[1], var_attrs[1], df[:,var_names[1]]; notes = notes, compress = compress, growable = growable);
     for _i in 2:length(var_names)
         append_nc!(file, var_names[_i], var_attrs[_i], df[:,var_names[_i]], ["ind"], [ATTR_CYC], [collect(eachindex(df[:,var_names[_i]]))]; compress = compress);
     end;
@@ -229,13 +240,14 @@ save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,
 """
 This method is a simplified version of the method above, namely when users do not want to define the attributes.
 
-    save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4)
+    save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4, growable::Bool = false)
 
 Save DataFrame to NetCDF, given
 - `file` Path to save the data
 - `df` DataFrame to save
 - `notes` Global attributes (notes)
 - `compress` Compression level fro NetCDF, default is 4
+- `growable` If true, make index growable, default is false
 
 ---
 # Examples
@@ -247,11 +259,11 @@ df[!,"C"] = rand(5);
 save_nc!("test.nc", df);
 ```
 """
-save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4) = (
+save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4, growable::Bool = false) = (
     _var_names = names(df);
     _var_attrs = [Dict{String,String}(_vn => _vn) for _vn in _var_names];
 
-    save_nc!(file, _var_names, _var_attrs, df; notes=notes, compress=compress);
+    save_nc!(file, _var_names, _var_attrs, df; notes=notes, compress=compress, growable = growable);
 
     return nothing
 );
