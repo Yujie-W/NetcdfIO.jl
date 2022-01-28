@@ -189,7 +189,7 @@ add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat) = (
     add_nc_dim!(file::String, dim_name::String, dim_size::Union{Int, AbstractFloat})
 
 Add dimension information to netcdf file, given
-- `file` Path to save the netcdf dataset
+- `file` Path of the netcdf dataset
 - `dim_name` Dimension name
 - `dim_size` Dimension size, must be Inf or Integer
 

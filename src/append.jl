@@ -76,7 +76,7 @@ append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::
     append_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,String}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Int,String},N}
 
 Append data to existing netcdf dataset, given
-- `file` Path to the netcdf dataset
+- `file` Path of the netcdf dataset
 - `var_name` New variable name to write to
 - `var_data` New variable data to write, can be integer, float, and string with N dimens
 - `var_attributes` New variable attributes

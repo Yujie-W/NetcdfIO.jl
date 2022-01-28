@@ -84,6 +84,50 @@ using Test
         rm("test.nc"; force=true);
     end;
 
+    @testset "Grow" begin
+        create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
+        _dset = Dataset("test.nc", "a");
+        append_nc!(_dset, "lat", collect(1:18), Dict("longname" => "latitude"), ["lat"]);
+        append_nc!(_dset, "lon", collect(1:36), Dict("longname" => "longitude"), ["lon"]; compress=4);
+        append_nc!(_dset, "ind", collect(1:5), Dict("longname" => "index"), ["ind"]);
+        append_nc!(_dset, "d2d", rand(36,5), Dict("longname" => "a 2d dataset"), ["lon", "ind"]);
+        append_nc!(_dset, "d3d", rand(36,18,5), Dict("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+
+        grow_nc!(_dset, "ind", 6, true);
+        @test true;
+        grow_nc!(_dset, "ind", 6, false);
+        @test true;
+        grow_nc!(_dset, "ind", [8,9], true);
+        @test true;
+        grow_nc!(_dset, "ind", [10,11], false);
+        @test true;
+        grow_nc!(_dset, "d2d", rand(36), true);
+        @test true;
+        grow_nc!(_dset, "d2d", rand(36), false);
+        @test true;
+        grow_nc!(_dset, "d2d", rand(36,2), true);
+        @test true;
+        grow_nc!(_dset, "d2d", rand(36,2), false);
+        @test true;
+        grow_nc!(_dset, "d3d", rand(36,18), true);
+        @test true;
+        grow_nc!(_dset, "d3d", rand(36,18), false);
+        @test true;
+        grow_nc!(_dset, "d3d", rand(36,18, 2), true);
+        @test true;
+        grow_nc!(_dset, "d3d", rand(36,18, 2), false);
+        @test true;
+
+        close(_dset);
+
+        grow_nc!("test.nc", "ind", 15, true);
+        @test true;
+        grow_nc!("test.nc", "d3d", rand(36,18), false);
+        @test true;
+
+        rm("test.nc"; force=true);
+    end;
+
     #=
     @testset "Save" begin
         data2 = rand(36,18) .+ 273.15;
@@ -101,43 +145,6 @@ using Test
         df[!,"C"] = rand(5);
         save_nc!("dataf.nc", df);
         save_nc!("dataf_grow.nc", df; growable=true);
-        @test true;
-    end;
-
-    @testset "Append" begin
-        # generate data to write into NC file
-        lats = collect(Float64, -85:10:85);
-        lons = collect(Float64, -175:10:175);
-        inds = collect(Int, 1:5);
-        data1 = rand(36) .+ 273.15;
-        data2 = rand(36,18) .+ 273.15;
-        data3 = rand(36,18,5) .+ 273.15;
-
-        # define the attributes of the dimensions and data
-        attrn = Dict("description" => "Random temperature", "unit" => "K");
-        latat = Dict("description" => "Latitude", "unit" => "°");
-        lonat = Dict("description" => "Longitude", "unit" => "°");
-        indat = Dict("description" => "Cycle index", "unit" => "-");
-
-        # define attributes names, information, and data
-        atts_name1 = ["lon"];
-        atts_name2 = ["lon", "lat"];
-        atts_name3 = ["lon", "lat", "ind"];
-        atts_attr1 = [lonat];
-        atts_attr2 = [lonat, latat];
-        atts_attr3 = [lonat, latat, indat];
-        atts_data1 = Any[lons];
-        atts_data2 = Any[lons, lats];
-        atts_data3 = Any[lons, lats, inds];
-
-        # save data as NC files (1D, 2D, and 3D)
-        append_nc!("dataf.nc", "data1", attrn, data1, atts_name1, atts_attr1, atts_data1);
-        @test true;
-        append_nc!("dataf.nc", "data2", attrn, data2, atts_name2, atts_attr2, atts_data2);
-        @test true;
-        append_nc!("dataf.nc", "data3", attrn, data3, atts_name3, atts_attr3, atts_data3);
-        @test true;
-        append_nc!("dataf_grow.nc", "data3", attrn, data3, atts_name3, atts_attr3, atts_data3);
         @test true;
     end;
 
