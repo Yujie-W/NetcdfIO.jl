@@ -4,6 +4,18 @@ CurrentModule = NetcdfIO
 ```
 
 
+## Create netcdf file
+```@docs
+create_nc!
+create_nc!(file::String)
+create_nc!(file::String, dim_names::Vector{String}, dim_sizes::Vector)
+add_nc_dim!
+add_nc_dim!(ds::Dataset, dim_name::String, dim_size::Int)
+add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat)
+add_nc_dim!(file::String, dim_name::String, dim_size::Union{Int, AbstractFloat})
+```
+
+
 ## Read variable size from netcdf
 ```@docs
 size_nc
@@ -53,6 +65,5 @@ append_nc!(file::String, var_name::String, var_attr::Dict{String,String}, var_da
 
 ## Create and grow variables in netcdf
 ```@docs
-create_nc!
 growable_nc!
 ```

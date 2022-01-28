@@ -1,14 +1,42 @@
 using DataFrames
+using NCDatasets
 using NetcdfIO
 using Test
 
 
 @testset verbose = true "NetcdfIO Test" begin
     @testset "Create" begin
-        create_nc!("growable.nc", String["lat","lon","ind"], Int[36,18,0]);
+        # create netcdf file
+        create_nc!("test.nc");
         @test true;
+        create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
+        @test true;
+        create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, Inf]);
+        @test true;
+        rm("test.nc"; force=true);
     end;
 
+    @testset "Add dim" begin
+        # create netcdf file
+        create_nc!("test.nc");
+        add_nc_dim!("test.nc", "dim1", 0);
+        @test true;
+        add_nc_dim!("test.nc", "dim2", 10);
+        @test true;
+        add_nc_dim!("test.nc", "dim3", 10.0);
+        @test true;
+        add_nc_dim!("test.nc", "dim4", Inf);
+        @test true;
+        _dset = Dataset("test.nc", "a");
+        add_nc_dim!(_dset, "dim5", 0);
+        add_nc_dim!(_dset, "dim6", 10);
+        add_nc_dim!(_dset, "dim7", 10.0);
+        add_nc_dim!(_dset, "dim8", Inf);
+        close(_dset);
+        rm("test.nc"; force=true);
+    end
+
+    #=
     @testset "Save" begin
         data2 = rand(36,18) .+ 273.15;
         data3 = rand(36,18,5) .+ 273.15;
@@ -91,9 +119,10 @@ using Test
         @test size_nc("data3.nc", "data3") == (3, (36,18,5));
         @test size_nc("dataf.nc", "A"    ) == (1, (5,));
     end;
+    =#
 end;
 
-
+#=
 # remove the generated nc files
 rm("data2.nc"     ; force = true);
 rm("data3.nc"     ; force = true);
@@ -101,3 +130,4 @@ rm("data3_grow.nc"; force = true);
 rm("dataf.nc"     ; force = true);
 rm("dataf_grow.nc"; force = true);
 rm("growable.nc"  ; force = true);
+=#

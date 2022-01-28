@@ -19,7 +19,7 @@ This method is a case if one wants to save both variable and attributes into the
              atts_data::Vector{Vector},
              notes::Dict{String,String};
              compress::Int = 4,
-             growable::Bool = false
+             growable_dims::Vector{String} = String["ind"]
     ) where {T<:Union{AbstractFloat,Int,String},N}
 
 Save dataset as NC file, given
@@ -32,7 +32,7 @@ Save dataset as NC file, given
 - `atts_data` Vector of attributes data, such as the latitude range
 - `notes` Global attributes (notes)
 - `compress` Compression level fro NetCDF, default is 4
-- `growable` If true, make index growable, default is false
+- `growable_dims` All dims in this vector will be growable, default is ["ind"]
 
 ---
 # Examples
@@ -78,14 +78,26 @@ save_nc!(file::String,
          atts_data::Vector{Vector},
          notes::Dict{String,String};
          compress::Int = 4,
-         growable::Bool = false
+         growable_dims::Vector{String} = String["ind"]
 ) where {T<:Union{AbstractFloat,Int,String},N} = (
     # make sure the data provided match in dimensions and ranges
     @assert length(atts_attr) == length(atts_data) == length(atts_name) == N;
     @assert 0 <= compress <= 9;
 
-    # create a dataset using "c" mode
-    _dset = Dataset(file, "c");
+    # create nc file using create_nc!
+    _sizes = Int[];
+    for _i in eachindex(atts_name)
+        if atts_name[_i] in growable_dims
+            push!(_sizes, 0);
+        else
+            push!(_sizes, length(atts_data[_i]));
+        end;
+    end;
+    create_nc!(file, atts_name, _sizes);
+    append_nc!(file, var_name, var_attr, var_data, atts_name, atts_attr, atts_data; compress=compress);
+
+    # create a dataset using "a" mode
+    _dset = Dataset(file, "a");
 
     # global title attribute
     for (_title,_notes) in notes
@@ -94,11 +106,6 @@ save_nc!(file::String,
 
     # dimensions for each attribute with their own sizes
     for _i in 1:N
-        if growable && atts_name[_i] == "ind"
-            defDim(_dset, atts_name[_i], Inf);
-        else
-            defDim(_dset, atts_name[_i], length(atts_data[_i]));
-        end;
         _var = defVar(_dset, atts_name[_i], eltype(atts_data[_i]), atts_name[_i:_i]; attrib=atts_attr[_i], deflatelevel=compress);
         _var[:,:] = atts_data[_i];
     end;
@@ -164,7 +171,8 @@ save_nc!(file::String,
     @assert 1 <= N <= 3;
     @assert 0 <= compress <= 9;
 
-    # generate lat and lon information based on the dimensions of the data
+    # determine the growable_dims based on growable
+    _growable_dims = (growable ? String["ind"] : String[]);
 
     # the case if the dimension is 1D
     if N==1
@@ -172,7 +180,7 @@ save_nc!(file::String,
         _atts_name = ["ind"];
         _atts_attr = [ATTR_CYC];
         _atts_data = Vector[_inds];
-        save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress);
+        save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress, growable_dims=_growable_dims);
 
         return nothing;
     end;
@@ -194,7 +202,7 @@ save_nc!(file::String,
         _atts_attr = [ATTR_LON, ATTR_LAT, ATTR_CYC];
         _atts_data = Vector[_lons, _lats, _inds];
     end;
-    save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress, growable = growable);
+    save_nc!(file, var_name, var_attr, var_data, _atts_name, _atts_attr, _atts_data, notes; compress=compress, growable_dims=_growable_dims);
 
     return nothing
 );

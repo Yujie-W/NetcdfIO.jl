@@ -6,7 +6,7 @@ using NCDatasets: Dataset, defDim, defVar
 
 
 # export public functions
-export append_nc!, create_nc!, dimname_nc, grow_nc!, read_nc, save_nc!, size_nc, varname_nc
+export add_nc_dim!, append_nc!, create_nc!, dimname_nc, grow_nc!, read_nc, save_nc!, size_nc, varname_nc
 
 
 # constants
