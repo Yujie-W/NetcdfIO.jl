@@ -98,9 +98,9 @@ save_nc!(file::String,
             defDim(_dset, atts_name[_i], Inf);
         else
             defDim(_dset, atts_name[_i], length(atts_data[_i]));
-            _var = defVar(_dset, atts_name[_i], eltype(atts_data[_i]), atts_name[_i:_i]; attrib=atts_attr[_i], deflatelevel=compress);
-            _var[:,:] = atts_data[_i];
         end;
+        _var = defVar(_dset, atts_name[_i], eltype(atts_data[_i]), atts_name[_i:_i]; attrib=atts_attr[_i], deflatelevel=compress);
+        _var[:,:] = atts_data[_i];
     end;
 
     # define variable with attribute units and copy data into it

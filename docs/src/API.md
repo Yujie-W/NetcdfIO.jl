@@ -51,7 +51,8 @@ append_nc!(file::String, var_name::String, var_attr::Dict{String,String}, var_da
 ```
 
 
-## Grow variables in netcdf
+## Create and grow variables in netcdf
 ```@docs
+create_nc!
 growable_nc!
 ```

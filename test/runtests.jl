@@ -4,8 +4,8 @@ using Test
 
 
 @testset verbose = true "NetcdfIO Test" begin
-    @testset "Grow" begin
-        growable_nc!("growable.nc", ["ind"]);
+    @testset "Create" begin
+        create_nc!("growable.nc", String["lat","lon","ind"], Int[36,18,0]);
         @test true;
     end;
 
