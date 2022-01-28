@@ -106,6 +106,7 @@ function add_nc_dim! end
 # General:
 #     2022-Jan-28: add method to add dim information to Dataset using Int
 #     2022-Jan-28: add documentation
+#     2022-Jan-28: remove nested if else statement
 #
 #######################################################################################################################################################################################################
 """
@@ -127,13 +128,15 @@ close(ds);
 ```
 """
 add_nc_dim!(ds::Dataset, dim_name::String, dim_size::Int) = (
-    if !(dim_name in keys(ds.dim))
-        if dim_size == 0
-            ds.dim[dim_name] = Inf;
-        else
-            ds.dim[dim_name] = dim_size;
-        end;
+    # if dim exists already, do nothing
+    if dim_name in keys(ds.dim)
+        @warn "Dimension $(dim_name) exists already, do nothing...";
+
+        return nothing
     end;
+
+    # if dim does not exist, define the dimension (0 for unlimited)
+    ds.dim[dim_name] = (dim_size == 0 ? Inf : dim_size);
 
     return nothing
 );
@@ -145,6 +148,7 @@ add_nc_dim!(ds::Dataset, dim_name::String, dim_size::Int) = (
 # General:
 #     2022-Jan-28: add method to add dim information to Dataset using Inf
 #     2022-Jan-28: add documentation
+#     2022-Jan-28: call the method for Int rather rather than duplicating the code
 #
 #######################################################################################################################################################################################################
 """
@@ -165,13 +169,8 @@ close(ds);
 ```
 """
 add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat) = (
-    if !(dim_name in keys(ds.dim))
-        if dim_size == Inf
-            ds.dim[dim_name] = Inf;
-        else
-            ds.dim[dim_name] = Int(dim_size);
-        end;
-    end;
+    _size = (dim_size == Inf ? 0 : Int(dim_size));
+    add_nc_dim!(ds, dim_name, _size);
 
     return nothing
 );

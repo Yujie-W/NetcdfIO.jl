@@ -23,6 +23,9 @@ using Test
         @test true;
         add_nc_dim!("test.nc", "dim2", 10);
         @test true;
+        @info "Expecting a warning here!";
+        add_nc_dim!("test.nc", "dim2", 10);
+        @test true;
         add_nc_dim!("test.nc", "dim3", 10.0);
         @test true;
         add_nc_dim!("test.nc", "dim4", Inf);
