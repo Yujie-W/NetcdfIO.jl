@@ -66,6 +66,21 @@ using Test
 
         close(_dset);
 
+        create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
+
+        append_nc!("test.nc", "str", ["A" for i in 1:18], Dict("longname" => "test strings"), ["lat"]);
+        @test true;
+        append_nc!("test.nc", "lat", collect(1:18), Dict("longname" => "latitude"), ["lat"]);
+        @test true;
+        append_nc!("test.nc", "lon", collect(1:36), Dict("longname" => "longitude"), ["lon"]; compress=4);
+        @test true;
+        append_nc!("test.nc", "ind", collect(1:5), Dict("longname" => "index"), ["ind"]);
+        @test true;
+        append_nc!("test.nc", "d2d", rand(36,18), Dict("longname" => "a 2d dataset"), ["lon", "lat"]);
+        @test true;
+        append_nc!("test.nc", "d3d", rand(36,18,5), Dict("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+        @test true;
+
         rm("test.nc"; force=true);
     end;
 
