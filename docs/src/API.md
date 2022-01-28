@@ -16,54 +16,8 @@ add_nc_dim!(file::String, dim_name::String, dim_size::Union{Int, AbstractFloat})
 ```
 
 
-## Read variable size from netcdf
-```@docs
-size_nc
-```
-
-
-## Read variable information from netcdf
-```@docs
-dimname_nc
-varname_nc
-```
-
-
-## Read variable from netcdf
-```@docs
-read_nc
-read_nc(file::String, var::String)
-read_nc(T, file::String, var::String)
-read_nc(file::String, var::String, indz::Int)
-read_nc(T, file::String, var::String, indz::Int)
-read_nc(file::String, var::String, indx::Int, indy::Int)
-read_nc(T, file::String, var::String, indx::Int, indy::Int)
-read_nc(file::String, var::String, indx::Int, indy::Int, indz::Int)
-read_nc(T, file::String, var::String, indx::Int, indy::Int, indz::Int)
-read_nc(file::String, selections::Vector{String} = varname_nc(file))
-```
-
-
-## Save variable to netcdf
-```@docs
-save_nc!
-save_nc!(file::String, var_name::String, var_attr::Dict{String,String}, var_data::Array{T,N}, atts_name::Vector{String}, atts_attr::Vector{Dict{String,String}}, atts_data::Vector{Vector},
-    notes::Dict{String,String}; compress::Int = 4) where {T<:Union{AbstractFloat,Int,String},N}
-save_nc!(file::String, var_name::String, var_attr::Dict{String,String}, var_data::Array{T,N}; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4) where {T<:Union{AbstractFloat,Int,String},N}
-save_nc!(file::String, var_names::Vector{String}, var_attrs::Vector{Dict{String,String}}, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4)
-save_nc!(file::String, df::DataFrame; notes::Dict{String,String} = ATTR_ABOUT, compress::Int = 4)
-```
-
-
-## Append variable to netcdf
+## Append new variables
 ```@docs
 append_nc!
-append_nc!(file::String, var_name::String, var_attr::Dict{String,String}, var_data::Array{FT,N}, atts_name::Vector{String}, atts_attr::Vector{Dict{String,String}}, atts_data::Vector; compress::Int =
-    4) where {FT<:AbstractFloat,N}
-```
-
-
-## Create and grow variables in netcdf
-```@docs
-growable_nc!
+append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,String}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Int,String},N}
 ```

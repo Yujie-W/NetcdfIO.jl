@@ -6,19 +6,19 @@ using Test
 
 @testset verbose = true "NetcdfIO Test" begin
     @testset "Create" begin
-        # create netcdf file
         create_nc!("test.nc");
         @test true;
         create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
         @test true;
         create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, Inf]);
         @test true;
+
         rm("test.nc"; force=true);
     end;
 
     @testset "Add dim" begin
-        # create netcdf file
         create_nc!("test.nc");
+
         add_nc_dim!("test.nc", "dim1", 0);
         @test true;
         add_nc_dim!("test.nc", "dim2", 10);
@@ -30,14 +30,44 @@ using Test
         @test true;
         add_nc_dim!("test.nc", "dim4", Inf);
         @test true;
+
         _dset = Dataset("test.nc", "a");
+
         add_nc_dim!(_dset, "dim5", 0);
+        @test true;
         add_nc_dim!(_dset, "dim6", 10);
+        @test true;
         add_nc_dim!(_dset, "dim7", 10.0);
+        @test true;
         add_nc_dim!(_dset, "dim8", Inf);
+        @test true;
+
         close(_dset);
+
         rm("test.nc"; force=true);
-    end
+    end;
+
+    @testset "Append" begin
+        create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
+        _dset = Dataset("test.nc", "a");
+
+        append_nc!(_dset, "str", ["A" for i in 1:18], Dict("longname" => "test strings"), ["lat"]);
+        @test true;
+        append_nc!(_dset, "lat", collect(1:18), Dict("longname" => "latitude"), ["lat"]);
+        @test true;
+        append_nc!(_dset, "lon", collect(1:36), Dict("longname" => "longitude"), ["lon"]; compress=4);
+        @test true;
+        append_nc!(_dset, "ind", collect(1:5), Dict("longname" => "index"), ["ind"]);
+        @test true;
+        append_nc!(_dset, "d2d", rand(36,18), Dict("longname" => "a 2d dataset"), ["lon", "lat"]);
+        @test true;
+        append_nc!(_dset, "d3d", rand(36,18,5), Dict("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+        @test true;
+
+        close(_dset);
+
+        rm("test.nc"; force=true);
+    end;
 
     #=
     @testset "Save" begin
