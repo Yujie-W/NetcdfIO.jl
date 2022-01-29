@@ -41,6 +41,7 @@ Note that the missing data will be labeled as NaN.
 # Examples
 ```julia
 # read data labeled as test from test.nc
+save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
 data = read_nc("test.nc", "test");
 ```
 """
@@ -79,6 +80,7 @@ Read data from nc file, given
 # Examples
 ```julia
 # read data labeled as test from test.nc as Float32
+save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
 data = read_nc(Float32, "test.nc", "test");
 ```
 """
@@ -112,6 +114,7 @@ Note that the dataset must be a 3D array to use this method.
 # Examples
 ```julia
 # read 1st layer data labeled as test from test.nc
+save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
 data = read_nc("test.nc", "test", 1);
 ```
 """
@@ -153,6 +156,7 @@ Read a subset from nc file, given
 # Examples
 ```julia
 # read 1st layer data labeled as test from test.nc as Float32
+save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
 data = read_nc(Float32, "test.nc", "test", 1);
 ```
 """
@@ -184,7 +188,10 @@ Read the time series of data for a site, given
 ---
 # Examples
 ```julia
-data = read_nc("test.nc", "test", 1, 1);
+save_nc!("test1.nc", "test", rand(36,18), Dict("description" => "Random randoms"));
+save_nc!("test2.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
+data1 = read_nc("test1.nc", "test", 1, 1);
+data2 = read_nc("test2.nc", "test", 1, 1);
 ```
 """
 read_nc(file::String, var_name::String, indx::Int, indy::Int) = (
@@ -226,7 +233,10 @@ Read the time series of data for a site, given
 ---
 # Examples
 ```julia
-data = read_nc(Float32, "test.nc", "test", 1, 1);
+save_nc!("test1.nc", "test", rand(36,18), Dict("description" => "Random randoms"));
+save_nc!("test2.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
+data1 = read_nc(Float32, "test1.nc", "test", 1, 1);
+data2 = read_nc(Float32, "test2.nc", "test", 1, 1);
 ```
 """
 read_nc(T, file::String, var_name::String, indx::Int, indy::Int) = T.(read_nc(file, var_name, indx, indy));
@@ -258,6 +268,7 @@ Read the time series of data for a site, given
 ---
 # Examples
 ```julia
+save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
 data = read_nc("test.nc", "test", 1, 1, 1);
 ```
 """
@@ -296,6 +307,7 @@ Read the time series of data for a site, given
 ---
 # Examples
 ```julia
+save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
 data = read_nc(Float32, "test.nc", "test", 1, 1, 1);
 ```
 """
@@ -324,8 +336,13 @@ Read the selected variables from a netcdf file as a DataFrame, given
 ---
 # Examples
 ```julia
-df = read_nc("test.nc");
-df = read_nc("test.nc", ["A", "B"]);
+df_raw = DataFrame();
+df_raw[!,"A"] = rand(5);
+df_raw[!,"B"] = rand(5);
+df_raw[!,"C"] = rand(5);
+save_nc!("test.nc", df_raw);
+df_new = read_nc("test.nc");
+df_new = read_nc("test.nc", ["A", "B"]);
 ```
 """
 read_nc(file::String, selections::Vector{String} = varname_nc(file)) = (
