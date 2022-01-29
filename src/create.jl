@@ -21,6 +21,7 @@ function create_nc! end
 # General
 #     2022-Jan-28: add the basic function to create an empty netcdf file
 #     2022-Jan-28: add documentation
+#     2022-Jan-28: add global attributes to the generated file
 #
 #######################################################################################################################################################################################################
 """
@@ -40,6 +41,11 @@ create_nc!(file::String) = (
     # create a dataset using "c" mode
     _dset = Dataset(file, "c");
 
+    # global title attribute
+    for (_title,_notes) in ATTR_ABOUT
+        _dset.attrib[_title] = _notes;
+    end;
+
     close(_dset);
 
     return nothing
@@ -53,6 +59,7 @@ create_nc!(file::String) = (
 #     2022-Jan-27: define the function to create an empty growable netcdf file
 #     2022-Jan-27: add documentation and examples
 #     2022-Jan-28: add input sizes to signal which dimensions are growable
+#     2022-Jan-28: add global attributes to the generated file
 #
 #######################################################################################################################################################################################################
 """
@@ -74,6 +81,11 @@ create_nc!("test2.nc", String["lon", "lat", "ind"], [36, 18, Inf]);
 create_nc!(file::String, dim_names::Vector{String}, dim_sizes::Vector) = (
     # create a dataset using "c" mode
     _dset = Dataset(file, "c");
+
+    # global title attribute
+    for (_title,_notes) in ATTR_ABOUT
+        _dset.attrib[_title] = _notes;
+    end;
 
     add_nc_dim!.([_dset], dim_names, dim_sizes);
 
@@ -122,8 +134,8 @@ Add dimension information to netcdf dataset, given
 # Examples
 ```julia
 ds = Dataset("test.nc", "a");
-add_nc_dim!("test.nc", "lat", 180);
-add_nc_dim!("test.nc", "ind", 0);
+add_nc_dim!(ds, "lat", 180);
+add_nc_dim!(ds, "ind", 0);
 close(ds);
 ```
 """

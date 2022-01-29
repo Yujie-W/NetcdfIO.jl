@@ -53,3 +53,12 @@ read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int)
 read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int)
 read_nc(file::String, selections::Vector{String} = varname_nc(file))
 ```
+
+
+## Quick save
+```@docs
+save_nc!
+save_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attribute::Dict{String,String}; compress::Int = 4, growable::Bool = false) where {T<:Union{AbstractFloat,Int,String},N}
+save_nc!(file::String, df::DataFrame, var_names::Vector{String}, var_attributes::Vector{Dict{String,String}}; compress::Int = 4, growable::Bool = false)
+save_nc!(file::String, df::DataFrame; compress::Int = 4, growable::Bool = false)
+```
