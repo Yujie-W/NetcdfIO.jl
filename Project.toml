@@ -1,7 +1,7 @@
 name = "NetcdfIO"
 uuid = "6a36f34d-89cf-423a-87c4-84549e82f670"
 authors = ["Yujie Wang <jesiner@gmail.com>"]
-version = "0.1.2"
+version = "0.2.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
