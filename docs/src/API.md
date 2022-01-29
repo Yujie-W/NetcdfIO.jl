@@ -24,9 +24,32 @@ append_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attributes:
 ```
 
 
-# Grow existing variables
+## Grow existing variables
 ```@docs
 grow_nc!
 grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool)
 grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool)
+```
+
+
+## Information of the dataset
+```@docs
+dimname_nc
+varname_nc
+size_nc
+```
+
+
+## Read existing variables
+```@docs
+read_nc
+read_nc(file::String, var_name::String)
+read_nc(T, file::String, var_name::String)
+read_nc(file::String, var_name::String, indz::Int)
+read_nc(T, file::String, var_name::String, indz::Int)
+read_nc(file::String, var_name::String, indx::Int, indy::Int)
+read_nc(T, file::String, var_name::String, indx::Int, indy::Int)
+read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int)
+read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int)
+read_nc(file::String, selections::Vector{String} = varname_nc(file))
 ```

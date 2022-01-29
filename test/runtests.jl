@@ -125,7 +125,40 @@ using Test
         grow_nc!("test.nc", "d3d", rand(36,18), false);
         @test true;
 
-        rm("test.nc"; force=true);
+        # do not delete the file so as to test other functions
+        # rm("test.nc"; force=true);
+    end;
+
+    @testset "Info" begin
+        @test dimname_nc("test.nc") == ["lon", "lat", "ind"];
+        @test varname_nc("test.nc") == ["d2d", "d3d"];
+        @test size_nc("test.nc", "d2d") == (2, (36,15));
+        @test size_nc("test.nc", "d3d") == (3, (36,18,15));
+
+        # do not delete the file so as to test other functions
+        # rm("test.nc"; force=true);
+    end;
+
+    @testset "Read" begin
+        read_nc(Float32, "test.nc", "d2d");
+        @test true;
+        read_nc(Float32, "test.nc", "d3d");
+        @test true;
+        read_nc(Float32, "test.nc", "d3d", 1);
+        @test true;
+        read_nc(Float32, "test.nc", "d2d", 1, 1);
+        @test true;
+        read_nc(Float32, "test.nc", "d3d", 1, 1);
+        @test true;
+        read_nc(Float32, "test.nc", "d3d", 1, 1, 1);
+        @test true;
+
+        append_nc!("test.nc", "A", collect(1:15), Dict("longname" => "DataFrame A"), ["ind"]);
+        append_nc!("test.nc", "B", collect(1:15), Dict("longname" => "DataFrame B"), ["ind"]);
+        append_nc!("test.nc", "C", collect(1:15), Dict("longname" => "DataFrame C"), ["ind"]);
+
+        read_nc("test.nc", ["A", "B", "C"]);
+        @test true;
     end;
 
     #=
@@ -146,33 +179,6 @@ using Test
         save_nc!("dataf.nc", df);
         save_nc!("dataf_grow.nc", df; growable=true);
         @test true;
-    end;
-
-    @testset "Info" begin
-        @test dimname_nc("data2.nc") == ["lon", "lat"];
-        @test dimname_nc("data3.nc") == ["lon", "lat", "ind"];
-        @test varname_nc("data2.nc") == ["data2"];
-        @test varname_nc("data3.nc") == ["data3"];
-        @test varname_nc("dataf.nc") == ["A", "B", "C", "data1", "data2", "data3"];
-    end;
-
-    @testset "Read" begin
-        read_nc(Float32, "data2.nc", "data2");
-        @test true;
-        read_nc(Float32, "data3.nc", "data3", 1);
-        @test true;
-        read_nc(Float32, "data2.nc", "data2", 1, 1);
-        @test true;
-        read_nc(Float32, "data3.nc", "data3", 1, 1, 1);
-        @test true;
-        read_nc("dataf.nc", ["A", "B", "C"]);
-        @test true;
-    end;
-
-    @testset "Size" begin
-        @test size_nc("data2.nc", "data2") == (2, (36,18));
-        @test size_nc("data3.nc", "data3") == (3, (36,18,5));
-        @test size_nc("dataf.nc", "A"    ) == (1, (5,));
     end;
     =#
 end;

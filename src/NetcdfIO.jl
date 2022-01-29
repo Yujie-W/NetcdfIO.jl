@@ -24,7 +24,6 @@ include("grow.jl"  )
 include("info.jl"  )
 include("read.jl"  )
 include("save.jl"  )
-include("size.jl"  )
 
 
 end # module
