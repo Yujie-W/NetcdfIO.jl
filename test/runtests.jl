@@ -131,7 +131,7 @@ using Test
 
     @testset "Info" begin
         @test dimname_nc("test.nc") == ["lon", "lat", "ind"];
-        @test varname_nc("test.nc") == ["d2d", "d3d"];
+        @test varname_nc("test.nc") == ["lat", "lon", "ind", "d2d", "d3d"];
         @test size_nc("test.nc", "d2d") == (2, (36,15));
         @test size_nc("test.nc", "d3d") == (3, (36,18,15));
 

@@ -36,12 +36,15 @@ grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Int,
 ```@docs
 dimname_nc
 varname_nc
+varname_nc(file::String)
+varname_nc(ds::Dataset)
 size_nc
 ```
 
 
 ## Read existing variables
 ```@docs
+find_variable
 read_nc
 read_nc(file::String, var_name::String)
 read_nc(T, file::String, var_name::String)
