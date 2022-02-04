@@ -148,6 +148,10 @@ using Test
         @test true;
         read_nc(Float32, "test.nc", "d3d"; transform=true);
         @test true;
+        read_nc(Float32, "test.nc", "lat", 1);
+        @test true;
+        read_nc(Float32, "test.nc", "lat", 1; transform=true);
+        @test true;
         read_nc(Float32, "test.nc", "d3d", 1);
         @test true;
         read_nc(Float32, "test.nc", "d3d", 1; transform=true);

@@ -146,6 +146,7 @@ read_nc(T, file::String, var_name::String; transform::Bool = true) = T.(read_nc(
 #     2022-Jan-28: fix documentation
 #     2022-Feb-03: add recursive variable query feature
 #     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
+#     2022-Feb-04: allow to read value from 1D array as well
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #     2022-Jan-20: add dimension control to avoid errors
@@ -173,14 +174,15 @@ data = read_nc("test.nc", "test", 1);
 ```
 """
 read_nc(file::String, var_name::String, indz::Int; transform::Bool = true) = (
-    @assert size_nc(file, var_name)[1] == 3 "The dataset must be a 3D array to use this method!";
+    _ndim = size_nc(file, var_name)[1];
+    @assert _ndim in [1,3] "The dataset must be a 1D or 3D array to use this method!";
 
     _dset = Dataset(file, "r");
     _fvar = find_variable(_dset, var_name);
     if transform
-        _dvar = _fvar[:,:,indz];
+        _dvar = (_ndim == 1 ? _fvar[indz] : _fvar[:,:,indz]);
     else
-        _dvar = _fvar.var[:,:,indz];
+        _dvar = (_ndim == 1 ? _fvar.var[indz] : _fvar.var[:,:,indz]);
     end;
     close(_dset);
 
