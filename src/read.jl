@@ -58,6 +58,7 @@ function read_nc end
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
 #     2022-Feb-03: add recursive variable query feature
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #
@@ -65,11 +66,12 @@ function read_nc end
 """
 When only file name and variable label are provided, `read_nc` function reads out all the data:
 
-    read_nc(file::String, var_name::String)
+    read_nc(file::String, var_name::String; transform::Bool = true)
 
 Read data from NC file, given
 - `file` Path of the netcdf dataset
 - `var_name` Variable to read
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 Note that the missing data will be labeled as NaN.
 
@@ -81,7 +83,7 @@ save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random random
 data = read_nc("test.nc", "test");
 ```
 """
-read_nc(file::String, var_name::String) = (
+read_nc(file::String, var_name::String; transform::Bool = true) = (
     _dset = Dataset(file, "r");
 
     _fvar = find_variable(_dset, var_name);
@@ -90,7 +92,11 @@ read_nc(file::String, var_name::String) = (
         @error "$(var_name) does not exist in $(file)!";
     end;
 
-    _dvar = _fvar[:,:];
+    if transform
+        _dvar = _fvar[:,:];
+    else
+        _dvar = _fvar.var[:,:];
+    end;
     close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
@@ -107,17 +113,19 @@ read_nc(file::String, var_name::String) = (
 # General
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 #
 #######################################################################################################################################################################################################
 """
 If a float type is given, the data will be converted to T, namely the output will be an array of T type numbers:
 
-    read_nc(T, file::String, var_name::String)
+    read_nc(T, file::String, var_name::String; transform::Bool = true)
 
 Read data from nc file, given
 - `T` Number type
 - `file` Path of the netcdf dataset
 - `var_name` Variable name
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -127,7 +135,7 @@ save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random random
 data = read_nc(Float32, "test.nc", "test");
 ```
 """
-read_nc(T, file::String, var_name::String) = T.(read_nc(file, var_name));
+read_nc(T, file::String, var_name::String; transform::Bool = true) = T.(read_nc(file, var_name; transform = transform));
 
 
 #######################################################################################################################################################################################################
@@ -137,6 +145,7 @@ read_nc(T, file::String, var_name::String) = T.(read_nc(file, var_name));
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
 #     2022-Feb-03: add recursive variable query feature
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #     2022-Jan-20: add dimension control to avoid errors
@@ -145,12 +154,13 @@ read_nc(T, file::String, var_name::String) = T.(read_nc(file, var_name));
 """
 In many cases, the NC dataset can be very huge, and reading all the data points into one array could be time and memory consuming. In this case, reading a subset of data would be the best option:
 
-    read_nc(file::String, var_name::String, indz::Int)
+    read_nc(file::String, var_name::String, indz::Int; transform::Bool = true)
 
 Read a subset from nc file, given
 - `file` Path of the netcdf dataset
 - `var_name` Variable name
 - `indz` The 3rd index of subset data to read
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 Note that the dataset must be a 3D array to use this method.
 
@@ -162,12 +172,16 @@ save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random random
 data = read_nc("test.nc", "test", 1);
 ```
 """
-read_nc(file::String, var_name::String, indz::Int) = (
+read_nc(file::String, var_name::String, indz::Int; transform::Bool = true) = (
     @assert size_nc(file, var_name)[1] == 3 "The dataset must be a 3D array to use this method!";
 
     _dset = Dataset(file, "r");
     _fvar = find_variable(_dset, var_name);
-    _dvar = _fvar[:,:,indz];
+    if transform
+        _dvar = _fvar[:,:,indz];
+    else
+        _dvar = _fvar.var[:,:,indz];
+    end;
     close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
@@ -184,18 +198,20 @@ read_nc(file::String, var_name::String, indz::Int) = (
 # General
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 #
 #######################################################################################################################################################################################################
 """
 Similarly, one may want to read the subset as a certain type using
 
-    read_nc(T, file::String, var_name::String, indz::Int)
+    read_nc(T, file::String, var_name::String, indz::Int; transform::Bool = true)
 
 Read a subset from nc file, given
 - `T` Number type
 - `file` Path of the netcdf dataset
 - `var_name` Variable name
 - `indz` The 3rd index of subset data to read
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -205,7 +221,7 @@ save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random random
 data = read_nc(Float32, "test.nc", "test", 1);
 ```
 """
-read_nc(T, file::String, var_name::String, indz::Int) = T.(read_nc(file, var_name, indz));
+read_nc(T, file::String, var_name::String, indz::Int; transform::Bool = true) = T.(read_nc(file, var_name, indz; transform = transform));
 
 
 #######################################################################################################################################################################################################
@@ -215,6 +231,7 @@ read_nc(T, file::String, var_name::String, indz::Int) = T.(read_nc(file, var_nam
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
 #     2022-Feb-03: add recursive variable query feature
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #     2022-Jan-20: add dimension control to avoid errors
@@ -223,13 +240,14 @@ read_nc(T, file::String, var_name::String, indz::Int) = T.(read_nc(file, var_nam
 """
 Another convenient wrapper is to read all the data for given index in x and y, for example, if one wants to read the time series of data at a given site:
 
-    read_nc(file::String, var_name::String, indx::Int, indy::Int)
+    read_nc(file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true)
 
 Read the time series of data for a site, given
 - `file` Path of the netcdf dataset
 - `var_name` Variable name
 - `indx` The 1st index of subset data to read, typically longitude
 - `indy` The 2nd index of subset data to read, typically latitude
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -240,13 +258,17 @@ data1 = read_nc("test1.nc", "test", 1, 1);
 data2 = read_nc("test2.nc", "test", 1, 1);
 ```
 """
-read_nc(file::String, var_name::String, indx::Int, indy::Int) = (
+read_nc(file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true) = (
     _ndim = size_nc(file, var_name)[1];
     @assert 2 <= _ndim <= 3 "The dataset must be a 2D or 3D array to use this method!";
 
     _dset = Dataset(file, "r");
     _fvar = find_variable(_dset, var_name);
-    _dvar = (_ndim==2 ? _fvar[indx,indy] : _fvar[indx,indy,:]);
+    if transform
+        _dvar = (_ndim==2 ? _fvar[indx,indy] : _fvar[indx,indy,:]);
+    else
+        _dvar = (_ndim==2 ? _fvar.var[indx,indy] : _fvar.var[indx,indy,:]);
+    end;
     close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
@@ -263,12 +285,13 @@ read_nc(file::String, var_name::String, indx::Int, indy::Int) = (
 # General
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 #
 #######################################################################################################################################################################################################
 """
 Similarly, one may want to read the subset as a certain type using
 
-    read_nc(T, file::String, var_name::String, indx::Int, indy::Int)
+    read_nc(T, file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true)
 
 Read the time series of data for a site, given
 - `T` Number type
@@ -276,6 +299,7 @@ Read the time series of data for a site, given
 - `var_name` Variable name
 - `indx` The 1st index of subset data to read, typically longitude
 - `indy` The 2nd index of subset data to read, typically latitude
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -286,7 +310,7 @@ data1 = read_nc(Float32, "test1.nc", "test", 1, 1);
 data2 = read_nc(Float32, "test2.nc", "test", 1, 1);
 ```
 """
-read_nc(T, file::String, var_name::String, indx::Int, indy::Int) = T.(read_nc(file, var_name, indx, indy));
+read_nc(T, file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true) = T.(read_nc(file, var_name, indx, indy; transform = transform));
 
 
 #######################################################################################################################################################################################################
@@ -296,6 +320,7 @@ read_nc(T, file::String, var_name::String, indx::Int, indy::Int) = T.(read_nc(fi
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
 #     2022-Feb-03: add recursive variable query feature
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #     2022-Jan-20: add dimension control to avoid errors
@@ -304,7 +329,7 @@ read_nc(T, file::String, var_name::String, indx::Int, indy::Int) = T.(read_nc(fi
 """
 Another convenient wrapper is to read the data for given index in x, y, and z, for example, if one wants to read the time series of data at a given site:
 
-    read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int)
+    read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true)
 
 Read the time series of data for a site, given
 - `file` Path of the netcdf dataset
@@ -312,6 +337,7 @@ Read the time series of data for a site, given
 - `indx` The 1st index of subset data to read, typically longitude
 - `indy` The 2nd index of subset data to read, typically latitude
 - `indz` The 3rd index of subset data to read, typically time
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -320,12 +346,16 @@ save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random random
 data = read_nc("test.nc", "test", 1, 1, 1);
 ```
 """
-read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int) = (
+read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = (
     @assert size_nc(file, var_name)[1] == 3 "The dataset must be a 3D array to use this method!";
 
     _dset = Dataset(file, "r");
     _fvar = find_variable(_dset, var_name);
-    _dvar = _fvar[indx,indy,indz];
+    if transform
+        _dvar = _fvar[indx,indy,indz];
+    else
+        _dvar = _fvar.var[indx,indy,indz];
+    end;
     close(_dset);
 
     return ismissing(_dvar) ? NaN : _dvar
@@ -338,12 +368,13 @@ read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int) = (
 # General
 #     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: fix documentation
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 #
 #######################################################################################################################################################################################################
 """
 Similarly, one may want to read the data as a certain type using
 
-    read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int)
+    read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true)
 
 Read the time series of data for a site, given
 - `T` Number type
@@ -352,6 +383,7 @@ Read the time series of data for a site, given
 - `indx` The 1st index of subset data to read, typically longitude
 - `indy` The 2nd index of subset data to read, typically latitude
 - `indz` The 3rd index of subset data to read, typically time
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -360,7 +392,7 @@ save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random random
 data = read_nc(Float32, "test.nc", "test", 1, 1, 1);
 ```
 """
-read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int) = T.(read_nc(file, var_name, indx, indy, indz));
+read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = T.(read_nc(file, var_name, indx, indy, indz; transform = transform));
 
 
 #######################################################################################################################################################################################################
@@ -369,6 +401,7 @@ read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int) = T.
 # General
 #     2022-Jan-04: add this function to read netcdf as DataFrame
 #     2022-Jan-28: fix documentation
+#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #
@@ -376,11 +409,12 @@ read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int) = T.
 """
 The method below reads all the 1D data (with the same length) into a DataFrame
 
-    read_nc(file::String, selections::Vector{String} = varname_nc(file))
+    read_nc(file::String, selections::Vector{String} = varname_nc(file); transform::Bool = true)
 
 Read the selected variables from a netcdf file as a DataFrame, given
 - `file` Path of the netcdf dataset
 - `selections` Variables to read from the file
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
 # Examples
@@ -394,11 +428,11 @@ df_new = read_nc("test.nc");
 df_new = read_nc("test.nc", ["A", "B"]);
 ```
 """
-read_nc(file::String, selections::Vector{String} = varname_nc(file)) = (
+read_nc(file::String, selections::Vector{String} = varname_nc(file); transform::Bool = true) = (
     _dims = [size_nc(file, _var)[1] for _var in selections];
     _lens = [size_nc(file, _var)[2][1] for _var in selections];
     @assert all(_dims .== 1) "All variables need to be 1D!";
     @assert all(_lens .== _lens[1]) "Dimensions of the variables need to be the same!";
 
-    return DataFrame( [Pair(_var, read_nc(file, _var)) for _var in selections] )
+    return DataFrame( [Pair(_var, read_nc(file, _var; transform = transform)) for _var in selections] )
 );
