@@ -46,15 +46,15 @@ size_nc
 ```@docs
 find_variable
 read_nc
-read_nc(file::String, var_name::String)
-read_nc(T, file::String, var_name::String)
-read_nc(file::String, var_name::String, indz::Int)
-read_nc(T, file::String, var_name::String, indz::Int)
-read_nc(file::String, var_name::String, indx::Int, indy::Int)
-read_nc(T, file::String, var_name::String, indx::Int, indy::Int)
-read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int)
-read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int)
-read_nc(file::String, selections::Vector{String} = varname_nc(file))
+read_nc(file::String, var_name::String; transform::Bool = true)
+read_nc(T, file::String, var_name::String; transform::Bool = true)
+read_nc(file::String, var_name::String, indz::Int; transform::Bool = true)
+read_nc(T, file::String, var_name::String, indz::Int; transform::Bool = true)
+read_nc(file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true)
+read_nc(T, file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true)
+read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true)
+read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true)
+read_nc(file::String, selections::Vector{String} = varname_nc(file); transform::Bool = true)
 ```
 
 
