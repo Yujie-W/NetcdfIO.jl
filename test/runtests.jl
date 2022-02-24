@@ -142,31 +142,31 @@ using Test
     @testset "Read" begin
         read_nc(Float32, "test.nc", "d2d");
         @test true;
-        read_nc(Float32, "test.nc", "d2d"; transform=true);
+        read_nc(Float32, "test.nc", "d2d"; transform=false);
         @test true;
         read_nc(Float32, "test.nc", "d3d");
         @test true;
-        read_nc(Float32, "test.nc", "d3d"; transform=true);
+        read_nc(Float32, "test.nc", "d3d"; transform=false);
         @test true;
         read_nc(Float32, "test.nc", "lat", 1);
         @test true;
-        read_nc(Float32, "test.nc", "lat", 1; transform=true);
+        read_nc(Float32, "test.nc", "lat", 1; transform=false);
         @test true;
         read_nc(Float32, "test.nc", "d3d", 1);
         @test true;
-        read_nc(Float32, "test.nc", "d3d", 1; transform=true);
+        read_nc(Float32, "test.nc", "d3d", 1; transform=false);
         @test true;
         read_nc(Float32, "test.nc", "d2d", 1, 1);
         @test true;
-        read_nc(Float32, "test.nc", "d2d", 1, 1; transform=true);
+        read_nc(Float32, "test.nc", "d2d", 1, 1; transform=false);
         @test true;
         read_nc(Float32, "test.nc", "d3d", 1, 1);
         @test true;
-        read_nc(Float32, "test.nc", "d3d", 1, 1; transform=true);
+        read_nc(Float32, "test.nc", "d3d", 1, 1; transform=false);
         @test true;
         read_nc(Float32, "test.nc", "d3d", 1, 1, 1);
         @test true;
-        read_nc(Float32, "test.nc", "d3d", 1, 1, 1; transform=true);
+        read_nc(Float32, "test.nc", "d3d", 1, 1, 1; transform=false);
         @test true;
 
         append_nc!("test.nc", "A", collect(1:15), Dict("longname" => "DataFrame A"), ["ind"]);
@@ -175,7 +175,7 @@ using Test
 
         read_nc("test.nc", ["A", "B", "C"]);
         @test true;
-        read_nc("test.nc", ["A", "B", "C"]; transform=true);
+        read_nc("test.nc", ["A", "B", "C"]; transform=false);
         @test true;
 
         rm("test.nc"; force=true);
