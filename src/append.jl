@@ -56,6 +56,11 @@ append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::
     @assert length(dim_names) ==  N "Dimension must be match!";
     @assert 0 <= compress <= 9 "Compression rate must be within 0 to 9";
 
+    # if type of variable is string, set deflatelevel to 0
+    if T == String
+        compress = 0;
+    end;
+
     _ds_var = defVar(ds, var_name, T, dim_names; attrib = var_attributes, deflatelevel = compress);
     _ds_var[:,:] = var_data;
 

@@ -99,22 +99,26 @@ using Test
         @test true;
         grow_nc!(_dset, "ind", [8,9], true);
         @test true;
-        grow_nc!(_dset, "ind", [10,11], false);
+        grow_nc!(_dset, "ind", [7,8], false);
         @test true;
         grow_nc!(_dset, "d2d", rand(36), true);
         @test true;
+        grow_nc!(_dset, "ind", 9, false);
         grow_nc!(_dset, "d2d", rand(36), false);
         @test true;
         grow_nc!(_dset, "d2d", rand(36,2), true);
         @test true;
+        grow_nc!(_dset, "ind", [10,11], false);
         grow_nc!(_dset, "d2d", rand(36,2), false);
         @test true;
         grow_nc!(_dset, "d3d", rand(36,18), true);
         @test true;
+        grow_nc!(_dset, "ind", 12, false);
         grow_nc!(_dset, "d3d", rand(36,18), false);
         @test true;
         grow_nc!(_dset, "d3d", rand(36,18, 2), true);
         @test true;
+        grow_nc!(_dset, "ind", [13,14], false);
         grow_nc!(_dset, "d3d", rand(36,18, 2), false);
         @test true;
 
