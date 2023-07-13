@@ -5,10 +5,6 @@ using DocStringExtensions: METHODLIST
 using NCDatasets: Dataset, defDim, defVar
 
 
-# export public functions
-export add_nc_dim!, append_nc!, create_nc!, dimname_nc, grow_nc!, read_nc, save_nc!, size_nc, varname_nc
-
-
 # constants
 const ATTR_LAT   = Dict("description" => "Latitude", "unit" => "°");
 const ATTR_LON   = Dict("description" => "Longitude", "unit" => "°");

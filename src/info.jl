@@ -3,7 +3,6 @@
 # Changes to the function
 # General
 #     2022-Jan-04: add a short cut function to read the dimension names
-#     2022-Jan-28: fix documentation
 #
 #######################################################################################################################################################################################################
 """
@@ -18,6 +17,7 @@ Return all the names of the dimensions, given
 ```julia
 dims = dimname_nc("test.nc");
 ```
+
 """
 function dimname_nc(file::String)
     _dset = Dataset(file, "r");
@@ -33,61 +33,19 @@ end
 # Changes to the function
 # General
 #     2022-Feb-03: abstractize the function to read the variable names recursively
-#
-#######################################################################################################################################################################################################
-"""
-This function returns the variable names in the netcdf dataset, and the supported methids are
-
-$(METHODLIST)
-
-"""
-function varname_nc end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to the method
-# General
 #     2022-Jan-04: add a short cut function to read the variable names excluding dimension names
-#     2022-Jan-28: fix documentation
 #     2022-Feb-03: remove dimension name control
-#
-#######################################################################################################################################################################################################
-"""
-
-    varname_nc(file::String)
-
-Return all the names of the variables (excluding the dimensions), given
-- `file` Path of the netcdf dataset
-
----
-# Examples
-```julia
-vars = varname_nc("test.nc");
-```
-"""
-varname_nc(file::String) = (
-    _dset = Dataset(file, "r");
-    _vars = varname_nc(_dset);
-    close(_dset);
-
-    return _vars
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to the method
-# General
 #     2022-Feb-03: add recursive variable query feature
 #
 #######################################################################################################################################################################################################
 """
 
     varname_nc(ds::Dataset)
+    varname_nc(file::String)
 
 Return all the names of the variables (excluding the dimensions), given
 - `ds` NCDatasets.Dataset type dataset
+- `file` Path of the netcdf dataset
 
 ---
 # Examples
@@ -95,8 +53,13 @@ Return all the names of the variables (excluding the dimensions), given
 dset = Dataset("test.nc");
 vars = varname_nc(dset);
 close(dset);
+
+vars = varname_nc("test.nc");
 ```
 """
+function varname_nc end
+
+
 varname_nc(ds::Dataset) = (
     _vars = String[];
 
@@ -112,6 +75,14 @@ varname_nc(ds::Dataset) = (
     return _vars
 );
 
+varname_nc(file::String) = (
+    _dset = Dataset(file, "r");
+    _vars = varname_nc(_dset);
+    close(_dset);
+
+    return _vars
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -119,8 +90,8 @@ varname_nc(ds::Dataset) = (
 # General
 #     2021-Dec-24: add a short cut function to read the size of a dataset
 #     2022-Jan-28: move the function from size.jl to info.jl
-#     2022-Jan-28: fix documentation
 #     2022-Feb-03: add recursive variable query feature
+#     2023-Jul-06: add method to read size from dataset directly
 #
 #######################################################################################################################################################################################################
 """
@@ -137,18 +108,24 @@ Return the dimensions and size of a NetCDF dataset, given
 ndims,sizes = size_nc("test.nc", "test");
 ```
 """
-function size_nc(file::String, var_name::String)
-    _dset = Dataset(file, "r");
+function size_nc end
 
-    _fvar = find_variable(_dset, var_name);
+size_nc(ds::Dataset, var_name::String) = (
+    _fvar = find_variable(ds, var_name);
     if _fvar === nothing
-        close(_dset)
-        return error("$(var_name) does not exist in $(file)!");
+        return error("$(var_name) does not exist in the given dataset!");
     end;
 
     _ndim = ndims(_fvar);
     _size = size(_fvar);
+
+    return _ndim, _size
+);
+
+size_nc(file::String, var_name::String) = (
+    _dset = Dataset(file, "r");
+    (_ndim,_size) = size_nc(_dset, var_name);
     close(_dset);
 
     return _ndim, _size
-end
+);
