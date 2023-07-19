@@ -1,8 +1,10 @@
 module NetcdfIO
 
+import NCDatasets: nc_open
+
 using DataFrames: DataFrame
 using DocStringExtensions: METHODLIST
-using NCDatasets: Dataset, defDim, defVar
+using NCDatasets: Dataset, NC_NOERR, NetCDFError, defDim, defVar, nc_strerror
 
 
 # constants
@@ -14,12 +16,13 @@ const ATTR_ABOUT = Dict("about" => "This is a file generated using NetcdfIO.jl",
 
 
 # include the files
-include("append.jl")
-include("create.jl")
-include("grow.jl"  )
-include("info.jl"  )
-include("read.jl"  )
-include("save.jl"  )
+include("append.jl");
+include("create.jl");
+include("grow.jl");
+include("hdf4.jl");
+include("info.jl");
+include("read.jl");
+include("save.jl");
 
 
 end # module
