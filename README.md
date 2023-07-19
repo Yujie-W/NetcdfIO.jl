@@ -20,7 +20,7 @@
 [cov-url]: https://codecov.io/gh/Yujie-W/NetcdfIO.jl
 
 ## About
-NetcdfIO contains a number of wrapper functions for NCDatasets.jl. The use of these functions significantly reduce the number of code to read/write data from/to a netcdf file. Note that NetcdfIO does not have HDF4 support; if you need to open HDF4 files, use `NetCDF` v0.10 or `NCDatasets` v0.10 on a old system (for example, our server has a netcdf v4.3.3.1 installed, and it works; my desktop has a netcdf v4.8.1 installed, but it does not work).
+NetcdfIO contains a number of wrapper functions for NCDatasets.jl. The use of these functions significantly reduce the number of code to read/write data from/to a netcdf file (may not be efficient though). Note that the libnetcdf shipped with NCDatasets does not have HDF4 support; if you need to open HDF4 files, we have implemented a function `switch_netcdf_lib!` to allow the users to switch between libnetcdf library. What works on my case if I installed libnetcdf through Conda.jl (4.8.1 in my case, located at `~/.julia/conda/3/lib/libnetcdf.so`), and double checked that HDF4 support is enabled. Then I ran `switch_netcdf_lib!(use_default = false)` to enable it. You can also run `switch_netcdf_lib!()` to switch back to the default library shipped with NCDatasets.
 
 | Documentation                                   | CI Status             | Compatibility           | Code Coverage           |
 |:------------------------------------------------|:----------------------|:------------------------|:------------------------|
@@ -29,8 +29,8 @@ NetcdfIO contains a number of wrapper functions for NCDatasets.jl. The use of th
 
 ## Installation
 ```julia
-julia> using Pkg;
-julia> Pkg.add("NetcdfIO");
+using Pkg;
+Pkg.add("NetcdfIO");
 ```
 
 

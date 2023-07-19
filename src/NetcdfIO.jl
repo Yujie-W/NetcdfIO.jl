@@ -13,13 +13,16 @@ const ATTR_ABOUT = Dict("about" => "This is a file generated using NetcdfIO.jl",
                         "notes" => "NetcdfIO.jl uses NCDatasets.jl to read and write NC files");
 
 
-# include the files
-include("append.jl")
-include("create.jl")
-include("grow.jl"  )
-include("info.jl"  )
-include("read.jl"  )
-include("save.jl"  )
+# my fix for NCDatasets.jl
+include("NCDatasets.jl");
+
+# my wrapper functions
+include("append.jl");
+include("create.jl");
+include("grow.jl");
+include("info.jl");
+include("read.jl");
+include("save.jl");
 
 
 end # module
