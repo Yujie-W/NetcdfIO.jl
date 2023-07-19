@@ -1,6 +1,9 @@
 import NetCDF_jll
+import NCDatasets: nc_open
 
-const LIBNETCDF  = deepcopy(NetCDF_jll.libnetcdf);
+using NCDatasets: NC_NOERR, NetCDFError, nc_strerror
+
+const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 
 
 #######################################################################################################################################################################################################
@@ -22,9 +25,15 @@ Switch between the default NetCDF library and a user-defined one, given
 function switch_netcdf_lib!(; use_default::Bool = true, user_defined::String = "$(homedir())/.julia/conda/3/lib/libnetcdf.so")
     if use_default
         NetCDF_jll.libnetcdf = LIBNETCDF;
+        NetCDF_jll.libnetcdf_path = LIBNETCDF;
+        Base.Libc.Libdl.dlclose(NetCDF_jll.libnetcdf_handle);
+        NetCDF_jll.libnetcdf_handle = Base.Libc.Libdl.dlopen(LIBNETCDF);
     else
         if isfile(user_defined)
             NetCDF_jll.libnetcdf = user_defined;
+            NetCDF_jll.libnetcdf_path = user_defined;
+            Base.Libc.Libdl.dlclose(NetCDF_jll.libnetcdf_handle);
+            NetCDF_jll.libnetcdf_handle = Base.Libc.Libdl.dlopen(user_defined);
         else
             @warn "File '$(user_defined)' not found!";
             @info "Hint: You may libnetcdf shipped with Conda.jl using Conda.add(\"libnetcdf\"). A version above 4.8.1 is recommended.";
@@ -33,4 +42,28 @@ function switch_netcdf_lib!(; use_default::Bool = true, user_defined::String = "
     end;
 
     return nothing
+end
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2023-Jul-19: use sym to refer to the handle so as to dynamically switch between libnetcdf libraries
+#
+#######################################################################################################################################################################################################
+function nc_open(path,mode::Integer)
+    @debug "nc_open $path with mode $mode"
+    ncidp = Ref(Cint(0))
+
+    _sym = Base.Libc.Libdl.dlsym(NetCDF_jll.libnetcdf_handle, :nc_open)
+    code = ccall(_sym,Cint,(Cstring,Cint,Ptr{Cint}),path,mode,ncidp)
+
+    if code == NC_NOERR
+        return ncidp[]
+    else
+        # otherwise throw an error message
+        # with a more helpful error message (i.e. with the path)
+        throw(NetCDFError(code, "Opening path $(path): $(nc_strerror(code))"))
+    end
 end

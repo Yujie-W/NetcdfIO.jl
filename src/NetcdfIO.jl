@@ -2,7 +2,7 @@ module NetcdfIO
 
 using DataFrames: DataFrame
 using DocStringExtensions: METHODLIST
-using NCDatasets: Dataset, NC_NOERR, NetCDFError, defDim, defVar, nc_strerror
+using NCDatasets: Dataset, defDim, defVar
 
 
 # constants
