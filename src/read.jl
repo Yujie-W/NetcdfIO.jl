@@ -45,6 +45,7 @@ end
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #     2022-Jan-20: add dimension control to avoid errors
+#     2023-Jul-25: add option to read any portion of the data
 #
 #######################################################################################################################################################################################################
 """
@@ -102,6 +103,15 @@ Read the data at a grid, given
 Read the selected variables from a netcdf file as a DataFrame, given
 - `file` Path of the netcdf dataset
 - `selections` Variables to read from the file
+- `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
+
+#
+    read_nc(file::String, var_name::String, dim_array::Vector; transform::Bool = true)
+
+Read parts of the data specified in an array
+- `file` Path of the netcdf dataset
+- `var_name` Variable name
+- `dim_array` Vector containing the parts of the data to read
 - `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
 ---
@@ -234,4 +244,21 @@ read_nc(file::String, selections::Vector{String} = varname_nc(file); transform::
     @assert all(_lens .== _lens[1]) "Dimensions of the variables need to be the same!";
 
     return DataFrame( [Pair(_var, read_nc(file, _var; transform = transform)) for _var in selections] )
+);
+
+read_nc(file::String, var_name::String, dim_array::Vector; transform::Bool = true) = (
+    _dset = Dataset(file, "r");
+    _fvar = find_variable(_dset, var_name);
+    if transform
+        _dvar = _fvar[dim_array...];
+    else
+        _dvar = _fvar.var[dim_array...];
+    end;
+    close(_dset);
+
+    if sum(ismissing.(_dvar)) == 0
+        return _dvar
+    end;
+
+    return replace(_dvar, missing=>NaN)
 );
