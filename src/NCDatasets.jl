@@ -1,7 +1,7 @@
 import NetCDF_jll
-import NCDatasets: nc_open
+import NCDatasets: nc_inq_varids, nc_open
 
-using NCDatasets: NC_NOERR, NetCDFError, nc_strerror
+using NCDatasets: NC_NOERR, NetCDFError, check, nc_strerror
 
 const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 
@@ -53,11 +53,11 @@ end
 #
 #######################################################################################################################################################################################################
 function nc_open(path,mode::Integer)
-    @debug "nc_open $path with mode $mode"
-    ncidp = Ref(Cint(0))
+    @debug "nc_open $path with mode $mode";
+    ncidp = Ref(Cint(0));
 
-    _sym = Base.Libc.Libdl.dlsym(NetCDF_jll.libnetcdf_handle, :nc_open)
-    code = ccall(_sym,Cint,(Cstring,Cint,Ptr{Cint}),path,mode,ncidp)
+    _sym = Base.Libc.Libdl.dlsym(NetCDF_jll.libnetcdf_handle, :nc_open);
+    code = ccall(_sym,Cint,(Cstring,Cint,Ptr{Cint}),path,mode,ncidp);
 
     if code == NC_NOERR
         return ncidp[]
@@ -66,4 +66,18 @@ function nc_open(path,mode::Integer)
         # with a more helpful error message (i.e. with the path)
         throw(NetCDFError(code, "Opening path $(path): $(nc_strerror(code))"))
     end
+end
+
+function nc_inq_varids(ncid::Integer)::Vector{Cint}
+    _sym = Base.Libc.Libdl.dlsym(NetCDF_jll.libnetcdf_handle, :nc_inq_varids);
+
+    # first get number of variables
+    nvarsp = Ref(Cint(0));
+    check(ccall(_sym,Cint,(Cint,Ptr{Cint},Ptr{Cint}),ncid,nvarsp,C_NULL));
+    nvars = nvarsp[];
+
+    varids = zeros(Cint,nvars);
+    check(ccall(_sym,Cint,(Cint,Ptr{Cint},Ptr{Cint}),ncid,nvarsp,varids));
+
+    return varids
 end
