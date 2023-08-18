@@ -254,7 +254,7 @@ function NCDataset(f::Function,args...; kwargs...)
     try
         f(ds)
     finally
-        @debug "closing netCDF NCDataset $(ds.ncid) $(NCDatasets.path(ds))"
+        @debug "closing netCDF NCDataset $(ds.ncid) $(path(ds))"
         close(ds)
     end
 end
@@ -298,7 +298,7 @@ Close the NCDataset `ds`. All pending changes will be written
 to the disk.
 """
 function Base.close(ds::NCDataset)
-    @debug "closing netCDF NCDataset $(ds.ncid) $(NCDatasets.path(ds))"
+    @debug "closing netCDF NCDataset $(ds.ncid) $(path(ds))"
     try
         nc_close(ds.ncid)
     catch err

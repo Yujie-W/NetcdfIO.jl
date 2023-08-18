@@ -1,6 +1,16 @@
-module CatArrays
 using Base
-import NCDatasets
+
+
+# computes the shape of the array of size `sz` after applying the indexes
+# size(a[indexes...]) == _shape_after_slice(size(a),indexes...)
+
+# the difficulty here is to make the size inferrable by the compiler
+@inline _shape_after_slice(sz,indexes...) = __sh(sz,(),1,indexes...)
+@inline __sh(sz,sh,n,i::Integer,indexes...) = __sh(sz,sh,               n+1,indexes...)
+@inline __sh(sz,sh,n,i::Colon,  indexes...) = __sh(sz,(sh...,sz[n]),    n+1,indexes...)
+@inline __sh(sz,sh,n,i,         indexes...) = __sh(sz,(sh...,length(i)),n+1,indexes...)
+@inline __sh(sz,sh,n) = sh
+
 
 mutable struct CatArray{T,N,M,TA} <: AbstractArray{T,N} where TA <: AbstractArray
     # dimension over which the sub-arrays are concatenated
@@ -69,7 +79,7 @@ end
 function Base.getindex(CA::CatArray{T,N},idx...) where {T,N}
     checkbounds(CA,idx...)
 
-    sz = NCDatasets._shape_after_slice(size(CA),idx...)
+    sz = _shape_after_slice(size(CA),idx...)
     idx_global_local = index_global_local(CA,idx)
     B = Array{T,length(sz)}(undef,sz...)
 
@@ -202,6 +212,3 @@ end
 
 # load all the data at once
 Base.Array(CA::CatArray{T,N}) where {T,N}  = CA[ntuple(i -> :, Val(N))...]
-
-export CatArray
-end

@@ -140,7 +140,7 @@ end
 
 mutable struct MFVariable{T,N,M,TA,A,TDS} <: AbstractNCVariable{T,N}
     ds::TDS
-    var::CatArrays.CatArray{T,N,M,TA}
+    var::CatArray{T,N,M,TA}
     attrib::MFAttributes{A}
     dimnames::NTuple{N,String}
     varname::String
@@ -148,7 +148,7 @@ end
 
 mutable struct MFCFVariable{T,N,M,TA,TV,A,TDS} <: AbstractNCVariable{T,N}
     ds::TDS
-    cfvar::CatArrays.CatArray{T,N,M,TA}
+    cfvar::CatArray{T,N,M,TA}
     var::TV
     attrib::MFAttributes{A}
     dimnames::NTuple{N,String}

@@ -1,7 +1,7 @@
-"""
-NCDatasets.jl are copied from the original NCDatasets.jl, with the following changes:
-1. Add support to change the libnetcdf library dynamically
-"""
+# """
+# NCDatasets.jl are copied from the original NCDatasets.jl, with the following changes:
+# 1. Add support to change the libnetcdf library dynamically
+# """
 module NCDatasets
 
 import Base: Array, close, collect, convert, delete!, display, filter, getindex, parent, parentindices, setindex!, show, showerror, size, view, cat
@@ -33,7 +33,6 @@ const SymbolOrString = Union{Symbol, AbstractString}
 
 include("ncdatasets/CatArrays.jl");
 include("ncdatasets/types.jl");
-include("ncdatasets/colors.jl");
 include("ncdatasets/errorhandling.jl");
 include("ncdatasets/netcdf_c.jl");
 include("ncdatasets/dataset.jl");

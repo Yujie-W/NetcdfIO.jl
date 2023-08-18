@@ -2,7 +2,7 @@
 # Groups
 ############################################################
 """
-    Base.keys(g::NCDatasets.Groups)
+    Base.keys(g::Groups)
 
 Return the names of all subgroubs of the group `g`.
 """
@@ -13,7 +13,7 @@ end
 
 
 """
-    group = getindex(g::NCDatasets.Groups,groupname::AbstractString)
+    group = getindex(g::Groups,groupname::AbstractString)
 
 Return the NetCDF `group` with the name `groupname`.
 For example:

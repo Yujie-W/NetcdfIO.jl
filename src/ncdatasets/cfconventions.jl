@@ -11,13 +11,13 @@ Base.string(n::CFStdName) = string(n.name)
 
 
 """
-    ncvar = NCDatasets.ancillaryvariables(ncv::NCDatasets.CFVariable,modifier)
+    ncillaryvariables(ncv::CFVariable,modifier)
 
 Return the first ancillary variables from the NetCDF variable `ncv` with the
 standard name modifier `modifier`. It can be used for example to access
 related variable like status flags.
 """
-function ancillaryvariables(ncv::NCDatasets.CFVariable,modifier)
+function ancillaryvariables(ncv::CFVariable,modifier)
     ds = dataset(ncv)
     varname = name(ncv)
 
@@ -43,7 +43,7 @@ end
 allowmissing(x::AbstractArray{T}) where {T} = convert(AbstractArray{Union{T, Missing}}, x)
 
 """
-    data = NCDatasets.filter(ncv, indices...; accepted_status_flags = nothing)
+    filter(ncv, indices...; accepted_status_flags = nothing)
 
 Load and filter observations by replacing all variables without an acepted status
 flag to `missing`. It is used the attribute `ancillary_variables` to identify
@@ -51,7 +51,7 @@ the status flag.
 
 ```
 # da["data"] is 2D matrix
-good_data = NCDatasets.filter(ds["data"],:,:, accepted_status_flags = ["good_data","probably_good_data"])
+good_data = filter(ds["data"],:,:, accepted_status_flags = ["good_data","probably_good_data"])
 ```
 
 """
@@ -176,7 +176,7 @@ export coord
 
 
 """
-    b = bounds(ncvar::NCDatasets.CFVariable)
+    bounds(ncvar::CFVariable)
 
 Return the CFVariable corresponding to the `bounds` attribute of the variable `ncvar`.
 The time units and calendar from the `ncvar` are used but not the

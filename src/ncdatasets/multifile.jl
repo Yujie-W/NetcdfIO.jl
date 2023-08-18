@@ -158,7 +158,7 @@ function NCDataset(fnames::AbstractArray{TS,N},mode = "r"; aggdim = nothing,
 
     if isnothing(aggdim) && !isnewdim
         # first unlimited dimensions
-        aggdim = NCDatasets.unlimited(ds[1].dim)[1]
+        aggdim = unlimited(ds[1].dim)[1]
     end
 
     attrib = MFAttributes([d.attrib for d in ds])
@@ -209,7 +209,7 @@ function _variable(mfds::MFDataset,varname::SymbolOrString)
         end
         # aggregated along a given dimension
         vars = variable.(mfds.ds,varname)
-        v = CatArrays.CatArray(ndims(vars[1])+1,vars...)
+        v = CatArray(ndims(vars[1])+1,vars...)
         return MFVariable(mfds,v,MFAttributes([var.attrib for var in vars]),
                           (dimnames(vars[1])...,mfds.aggdim),String(varname))
     elseif mfds.aggdim == ""
@@ -229,7 +229,7 @@ function _variable(mfds::MFDataset,varname::SymbolOrString)
         @debug "dimension $dim"
 
         if !isnothing(dim)
-            v = CatArrays.CatArray(dim,vars...)
+            v = CatArray(dim,vars...)
             return MFVariable(mfds,v,MFAttributes([var.attrib for var in vars]),
                           dimnames(vars[1]),String(varname))
         else
@@ -249,7 +249,7 @@ function _cfvariable(mfds::MFDataset,varname::SymbolOrString)
         end
         # aggregated along a given dimension
         cfvars = cfvariable.(mfds.ds,varname)
-        cfvar = CatArrays.CatArray(ndims(cfvars[1])+1,cfvars...)
+        cfvar = CatArray(ndims(cfvars[1])+1,cfvars...)
         var = variable(mfds,varname)
 
         return MFCFVariable(mfds,cfvar,var,var.attrib,
@@ -271,7 +271,7 @@ function _cfvariable(mfds::MFDataset,varname::SymbolOrString)
         @debug "dim $dim"
 
         if !isnothing(dim)
-            cfvar = CatArrays.CatArray(dim,cfvars...)
+            cfvar = CatArray(dim,cfvars...)
             var = variable(mfds,varname)
 
             return MFCFVariable(mfds,cfvar,var,var.attrib,
@@ -295,5 +295,5 @@ Base.setindex!(v::MFCFVariable,data,ind...) = v.cfvar[ind...] = data
 
 
 function Base.cat(vs::AbstractVariable...; dims::Integer)
-    CatArrays.CatArray(dims,vs...)
+    CatArray(dims,vs...)
 end

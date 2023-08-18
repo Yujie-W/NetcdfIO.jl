@@ -316,7 +316,7 @@ function Base.getindex(v::Union{CFVariable,Variable,MFVariable,SubVariable},indi
 
     sz_source = size(v)
     ri = to_range_list.(indices,sz_source)
-    sz_dest = NCDatasets._shape_after_slice(sz_source,indices...)
+    sz_dest = _shape_after_slice(sz_source,indices...)
 
     N = length(indices)
 
@@ -356,7 +356,7 @@ Base.Array(v::AbstractVariable{T,N}) where {T,N} = v[ntuple(i -> :, Val(N))...]
 
 
 """
-    NCDatasets.load!(ncvar::CFVariable, data, buffer, indices)
+    load!(ncvar::CFVariable, data, buffer, indices)
 
 Loads a NetCDF variables `ncvar` in-place and puts the result in `data` (an
 array of `eltype(ncvar)`) along the specified `indices`. `buffer` is a temporary
@@ -384,7 +384,7 @@ ncv = ds["vgos"];
 # data and buffer must have the right shape and type
 data = zeros(eltype(ncv),size(ncv)); # here Vector{Float64}
 buffer = zeros(eltype(ncv.var),size(ncv)); # here Vector{Int16}
-NCDatasets.load!(ncv,data,buffer,:,:,:)
+load!(ncv,data,buffer,:,:,:)
 close(ds)
 ```
 """

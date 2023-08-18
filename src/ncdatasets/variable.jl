@@ -108,7 +108,7 @@ end
 end
 
 """
-    NCDatasets.load!(ncvar::Variable, data, indices)
+    load!(ncvar::Variable, data, indices)
 
 Loads a NetCDF variables `ncvar` in-place and puts the result in `data` along the
 specified `indices`. One can use @inbounds annotate code where
@@ -121,9 +121,9 @@ ds = NCDataset("file.nc")
 ncv = ds["vgos"].var;
 # data must have the right shape and type
 data = zeros(eltype(ncv),size(ncv));
-NCDatasets.load!(ncv,data,:,:,:)
+load!(ncv,data,:,:,:)
 # or
-# @inbounds NCDatasets.load!(ncv,data,:,:,:)
+# @inbounds load!(ncv,data,:,:,:)
 close(ds)
 
 # loading a subset
@@ -435,17 +435,6 @@ _normalizeindex(n,ind) = error("unsupported index")
 function normalizeindexes(sz,indexes)
     return ntuple(i -> _normalizeindex(sz[i],indexes[i]), length(sz))
 end
-
-
-# computes the shape of the array of size `sz` after applying the indexes
-# size(a[indexes...]) == _shape_after_slice(size(a),indexes...)
-
-# the difficulty here is to make the size inferrable by the compiler
-@inline _shape_after_slice(sz,indexes...) = __sh(sz,(),1,indexes...)
-@inline __sh(sz,sh,n,i::Integer,indexes...) = __sh(sz,sh,               n+1,indexes...)
-@inline __sh(sz,sh,n,i::Colon,  indexes...) = __sh(sz,(sh...,sz[n]),    n+1,indexes...)
-@inline __sh(sz,sh,n,i,         indexes...) = __sh(sz,(sh...,length(i)),n+1,indexes...)
-@inline __sh(sz,sh,n) = sh
 
 
 function ncsub(indexes::NTuple{N,T}) where N where T

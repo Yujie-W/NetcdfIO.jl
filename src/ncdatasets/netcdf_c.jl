@@ -649,7 +649,7 @@ end
 # Enum
 
 function nc_def_enum(ncid::Integer,base_typeid::Integer,name)
-    typeidp = Ref(NCDatasets.nc_type(0))
+    typeidp = Ref(nc_type(0))
     check(ccall((:nc_def_enum,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{nc_type}),ncid,base_typeid,name,typeidp))
 
     return typeidp[]
@@ -662,7 +662,7 @@ function nc_inq_enum(ncid::Integer,xtype::Integer)
     num_membersp = Ref(Csize_t(0))
     cname = zeros(UInt8,NC_MAX_NAME+1)
 
-    check(ccall((:nc_inq_enum,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{NCDatasets.nc_type},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,cname,base_nc_typep,base_sizep,num_membersp))
+    check(ccall((:nc_inq_enum,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{nc_type},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,cname,base_nc_typep,base_sizep,num_membersp))
 
     type_name = unsafe_string(pointer(cname))
     base_nc_type = base_nc_typep[]
@@ -680,7 +680,7 @@ end
 
 function nc_inq_enum_member(ncid::Integer,xtype::Integer,idx::Integer, T::Type = nc_inq_enum(ncid,xtype)[2])
     valuep = Ref{T}()
-    cmember_name = zeros(UInt8,NCDatasets.NC_MAX_NAME+1)
+    cmember_name = zeros(UInt8,NC_MAX_NAME+1)
 
     check(ccall((:nc_inq_enum_member,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{UInt8},Ptr{Nothing}),ncid,xtype,idx,cmember_name,valuep))
 
@@ -690,7 +690,7 @@ function nc_inq_enum_member(ncid::Integer,xtype::Integer,idx::Integer, T::Type =
 end
 
 function nc_inq_enum_ident(ncid::Integer,xtype::Integer,value)
-    cidentifier = zeros(UInt8,NCDatasets.NC_MAX_NAME+1)
+    cidentifier = zeros(UInt8,NC_MAX_NAME+1)
     check(ccall((:nc_inq_enum_ident,libnetcdf),Cint,(Cint,nc_type,Clonglong,Ptr{UInt8}),ncid,xtype,Clonglong(value),cidentifier))
     identifier = unsafe_string(pointer(cidentifier))
     return identifier
@@ -785,7 +785,7 @@ function nc_get_var!(ncid::Integer,varid::Integer,ip::Array{String,N}) where N
 end
 
 function nc_get_var!(ncid::Integer,varid::Integer,ip::Array{Vector{T},N}) where {T,N}
-    tmp = Array{NCDatasets.nc_vlen_t{T},N}(undef,size(ip))
+    tmp = Array{nc_vlen_t{T},N}(undef,size(ip))
     nc_get_var!(ncid,varid,tmp)
 
     for i in eachindex(tmp)
@@ -890,7 +890,7 @@ end
 
 
 function nc_get_vara!(ncid::Integer,varid::Integer,startp,countp,ip::Array{Vector{T},N}) where {T,N}
-    tmp = Array{NCDatasets.nc_vlen_t{T},N}(undef,size(ip))
+    tmp = Array{nc_vlen_t{T},N}(undef,size(ip))
     nc_get_vara!(ncid,varid,startp,countp,tmp)
 
     for i in eachindex(tmp)
@@ -1009,7 +1009,7 @@ end
 
 function nc_get_vars!(ncid::Integer,varid::Integer,startp,countp,stridep,ip::Array{Vector{T},N}) where {T,N}
     @debug "nc_get_vars!: $startp,$countp,$stridep"
-    tmp = Array{NCDatasets.nc_vlen_t{T},N}(undef,size(ip))
+    tmp = Array{nc_vlen_t{T},N}(undef,size(ip))
     nc_get_vars!(ncid,varid,startp,countp,stridep,tmp)
 
     for i in eachindex(tmp)
@@ -1453,7 +1453,7 @@ end
 # get matching julia type
 function _jltype(ncid,xtype)
     jltype =
-        if xtype >= NCDatasets.NC_FIRSTUSERTYPEID
+        if xtype >= NC_FIRSTUSERTYPEID
             name,size,base_nc_type,nfields,class = nc_inq_user_type(ncid,xtype)
             # assume here variable-length type
             if class == NC_VLEN
