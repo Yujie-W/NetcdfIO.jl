@@ -107,7 +107,7 @@ end
 
 function variable(dds::DeferDataset,varname::AbstractString)
     data = get(dds.data["var"],varname,nothing)
-    if data == nothing
+    if isnothing(data)
         error("Dataset $(dds.r.filename) does not contain the variable $varname")
     end
     T = data["eltype"]

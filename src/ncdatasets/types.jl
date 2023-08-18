@@ -87,16 +87,6 @@ mutable struct NCDataset{TDS} <: AbstractNCDataset where TDS <: Union{AbstractNC
                        isdefmode::Ref{Bool};
                        parentdataset = nothing,
                        )
-
-        function _finalize(ds)
-            @debug begin
-                ccall(:jl_, Cvoid, (Any,), "finalize $ncid $timeid \n")
-            end
-            # only close open root group
-            if (ds.ncid != -1) && (ds.parentdataset == nothing)
-                close(ds)
-            end
-        end
         ds = new{typeof(parentdataset)}()
         ds.parentdataset = parentdataset
         ds.ncid = ncid
@@ -111,6 +101,17 @@ mutable struct NCDataset{TDS} <: AbstractNCDataset where TDS <: Union{AbstractNC
         end
         timeid = Dates.now()
         @debug "add finalizer $ncid $(timeid)"
+
+        function _finalize(ds)
+            @debug begin
+                ccall(:jl_, Cvoid, (Any,), "finalize $ncid $timeid \n")
+            end
+            # only close open root group
+            if (ds.ncid != -1) && isnothing(ds.parentdataset)
+                close(ds)
+            end
+        end
+
         finalizer(_finalize, ds)
         return ds
     end

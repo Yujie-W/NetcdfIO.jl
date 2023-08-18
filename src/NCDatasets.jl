@@ -30,6 +30,7 @@ end
 const default_timeunits = "days since 1900-00-00 00:00:00"
 const SymbolOrString = Union{Symbol, AbstractString}
 
+
 include("ncdatasets/CatArrays.jl");
 include("ncdatasets/types.jl");
 include("ncdatasets/colors.jl");
@@ -49,11 +50,5 @@ include("ncdatasets/ncgen.jl");
 include("ncdatasets/select.jl");
 include("ncdatasets/precompile.jl");
 
-export CatArrays
-export CFTime
-export daysinmonth, daysinyear, yearmonthday, yearmonth, monthday
-export dayofyear, firstdayofyear
-export DateTimeStandard, DateTimeJulian, DateTimeProlepticGregorian,
-    DateTimeAllLeap, DateTimeNoLeap, DateTime360Day, AbstractCFDateTime
 
 end # module

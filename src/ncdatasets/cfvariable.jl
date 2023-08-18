@@ -119,24 +119,24 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
 
     varid = nc_def_var(ds.ncid,name,typeid,dimids)
 
-    if chunksizes !== nothing
+    if !isnothing(chunksizes)
         storage = :chunked
         # this will fail on NetCDF-3 files
         nc_def_var_chunking(ds.ncid,varid,storage,reverse(chunksizes))
     end
 
-    if shuffle || (deflatelevel !== nothing)
-        deflate = deflatelevel !== nothing
+    if shuffle || !isnothing(deflatelevel)
+        deflate = !isnothing(deflatelevel)
 
         # this will fail on NetCDF-3 files
         nc_def_var_deflate(ds.ncid,varid,shuffle,deflate,deflatelevel)
     end
 
-    if checksum !== nothing
+    if !isnothing(checksum)
         nc_def_var_fletcher32(ds.ncid,varid,checksum)
     end
 
-    if fillvalue !== nothing
+    if !isnothing(fillvalue)
         nc_def_var_fill(ds.ncid, varid, nofill, vtype(fillvalue))
     end
 
@@ -390,7 +390,7 @@ close(ds)
 """
 @inline function load!(v::Union{CFVariable{T,N},MFCFVariable{T,N},SubVariable{T,N}}, data, buffer, indices::Union{Integer, AbstractRange{<:Integer}, Colon}...) where {T,N}
 
-    if v.var == nothing
+    if isnothing(v.var)
         return load!(v,indices...)
     else
         load!(v.var,buffer,indices...)

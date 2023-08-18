@@ -60,10 +60,11 @@ function filter(ncv::Union{Variable,CFVariable}, indices...; accepted_status_fla
 #    accepted_status_flags = ("good_value", "probably_good_value")
     data = allowmissing(ncv[indices...])
 
-    if (accepted_status_flags != nothing)
+    if !isnothing(accepted_status_flags)
         ncv_ancillary = ancillaryvariables(ncv,"status_flag");
-        if ncv_ancillary == nothing
-            error("no variable with the attribute status_flag as standard_name among $(ancillary_variables) found")
+        if isnothing(ncv_ancillary)
+            #error("no variable with the attribute status_flag as standard_name among $(ancillary_variables) found")
+            error("no variable with the attribute status_flag as standard_name among ancillary_variables found")
         end
 
         flag_values = ncv_ancillary.attrib["flag_values"]
@@ -76,7 +77,7 @@ function filter(ncv::Union{Variable,CFVariable}, indices...; accepted_status_fla
         for i = eachindex(accepted_status_flags,accepted_status_flag_values)
             tmp = findfirst(accepted_status_flags[i] .== flag_meanings)
 
-            if tmp == nothing
+            if isnothing(tmp)
                 error("cannot recognise flag $(accepted_status_flags[i])")
             end
             accepted_status_flag_values[i] = flag_values[tmp]
@@ -153,7 +154,7 @@ function coord(v::Union{CFVariable,Variable,SubVariable,MFCFVariable},standard_n
             units = get(coord.attrib,"units","")
 
             for re in matches[standard_name]
-                if match(re,units) != nothing
+                if !isnothing(match(re,units))
                     if Set(dimnames(coord)) ⊆ dims
                         if ndims(coord) > coordndims
                             coordfound = coord

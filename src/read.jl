@@ -24,7 +24,7 @@ function find_variable(ds::Dataset, var_name::String)
     _dvar = nothing;
     for _group in keys(ds.group)
         _dvar = find_variable(ds.group[_group], var_name)
-        if _dvar !== nothing
+        if !isnothing(_dvar)
             break;
         end;
     end;
@@ -145,7 +145,7 @@ read_nc(file::String, var_name::String; transform::Bool = true) = (
     _dset = Dataset(file, "r");
 
     _fvar = find_variable(_dset, var_name);
-    if _fvar === nothing
+    if isnothing(_fvar)
         close(_dset)
         @error "$(var_name) does not exist in $(file)!";
     end;

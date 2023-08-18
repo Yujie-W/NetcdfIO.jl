@@ -2,7 +2,6 @@ module NetcdfIO
 
 using DataFrames: DataFrame
 using DocStringExtensions: METHODLIST
-using NCDatasets: Dataset, defDim, defVar
 
 
 # constants
@@ -13,8 +12,10 @@ const ATTR_ABOUT = Dict("about" => "This is a file generated using NetcdfIO.jl",
                         "notes" => "NetcdfIO.jl uses NCDatasets.jl to read and write NC files");
 
 
-# my fix for NCDatasets.jl
+# local NCDatasets.jl
 include("NCDatasets.jl");
+
+using .NCDatasets: Dataset, defDim, defVar
 
 # my wrapper functions
 include("append.jl");

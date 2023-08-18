@@ -11,7 +11,7 @@ Near(target::Number) = Near(target,nothing)
 function _findfirst(n::Near,v::AbstractVector)
     diff, ind = findmin(x -> abs(x - n.target),v)
 
-    if (n.tolerance != nothing) && (diff > n.tolerance)
+    if !isnothing(n.tolerance) && (diff > n.tolerance)
         return Int[]
     else
         return ind
@@ -276,7 +276,7 @@ function coordinate_value(v::AbstractVariable,name_coord::Symbol)
     i = findfirst(==(dimension_name),dimnames(v))
     fmtd(v) = join(dimnames(v),"×")
 
-    if i == nothing
+    if isnothing(i)
         error("$name_coord (dimensions: $(fmtd(ncv))) and $(name(v)) (dimensions: $(fmtd(v))) do not share a named dimension")
     end
     return Array(ncv),i

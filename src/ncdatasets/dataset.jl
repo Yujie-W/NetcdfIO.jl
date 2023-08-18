@@ -95,7 +95,7 @@ function initboundsmap!(ds)
         v = variable(ds,vname)
         bounds = get(v.attrib,"bounds",nothing)
 
-        if bounds !== nothing
+        if !isnothing(bounds)
             ds._boundsmap[bounds] = vname
         end
     end
@@ -213,7 +213,7 @@ function NCDataset(filename::AbstractString,
     @debug "ncmode: $ncmode"
 
     if (mode == "r") || (mode == "a")
-        if memory == nothing
+        if isnothing(memory)
             ncid = nc_open(filename,ncmode)
         else
             ncid = nc_open_mem(filename,ncmode,memory)

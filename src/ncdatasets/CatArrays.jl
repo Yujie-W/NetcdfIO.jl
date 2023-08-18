@@ -186,7 +186,7 @@ end
 
 function Base.setindex!(CA::CatArray{T,N},data,idx...) where {T,N}
     idx_global_local = index_global_local(CA,idx)
-    @debug ind,idx_global,idx_local,sz
+    # @debug ind,idx_global,idx_local,sz
 
     for (array,(idx_global,idx_local)) in zip(CA.arrays,idx_global_local)
         if valid_local_idx(idx_local...)

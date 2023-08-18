@@ -42,6 +42,7 @@ const NC_SHARE = 0x0800
 const NC_NETCDF4 = 0x1000
 const NC_MPIIO = 0x2000
 const NC_MPIPOSIX = 0x4000
+const NC_PERSIST = 0x4000
 const NC_INMEMORY = 0x8000
 const NC_PNETCDF = NC_MPIIO
 const NC_FORMAT_CLASSIC = 1
@@ -672,14 +673,12 @@ function nc_inq_enum(ncid::Integer,xtype::Integer)
 end
 
 
-function nc_insert_enum(ncid::Integer,xtype::Integer,name,value,
-                        T = nc_inq_enum(ncid,typeid)[2])
+function nc_insert_enum(ncid::Integer,xtype::Integer,name,value, T = nc_inq_enum(ncid,xtype)[2])
     valuep = Ref{T}(value)
     check(ccall((:nc_insert_enum,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{Nothing}),ncid,xtype,name,valuep))
 end
 
-function nc_inq_enum_member(ncid::Integer,xtype::Integer,idx::Integer,
-                            T::Type = nc_inq_enum(ncid,typeid)[2])
+function nc_inq_enum_member(ncid::Integer,xtype::Integer,idx::Integer, T::Type = nc_inq_enum(ncid,xtype)[2])
     valuep = Ref{T}()
     cmember_name = zeros(UInt8,NCDatasets.NC_MAX_NAME+1)
 
@@ -868,7 +867,7 @@ function nc_put_vara(ncid::Integer,varid::Integer,startp,countp,
 end
 
 function nc_get_vara!(ncid::Integer,varid::Integer,startp,countp,ip)
-    @debug "nc_get_vara!",startp,indexp
+    # @debug "nc_get_vara!",startp,indexp
     check(ccall((:nc_get_vara,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Csize_t},Ptr{Nothing}),ncid,varid,startp,countp,ip))
 end
 
@@ -2166,7 +2165,7 @@ end
 
 function init_certificate_authority()
     value = ca_roots()
-    if value == nothing
+    if isnothing(value)
         return
     end
 

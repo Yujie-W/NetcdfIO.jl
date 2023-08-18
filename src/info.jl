@@ -112,7 +112,7 @@ function size_nc end
 
 size_nc(ds::Dataset, var_name::String) = (
     _fvar = find_variable(ds, var_name);
-    if _fvar === nothing
+    if isnothing(_fvar)
         return error("$(var_name) does not exist in the given dataset!");
     end;
 

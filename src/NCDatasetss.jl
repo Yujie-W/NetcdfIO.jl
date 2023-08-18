@@ -1,3 +1,4 @@
+#=
 import NetCDF_jll
 import NCDatasets: nc_inq_varids, nc_open
 
@@ -81,3 +82,4 @@ function nc_inq_varids(ncid::Integer)::Vector{Cint}
 
     return varids
 end
+=#

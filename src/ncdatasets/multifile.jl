@@ -156,7 +156,7 @@ function NCDataset(fnames::AbstractArray{TS,N},mode = "r"; aggdim = nothing,
         ds = NCDataset.(fnames,mode);
     end
 
-    if (aggdim == nothing) && !isnewdim
+    if isnothing(aggdim) && !isnewdim
         # first unlimited dimensions
         aggdim = NCDatasets.unlimited(ds[1].dim)[1]
     end
@@ -228,7 +228,7 @@ function _variable(mfds::MFDataset,varname::SymbolOrString)
         dim = findfirst(dimnames(vars[1]) .== mfds.aggdim)
         @debug "dimension $dim"
 
-        if (dim != nothing)
+        if !isnothing(dim)
             v = CatArrays.CatArray(dim,vars...)
             return MFVariable(mfds,v,MFAttributes([var.attrib for var in vars]),
                           dimnames(vars[1]),String(varname))
@@ -270,7 +270,7 @@ function _cfvariable(mfds::MFDataset,varname::SymbolOrString)
         dim = findfirst(dimnames(cfvars[1]) .== mfds.aggdim)
         @debug "dim $dim"
 
-        if (dim != nothing)
+        if !isnothing(dim)
             cfvar = CatArrays.CatArray(dim,cfvars...)
             var = variable(mfds,varname)
 
