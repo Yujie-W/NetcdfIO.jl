@@ -31,23 +31,23 @@ const default_timeunits = "days since 1900-00-00 00:00:00"
 const SymbolOrString = Union{Symbol, AbstractString}
 
 
-include("ncdatasets/CatArrays.jl");
-include("ncdatasets/types.jl");
-include("ncdatasets/errorhandling.jl");
-include("ncdatasets/netcdf_c.jl");
-include("ncdatasets/dataset.jl");
-include("ncdatasets/attributes.jl");
-include("ncdatasets/dimensions.jl");
-include("ncdatasets/groupes.jl");
-include("ncdatasets/variable.jl");
-include("ncdatasets/cfvariable.jl");
-include("ncdatasets/subvariable.jl");
-include("ncdatasets/cfconventions.jl");
-include("ncdatasets/defer.jl");
-include("ncdatasets/multifile.jl");
-include("ncdatasets/ncgen.jl");
-include("ncdatasets/select.jl");
-include("ncdatasets/precompile.jl");
+include("CatArrays.jl");
+include("types.jl");
+include("errorhandling.jl");
+include("netcdf_c.jl");
+include("dataset.jl");
+include("attributes.jl");
+include("dimensions.jl");
+include("groupes.jl");
+include("variable.jl");
+include("cfvariable.jl");
+include("subvariable.jl");
+include("cfconventions.jl");
+include("defer.jl");
+include("multifile.jl");
+include("ncgen.jl");
+include("select.jl");
+include("precompile.jl");
 
 
 end # module

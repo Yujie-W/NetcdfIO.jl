@@ -1,3 +1,11 @@
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2023-Sep-01: use dlsym method to call libnetcdf functions for nc_open and nc_inq_varids (more to do in the future)
+#
+#######################################################################################################################################################################################################
+
 # This file is originally based netcdf_c.jl from NetCDF.jl
 # Copyright (c) 2012-2013: Fabian Gans, Max-Planck-Institut fuer Biogeochemie, Jena, Germany
 # MIT
@@ -262,10 +270,11 @@ end
 # end
 
 function nc_open(path,mode::Integer)
-    @debug "nc_open $path with mode $mode"
-    ncidp = Ref(Cint(0))
+    @debug "nc_open $path with mode $mode";
+    ncidp = Ref(Cint(0));
 
-    code = ccall((:nc_open,libnetcdf),Cint,(Cstring,Cint,Ptr{Cint}),path,mode,ncidp)
+    _sym = Base.Libc.Libdl.dlsym(NetCDF_jll.libnetcdf_handle, :nc_open);
+    code = ccall(_sym,Cint,(Cstring,Cint,Ptr{Cint}),path,mode,ncidp);
 
     if code == NC_NOERR
         return ncidp[]
@@ -351,13 +360,16 @@ end
 # end
 
 function nc_inq_varids(ncid::Integer)::Vector{Cint}
-    # first get number of variables
-    nvarsp = Ref(Cint(0))
-    check(ccall((:nc_inq_varids,libnetcdf),Cint,(Cint,Ptr{Cint},Ptr{Cint}),ncid,nvarsp,C_NULL))
-    nvars = nvarsp[]
+    _sym = Base.Libc.Libdl.dlsym(NetCDF_jll.libnetcdf_handle, :nc_inq_varids);
 
-    varids = zeros(Cint,nvars)
-    check(ccall((:nc_inq_varids,libnetcdf),Cint,(Cint,Ptr{Cint},Ptr{Cint}),ncid,nvarsp,varids))
+    # first get number of variables
+    nvarsp = Ref(Cint(0));
+    check(ccall(_sym,Cint,(Cint,Ptr{Cint},Ptr{Cint}),ncid,nvarsp,C_NULL));
+    nvars = nvarsp[];
+
+    varids = zeros(Cint,nvars);
+    check(ccall(_sym,Cint,(Cint,Ptr{Cint},Ptr{Cint}),ncid,nvarsp,varids));
+
     return varids
 end
 
