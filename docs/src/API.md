@@ -42,3 +42,9 @@ read_nc
 ```@docs
 save_nc!
 ```
+
+
+## Switch libnetcdf library
+```@docs
+switch_netcdf_lib!
+```

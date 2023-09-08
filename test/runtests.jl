@@ -1,6 +1,6 @@
 using DataFrames
-using NCDatasets
 using NetcdfIO
+using NetcdfIO.NCDatasets
 using Test
 
 
@@ -31,7 +31,7 @@ using Test
         NetcdfIO.add_nc_dim!("test.nc", "dim4", Inf);
         @test true;
 
-        _dset = Dataset("test.nc", "a");
+        _dset = NCDatasets.Dataset("test.nc", "a");
 
         NetcdfIO.add_nc_dim!(_dset, "dim5", 0);
         @test true;
@@ -49,7 +49,7 @@ using Test
 
     @testset "Append" begin
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
-        _dset = Dataset("test.nc", "a");
+        _dset = NCDatasets.Dataset("test.nc", "a");
 
         NetcdfIO.append_nc!(_dset, "str", ["A" for i in 1:18], Dict("longname" => "test strings"), ["lat"]);
         @test true;
@@ -86,7 +86,7 @@ using Test
 
     @testset "Grow" begin
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
-        _dset = Dataset("test.nc", "a");
+        _dset = NCDatasets.Dataset("test.nc", "a");
         NetcdfIO.append_nc!(_dset, "lat", collect(1:18), Dict("longname" => "latitude"), ["lat"]);
         NetcdfIO.append_nc!(_dset, "lon", collect(1:36), Dict("longname" => "longitude"), ["lon"]; compress=4);
         NetcdfIO.append_nc!(_dset, "ind", collect(1:5), Dict("longname" => "index"), ["ind"]);
