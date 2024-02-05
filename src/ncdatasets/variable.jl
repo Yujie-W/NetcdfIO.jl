@@ -292,7 +292,6 @@ function fillvalue(v::Variable{NetCDFType,N}) where {NetCDFType,N}
     no_fill,fv = nc_inq_var_fill(v.ds.ncid, v.varid)
     return fv::NetCDFType
 end
-export fillvalue
 
 
 """

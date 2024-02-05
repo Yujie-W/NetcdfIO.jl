@@ -65,56 +65,6 @@ function Base.view(v::SubVariable,indices::Union{Int,Colon,AbstractVector{Int}}.
     SubVariable(parent(v),sub_indices...)
 end
 
-"""
-    sv = view(v::AbstractVariable,indices...)
-
-Returns a view of the variable `v` where indices are only lazily applied.
-No data is actually copied or loaded.
-Modifications to a view `sv`, also modifies the underlying array `v`.
-All attributes of `v` are also present in `sv`.
-
-# Examples
-
-```julia
-using NCDatasets
-fname = tempname()
-data = zeros(Int,10,11)
-ds = NCDataset(fname,"c")
-ncdata = defVar(ds,"temp",data,("lon","lat"))
-ncdata_view = view(ncdata,2:3,2:4)
-size(ncdata_view)
-# output (2,3)
-ncdata_view[1,1] = 1
-ncdata[2,2]
-# outputs 1 as ncdata is also modified
-close(ds)
-```
-
-"""
-Base.view(v::AbstractVariable,indices::Union{Int,Colon,AbstractVector{Int}}...) = SubVariable(v,indices...)
-Base.view(v::SubVariable,indices::CartesianIndex) = view(v,indices.I...)
-Base.view(v::SubVariable,indices::CartesianIndices) = view(v,indices.indices...)
-
-Base.getindex(v::SubVariable,indices::Union{Int,Colon,AbstractRange{<:Integer}}...) = materialize(view(v,indices...))
-
-Base.getindex(v::SubVariable,indices::CartesianIndex) = getindex(v,indices.I...)
-Base.getindex(v::SubVariable,indices::CartesianIndices) =
-    getindex(v,indices.indices...)
-
-function Base.setindex!(v::SubVariable,data,indices...)
-    sub_indices = subsub(v.indices,indices)
-    v.parent[sub_indices...] = data
-end
-
-Base.setindex!(v::SubVariable,data,indices::CartesianIndex) =
-    setindex!(v,data,indices.I...)
-Base.setindex!(v::SubVariable,data,indices::CartesianIndices) =
-    setindex!(v,data,indices.indices...)
-
-
-
-
-
 
 Base.keys(ds::SubDimensions) = keys(ds.dim)
 
