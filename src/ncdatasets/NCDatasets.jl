@@ -41,12 +41,6 @@ include("dimensions.jl");
 include("groupes.jl");
 include("variable.jl");
 include("cfvariable.jl");
-include("subvariable.jl");
-include("cfconventions.jl");
-include("defer.jl");
-include("multifile.jl");
-include("ncgen.jl");
-include("select.jl");
 include("precompile.jl");
 
 

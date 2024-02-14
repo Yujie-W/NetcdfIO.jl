@@ -14,9 +14,6 @@ function listAtt(ncid,varid)
 end
 
 
-attribnames(ds::Union{AbstractNCDataset,AbstractNCVariable}) = keys(ds.attrib)
-attrib(ds::Union{AbstractNCDataset,AbstractNCVariable},name::AbstractString) = ds.attrib[name]
-
 function Base.get(a::BaseAttributes, name::SymbolOrString,default)
     if haskey(a,name)
         return a[name]
@@ -81,25 +78,3 @@ end
 Return a list of the names of all attributes.
 """
 Base.keys(a::Attributes) = listAtt(a.ds.ncid,a.varid)
-
-
-"""
-    Base.haskey(a::Attributes,name)
-
-Check if name is an attribute
-"""
-Base.haskey(a::Attributes{NCDataset},name::SymbolOrString) = _nc_has_att(a.ds.ncid,a.varid,name)
-
-
-"""
-    Base.delete!(a::Attributes, name)
-
-Delete the attribute `name` from the attribute list `a`.
-"""
-function Base.delete!(a::Attributes,name::SymbolOrString)
-    defmode(a.ds)
-    nc_del_att(a.ds.ncid,a.varid,name)
-    return nothing
-end
-
-Base.show(io::IO, a::BaseAttributes) = CommonDataModel.show_attrib(io,a)

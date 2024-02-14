@@ -127,16 +127,6 @@ mutable struct MFAttributes{T} <: BaseAttributes where T <: BaseAttributes
     as::Vector{T}
 end
 
-function Base.getindex(a::MFAttributes,name::AbstractString)
-    return a.as[1][name]
-end
-
-function Base.setindex!(a::MFAttributes,data,name::AbstractString)
-    for a in a.as
-        a[name] = data
-    end
-    return data
-end
 
 mutable struct MFVariable{T,N,M,TA,A,TDS} <: AbstractNCVariable{T,N}
     ds::TDS

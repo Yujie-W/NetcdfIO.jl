@@ -183,6 +183,14 @@ using Test
         @test true;
 
         rm("test.nc"; force=true);
+
+        # the case with groups
+        if homedir() == "/home/wyujie"
+            fn = "/home/wyujie/DATASERVER/satellite/OCO3/L2_Lite_SIF/B10309r/2022/oco3_LtSIF_220323_B10309r_220520223132s.nc4";
+            vn = "SIF_771nm";
+            NetcdfIO.read_nc(fn, vn);
+            @test true;
+        end;
     end;
 
     @testset "Save" begin

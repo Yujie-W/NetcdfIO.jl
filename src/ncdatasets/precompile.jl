@@ -11,7 +11,6 @@ if VERSION >= v"1.6"
             CF = CFVariable{T,N,Var,A,St}
             precompile(Var, (DS, Cint, NTuple{N,Cint}, A))
             precompile(CF, (Var, A, St))
-            precompile(dimsize, (CF,))
             precompile(getindex, (CF, Colon))
             precompile(getindex, (CF, Int))
             precompile(getindex, (CF, ntuple(Int, N)...))

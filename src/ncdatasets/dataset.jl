@@ -1,7 +1,6 @@
 
 
 const NCIterable = Union{BaseAttributes,AbstractDimensions,AbstractNCDataset,AbstractGroups}
-Base.length(a::NCIterable) = length(keys(a))
 
 
 ############################################################
@@ -27,21 +26,6 @@ const jlType = Dict(
 # Inverse mapping
 const ncType = Dict(value => key for (key, value) in jlType)
 
-iswritable(ds::NCDataset) = ds.iswritable
-
-function isopen(ds::NCDataset)
-    try
-        dspath = path(ds)
-        return true
-    catch err
-        if isa(err,NetCDFError)
-            if err.code == NC_EBADID
-                return false
-            end
-        end
-        rethrow()
-    end
-end
 
 "Make sure that a dataset is in data mode"
 function datamode(ds)
@@ -220,18 +204,6 @@ function NCDataset(filename::AbstractString,
 end
 
 
-function NCDataset(f::Function,args...; kwargs...)
-    ds = NCDataset(args...; kwargs...)
-    try
-        f(ds)
-    finally
-        @debug "closing netCDF NCDataset $(ds.ncid) $(path(ds))"
-        close(ds)
-    end
-end
-
-export NCDataset, Dataset
-
 ############################################################
 # High-level: user convenience
 ############################################################
@@ -242,25 +214,6 @@ Return a list of all variables names in NCDataset `ds`.
 """
 Base.keys(ds::NCDataset) = listVar(ds.ncid)
 
-"""
-    path(ds::NCDataset)
-
-Return the file path (or the opendap URL) of the NCDataset `ds`
-"""
-path(ds::NCDataset) = nc_inq_path(ds.ncid)
-export path
-
-
-"""
-    sync(ds::NCDataset)
-
-Write all changes in NCDataset `ds` to the disk.
-"""
-function sync(ds::NCDataset)
-    datamode(ds)
-    nc_sync(ds.ncid)
-end
-export sync
 
 """
     close(ds::NCDataset)
@@ -287,70 +240,7 @@ function Base.close(ds::NCDataset)
 end
 export close
 
-############################################################
-# Common methods
-############################################################
-function Base.iterate(a::NCIterable, state = keys(a))
-    if length(state) == 0
-        return nothing
-    end
 
-    return (state[1] => a[popfirst!(state)], state)
-end
-
-"""
-    varbyattrib(ds, attname = attval)
-
-Returns a list of variable(s) which has the attribute `attname` matching the value `attval`
-in the dataset `ds`.
-The list is empty if the none of the variables has the match.
-The output is a list of `CFVariable`s.
-
-# Examples
-
-Load all the data of the first variable with standard name "longitude" from the
-NetCDF file `results.nc`.
-
-```julia-repl
-julia> ds = NCDataset("results.nc", "r");
-julia> data = varbyattrib(ds, standard_name = "longitude")[1][:]
-```
-
-"""
-function varbyattrib(ds::Union{AbstractNCDataset,AbstractVariable}; kwargs...)
-    # Start with an empty list of variables
-    varlist = []
-
-    # Loop on the variables
-    for v in keys(ds)
-        var = ds[v]
-
-        matchall = true
-
-        for (attsym,attval) in kwargs
-            attname = String(attsym)
-
-            # Check if the variable has the desired attribute
-            if haskey(var.attrib, attname)
-                # Check if the attribute value is the selected one
-                if var.attrib[attname] != attval
-                    matchall = false
-                    break
-                end
-            else
-                matchall = false
-                break
-            end
-        end
-
-        if matchall
-            push!(varlist, var)
-        end
-    end
-
-    return varlist
-end
-export varbyattrib
 
 
 
@@ -377,133 +267,3 @@ This example checks if the file `/tmp/test.nc` has a variable with the
 name `temperature` and a dimension with the name `lon`.
 """
 Base.haskey(a::NCIterable,name::AbstractString) = name in keys(a)
-Base.in(name::AbstractString,a::NCIterable) = name in keys(a)
-
-
-dimnames(ds::AbstractNCDataset) = keys(ds.dim)
-dim(ds::AbstractNCDataset,name::AbstractString) = ds.dim[name]
-
-function Base.getindex(ds::Union{AbstractNCDataset,AbstractVariable},n::CFStdName)
-    ncvars = varbyattrib(ds, standard_name = String(n.name))
-    if length(ncvars) == 1
-        return ncvars[1]
-    else
-        throw(KeyError("$(length(ncvars)) matches while searching for a variable with standard_name attribute equal to $(n.name)"))
-    end
-end
-
-"""
-    write(dest_filename::AbstractString, src::AbstractNCDataset; include = keys(src), exclude = [], idimensions = Dict())
-    write(dest::NCDataset, src::AbstractNCDataset; include = keys(src), exclude = [], idimensions = Dict())
-
-Write the variables of `src` dataset into an empty `dest` dataset (which must be opened in mode `"a"` or `"c"`).
-The keywords `include` and `exclude` configure which variable of `src` should be included
-(by default all), or which should be `excluded` (by default none).
-
-If the first argument is a file name, then the dataset is open in create mode (`"c"`).
-
-This function is useful when you want to save the dataset from a multi-file dataset.
-
-`idimensions` is a dictionary with dimension names mapping to a list of
-indices if only a subset of the dataset should be saved.
-
-## Example
-
-```
-NCDataset(fname_src) do ds
-    write(fname_slice,ds,idimensions = Dict("lon" => 2:3))
-end
-```
-
-All variables in the source file `fname_src` with a dimension `lon` will be sliced
-along the indices `2:3` for the `lon` dimension. All attributes (and variables
-without a dimension `lon`) will be copied over unmodified.
-
-It is assumed that all the variable of the output file can be loaded in memory.
-"""
-function Base.write(dest::NCDataset, src::AbstractDataset;
-                    include = keys(src),
-                    exclude = String[],
-                    idimensions = Dict())
-
-    torange(indices::Colon) = indices
-    function torange(indices)
-        i = indices[1]:indices[end]
-        if i == indices
-            return i
-        else
-            error("indices cannot be converted to range")
-        end
-    end
-
-    #unlimited_dims = unlimited(src.dim)
-    unlimited_dims = unlimited(src)
-
-    for (dimname,dimlength) in dims(src)
-        isunlimited = dimname in unlimited_dims
-
-        # if haskey(dest.dim,dimname)
-        #     # check length
-        #     if (dest.dim[dimname] !== src.dim[dimname]) && !isunlimited
-        #         throw(DimensionMismatch("length of the dimensions $dimname are inconstitent in files $(path(dest)) and $(path(src))"))
-        #     end
-        # else
-            if isunlimited
-                defDim(dest, dimname, Inf)
-            else
-                if haskey(idimensions,dimname)
-                    dimlength = length(idimensions[dimname])
-                    @debug "subset $dimname $(idimensions[dimname])"
-                end
-                defDim(dest, dimname, dimlength)
-            end
-        # end
-    end
-
-    # loop over variables
-    for varname in include
-        (varname ∈ exclude) && continue
-        @debug "Writing variable $varname..."
-
-        cfvar = src[varname]
-        dimension_names = dimnames(cfvar)
-        var = cfvar.var
-        # indices for subset
-        index = ntuple(i -> torange(get(idimensions,dimension_names[i],:)),length(dimension_names))
-
-        destvar = defVar(dest, varname, eltype(var), dimension_names; attrib = attribs(cfvar))
-        # copy data
-        destvar.var[:] = cfvar.var[index...]
-    end
-
-    # loop over all global attributes
-    for (attribname,attribval) in attribs(src)
-        dest.attrib[attribname] = attribval
-    end
-
-    # loop over all groups
-    for (groupname,groupsrc) in groups(src)
-        groupdest = defGroup(dest,groupname)
-        write(groupdest,groupsrc; idimensions = idimensions)
-    end
-
-    return dest
-end
-
-function Base.write(dest_filename::AbstractString, src::AbstractDataset; kwargs...)
-    NCDataset(dest_filename,"c") do dest
-        write(dest,src; kwargs...)
-    end
-    return nothing
-end
-
-
-get_chunk_cache() = nc_get_chunk_cache()
-
-function set_chunk_cache(;size=nothing,nelems=nothing,preemption=nothing)
-    size_orig,nelems_orig,preemption_orig = nc_get_chunk_cache()
-    size = (isnothing(size) ? size_orig : size)
-    nelems = (isnothing(nelems) ? nelems_orig : nelems)
-    preemption = (isnothing(preemption) ? preemption_orig : preemption)
-    nc_set_chunk_cache(size,nelems,preemption)
-end

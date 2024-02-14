@@ -30,37 +30,3 @@ function Base.getindex(g::Groups,groupname::SymbolOrString)
     ds = NCDataset(grp_ncid,g.ds.iswritable,g.ds.isdefmode; parentdataset = g.ds)
     return ds
 end
-
-"""
-    defGroup(ds::NCDataset,groupname, attrib = []))
-
-Create the group with the name `groupname` in the dataset `ds`.
-`attrib` is a list of attribute name and attribute value pairs (see `NCDataset`).
-"""
-function defGroup(ds::NCDataset,groupname::SymbolOrString; attrib = [])
-    defmode(ds) # make sure that the file is in define mode
-    grp_ncid = nc_def_grp(ds.ncid,groupname)
-    ds = NCDataset(grp_ncid,ds.iswritable,ds.isdefmode; parentdataset = ds)
-
-    # set global attributes for group
-    for (attname,attval) in attrib
-        ds.attrib[attname] = attval
-    end
-
-    return ds
-end
-export defGroup
-
-
-groupnames(ds::AbstractNCDataset) = keys(ds.group)
-group(ds::AbstractNCDataset,groupname::AbstractString) = ds.group[groupname]
-
-"""
-    name(ds::NCDataset)
-
-Return the group name of the NCDataset `ds`
-"""
-name(ds::NCDataset) = nc_inq_grpname(ds.ncid)
-groupname(ds::NCDataset) = name(ds)
-
-export groupname

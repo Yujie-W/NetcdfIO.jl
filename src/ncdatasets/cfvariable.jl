@@ -175,20 +175,3 @@ function boundsParentVar(ds::AbstractNCDataset,varname)
         return ""
     end
 end
-
-
-export cfvariable
-
-
-"""
-    dimsize(v::CFVariable)
-Get the size of a `CFVariable` as a named tuple of dimension → length.
-"""
-function dimsize(v::Union{CFVariable{T,N,<:Variable},MFCFVariable,SubVariable}) where {T,N}
-    s = size(v)
-    names = Symbol.(dimnames(v))
-    return NamedTuple{names}(s)
-end
-
-
-export dimsize
