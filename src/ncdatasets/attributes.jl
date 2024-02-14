@@ -14,7 +14,7 @@ function listAtt(ncid,varid)
 end
 
 
-function Base.get(a::BaseAttributes, name::SymbolOrString,default)
+function get(a::BaseAttributes, name::Union{Symbol, AbstractString},default)
     if haskey(a,name)
         return a[name]
     else
@@ -24,7 +24,7 @@ end
 
 
 """
-    getindex(a::Attributes,name::SymbolOrString)
+    getindex(a::Attributes,name::Union{Symbol, AbstractString})
 
 Return the value of the attribute called `name` from the
 attribute list `a`. Generally the attributes are loaded by
@@ -35,13 +35,13 @@ ds = NCDataset("file.nc")
 title = ds.attrib["title"]
 ```
 """
-function Base.getindex(a::Attributes,name::SymbolOrString)
+function getindex(a::Attributes,name::Union{Symbol, AbstractString})
     return nc_get_att(a.ds.ncid,a.varid,name)
 end
 
 
 """
-    Base.setindex!(a::Attributes,data,name::SymbolOrString)
+    setindex!(a::Attributes,data,name::Union{Symbol, AbstractString})
 
 Set the attribute called `name` to the value `data` in the
 attribute list `a`. `data` can be a vector or a scalar. A scalar
@@ -67,14 +67,14 @@ close(ds)
 
 
 """
-function Base.setindex!(a::Attributes,data,name::SymbolOrString)
+function setindex!(a::Attributes,data,name::Union{Symbol, AbstractString})
     defmode(a.ds) # make sure that the file is in define mode
     return nc_put_att(a.ds.ncid,a.varid,name,data)
 end
 
 """
-    Base.keys(a::Attributes)
+    keys(a::Attributes)
 
 Return a list of the names of all attributes.
 """
-Base.keys(a::Attributes) = listAtt(a.ds.ncid,a.varid)
+keys(a::Attributes) = listAtt(a.ds.ncid,a.varid)

@@ -560,7 +560,7 @@ function nc_inq_user_type(ncid::Integer,xtype::Integer)
 end
 
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractString)
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::AbstractString)
     if name == "_FillValue"
         nc_put_att_string(ncid,varid,"_FillValue",[data])
     else
@@ -569,50 +569,50 @@ function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Abst
     end
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Char})
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Vector{Char})
     nc_put_att(ncid,varid,name,join(data))
 end
 
 # NetCDF does not necessarily support 64 bit attributes
-nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Int64) =
+nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Int64) =
     nc_put_att(ncid,varid,name,Int32(data))
 
-nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Int64}) =
+nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Vector{Int64}) =
     nc_put_att(ncid,varid,name,Int32.(data))
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Number)
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Number)
     check(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,nc_type,Csize_t,Ptr{Nothing}),
                 ncid,varid,name,ncType[typeof(data)],1,[data]))
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Char)
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Char)
     # UInt8('α')
     # ERROR: InexactError: trunc(UInt8, 945)
     check(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,nc_type,Csize_t,Ptr{Nothing}),
                 ncid,varid,name,ncType[typeof(data)],1,[UInt8(data)]))
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}) where T <: AbstractString
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Vector{T}) where T <: AbstractString
     check(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,
                                               nc_type,Csize_t,Ptr{Nothing}),
                 ncid,varid,name,ncType[eltype(data)],length(data),pointer.(data)))
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}) where {T}
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::Vector{T}) where {T}
     nc_put_att(ncid,varid,name,ncType[T],data)
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,typeid::Integer,data::Vector)
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},typeid::Integer,data::Vector)
     check(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,nc_type,Csize_t,Ptr{Nothing}),
                 ncid,varid,name,typeid,length(data),data))
 end
 
 # convert e.g. ranges to vectors
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractVector)
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data::AbstractVector)
     nc_put_att(ncid,varid,name,Vector(data))
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data)
+function nc_put_att(ncid::Integer,varid::Integer,name::Union{Symbol, AbstractString},data)
     error("attributes can only be scalars or vectors")
 end
 

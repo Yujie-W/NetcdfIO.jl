@@ -9,7 +9,7 @@ Construct a NetCDFError from the error code.
 """
 NetCDFError(code::Cint) = NetCDFError(code, nc_strerror(code))
 
-function Base.showerror(io::IO, err::NetCDFError)
+function showerror(io::IO, err::NetCDFError)
     print(io, "NetCDF error: ")
     printstyled(io, err.msg, color=:red)
     print(io, " (NetCDF error code: $(err.code))")

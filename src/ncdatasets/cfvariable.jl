@@ -18,7 +18,7 @@ the appropriate size will be created as required using the names in `dimnames`.
 
 If `data` is a vector or array of `DateTime` objects, then the dates
 are saved as double-precision floats and units
-"$(CFTime.DEFAULT_TIME_UNITS)" (unless a time unit
+"CFTime.DEFAULT_TIME_UNITS" (unless a time unit
 is specifed with the `attrib` keyword as described below). Dates are
 converted to the default calendar in the CF conversion which is the
 mixed Julian/Gregorian calendar.
@@ -96,7 +96,7 @@ julia> NCDataset("test_file.nc","c") do ds
 
 
 """
-function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
+function defVar(ds::NCDataset,name::Union{Symbol, AbstractString},vtype::DataType,dimnames;
                 chunksizes = nothing,
                 shuffle = false,
                 deflatelevel = nothing,

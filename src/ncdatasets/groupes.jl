@@ -2,11 +2,11 @@
 # Groups
 ############################################################
 """
-    Base.keys(g::Groups)
+    keys(g::Groups)
 
 Return the names of all subgroubs of the group `g`.
 """
-function Base.keys(g::Groups)
+function keys(g::Groups)
     return String[nc_inq_grpname(ncid)
                   for ncid in nc_inq_grps(g.ds.ncid)]
 end
@@ -25,7 +25,7 @@ julia> forecast_temp = forecast_group["temperature"]
 ```
 
 """
-function Base.getindex(g::Groups,groupname::SymbolOrString)
+function getindex(g::Groups,groupname::Union{Symbol, AbstractString})
     grp_ncid = nc_inq_grp_ncid(g.ds.ncid,groupname)
     ds = NCDataset(grp_ncid,g.ds.iswritable,g.ds.isdefmode; parentdataset = g.ds)
     return ds

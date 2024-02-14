@@ -212,7 +212,7 @@ end
 
 Return a list of all variables names in NCDataset `ds`.
 """
-Base.keys(ds::NCDataset) = listVar(ds.ncid)
+keys(ds::NCDataset) = listVar(ds.ncid)
 
 
 """
@@ -221,8 +221,7 @@ Base.keys(ds::NCDataset) = listVar(ds.ncid)
 Close the NCDataset `ds`. All pending changes will be written
 to the disk.
 """
-function Base.close(ds::NCDataset)
-    @debug "closing netCDF NCDataset $(ds.ncid) $(path(ds))"
+function close(ds::NCDataset)
     try
         nc_close(ds.ncid)
     catch err
@@ -238,10 +237,6 @@ function Base.close(ds::NCDataset)
     ds.ncid = -1
     return ds
 end
-export close
-
-
-
 
 
 """
@@ -266,4 +261,4 @@ end
 This example checks if the file `/tmp/test.nc` has a variable with the
 name `temperature` and a dimension with the name `lon`.
 """
-Base.haskey(a::NCIterable,name::AbstractString) = name in keys(a)
+haskey(a::NCIterable,name::AbstractString) = name in keys(a)

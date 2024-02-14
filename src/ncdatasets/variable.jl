@@ -23,7 +23,7 @@ Return a tuple of integers with the size of the variable `var`.
     Note that the size of a variable can change, i.e. for a variable with an
     unlimited dimension.
 """
-Base.size(v::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(v.ds.ncid,v.dimids[i]),Val(N))
+size(v::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(v.ds.ncid,v.dimids[i]),Val(N))
 
 
 ############################################################
@@ -56,12 +56,12 @@ variable `v` is indexed.
 variable(ds::NCDataset,varname::AbstractString) = _variable(ds,varname)
 
 
-function Base.getindex(v::Variable,indexes::Int...)
+function getindex(v::Variable,indexes::Int...)
     datamode(v.ds)
     return nc_get_var1(eltype(v),v.ds.ncid,v.varid,[i-1 for i in indexes[ndims(v):-1:1]])
 end
 
-function Base.setindex!(v::Variable{T,N},data,indexes::Int...) where N where T
+function setindex!(v::Variable{T,N},data,indexes::Int...) where N where T
     @debug "$(@__LINE__)"
     datamode(v.ds)
     # use zero-based indexes and reversed order
@@ -69,7 +69,7 @@ function Base.setindex!(v::Variable{T,N},data,indexes::Int...) where N where T
     return data
 end
 
-function Base.getindex(v::Variable{T,N},indexes::Colon...) where {T,N}
+function getindex(v::Variable{T,N},indexes::Colon...) where {T,N}
     datamode(v.ds)
     data = Array{T,N}(undef,size(v))
     nc_get_var!(v.ds.ncid,v.varid,data)
@@ -82,14 +82,14 @@ function Base.getindex(v::Variable{T,N},indexes::Colon...) where {T,N}
     end
 end
 
-function Base.setindex!(v::Variable{T,N},data::AbstractArray{T,N},indexes::Colon...) where {T,N}
+function setindex!(v::Variable{T,N},data::AbstractArray{T,N},indexes::Colon...) where {T,N}
     datamode(v.ds) # make sure that the file is in data mode
 
     nc_put_var(v.ds.ncid,v.varid,data)
     return data
 end
 
-function Base.setindex!(v::Variable{T,N},data::AbstractArray{T2,N},indexes::Colon...) where {T,T2,N}
+function setindex!(v::Variable{T,N},data::AbstractArray{T2,N},indexes::Colon...) where {T,T2,N}
     datamode(v.ds) # make sure that the file is in data mode
     tmp =
         if T <: Integer
@@ -144,7 +144,7 @@ end
     return start,count,stride
 end
 
-function Base.getindex(v::Variable{T,N},indexes::TR...) where {T,N} where TR <: Union{StepRange{Int,Int},UnitRange{Int}}
+function getindex(v::Variable{T,N},indexes::TR...) where {T,N} where TR <: Union{StepRange{Int,Int},UnitRange{Int}}
     start,count,stride,jlshape = ncsub(indexes[1:N])
     data = Array{T,N}(undef,jlshape)
 
@@ -153,7 +153,7 @@ function Base.getindex(v::Variable{T,N},indexes::TR...) where {T,N} where TR <: 
     return data
 end
 
-function Base.setindex!(v::Variable{T,N},data::T,indexes::StepRange{Int,Int}...) where {T,N}
+function setindex!(v::Variable{T,N},data::T,indexes::StepRange{Int,Int}...) where {T,N}
     datamode(v.ds) # make sure that the file is in data mode
     start,count,stride,jlshape = ncsub(indexes[1:ndims(v)])
     tmp = fill(data,jlshape)
@@ -161,7 +161,7 @@ function Base.setindex!(v::Variable{T,N},data::T,indexes::StepRange{Int,Int}...)
     return data
 end
 
-function Base.setindex!(v::Variable{T,N},data::Array{T,N},indexes::StepRange{Int,Int}...) where {T,N}
+function setindex!(v::Variable{T,N},data::Array{T,N},indexes::StepRange{Int,Int}...) where {T,N}
     datamode(v.ds) # make sure that the file is in data mode
     start,count,stride,jlshape = ncsub(indexes[1:ndims(v)])
     nc_put_vars(v.ds.ncid,v.varid,start,count,stride,data)
@@ -169,7 +169,7 @@ function Base.setindex!(v::Variable{T,N},data::Array{T,N},indexes::StepRange{Int
 end
 
 # data can be Array{T2,N} or BitArray{N}
-function Base.setindex!(v::Variable{T,N},data::AbstractArray,indexes::StepRange{Int,Int}...) where {T,N}
+function setindex!(v::Variable{T,N},data::AbstractArray,indexes::StepRange{Int,Int}...) where {T,N}
     datamode(v.ds) # make sure that the file is in data mode
     start,count,stride,jlshape = ncsub(indexes[1:ndims(v)])
 
@@ -182,7 +182,7 @@ end
 
 
 
-function Base.getindex(v::Variable{T,N},indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N}
+function getindex(v::Variable{T,N},indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N}
     sz = size(v)
     start,count,stride = ncsub2(sz,indexes...)
     jlshape = _shape_after_slice(sz,indexes...)
@@ -195,11 +195,11 @@ function Base.getindex(v::Variable{T,N},indexes::Union{Int,Colon,AbstractRange{<
 end
 
 # NetCDF scalars indexed as []
-Base.getindex(v::Variable{T, 0}) where T = v[1]
+getindex(v::Variable{T, 0}) where T = v[1]
 
 
 
-function Base.setindex!(v::Variable,data,indexes::Union{Int,Colon,AbstractRange{<:Integer}}...)
+function setindex!(v::Variable,data,indexes::Union{Int,Colon,AbstractRange{<:Integer}}...)
     ind = normalizeindexes(size(v),indexes)
 
     # make arrays out of scalars (arrays can have zero dimensions)
@@ -211,5 +211,5 @@ function Base.setindex!(v::Variable,data,indexes::Union{Int,Colon,AbstractRange{
 end
 
 
-Base.getindex(v::Union{MFVariable,DeferVariable,Variable},ci::CartesianIndices) = v[ci.indices...]
-Base.setindex!(v::Union{MFVariable,DeferVariable,Variable},data,ci::CartesianIndices) = setindex!(v,data,ci.indices...)
+getindex(v::Union{MFVariable,DeferVariable,Variable},ci::CartesianIndices) = v[ci.indices...]
+setindex!(v::Union{MFVariable,DeferVariable,Variable},data,ci::CartesianIndices) = setindex!(v,data,ci.indices...)

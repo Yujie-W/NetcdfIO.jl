@@ -17,7 +17,7 @@ const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 # local NCDatasets.jl
 include("ncdatasets/NCDatasets.jl");
 
-using .NCDatasets: Dataset, defDim, defVar
+using .NCDatasets: Dataset, defVar
 
 
 # my wrapper functions

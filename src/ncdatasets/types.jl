@@ -99,7 +99,7 @@ mutable struct NCDataset{TDS} <: AbstractNCDataset where TDS <: Union{AbstractNC
         if !iswritable
             initboundsmap!(ds)
         end
-        timeid = Dates.now()
+        timeid = now()
         @debug "add finalizer $ncid $(timeid)"
 
         function _finalize(ds)

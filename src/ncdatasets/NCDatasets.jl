@@ -1,34 +1,23 @@
-# """
+#######################################################################################################################################################################################################
+#
 # NCDatasets.jl are copied from the original NCDatasets.jl, with the following changes:
-# 1. Add support to change the libnetcdf library dynamically
-# """
+#     1. Add support to change the libnetcdf library dynamically
+#     2. Remove unnecessary code that is not used by NetcdfIO
+#     3. Clean up the code that is already moved to CommonDataModel.jl
+#
+#######################################################################################################################################################################################################
 module NCDatasets
 
-import Base: Array, close, collect, convert, delete!, display, filter, getindex, parent, parentindices, setindex!, show, showerror, size, view, cat
-import CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
-import CommonDataModel: dataset, isopen, name, path, unlimited
-import CommonDataModel: attrib, attribnames, defAttrib
-import CommonDataModel: CFtransformdata!, cfvariable, defVar, variable
-import CommonDataModel: defDim, dim, dimnames
-import CommonDataModel: defGroup, group, groupnames
-import CommonDataModel: add_offset, boundsParentVar, fillvalue, fill_and_missing_values, scale_factor
-import CommonDataModel: time_origin, time_factor
+import Base: close, convert, haskey, get, getindex, keys, setindex!, showerror, size
+import CommonDataModel: defVar, variable
 
-using CFTime
-using DataStructures: OrderedDict
-using Dates
 using NetCDF_jll
-using NetworkOptions
-using Printf
-using CommonDataModel
-using CommonDataModel: dims, attribs, groups
 
-function __init__()
-    NetCDF_jll.is_available() && init_certificate_authority()
-end
-
-const default_timeunits = "days since 1900-00-00 00:00:00"
-const SymbolOrString = Union{Symbol, AbstractString}
+using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
+using CommonDataModel: name
+using DataStructures: OrderedDict
+using Dates: now
+using NetworkOptions: ca_roots
 
 
 include("CatArrays.jl");
