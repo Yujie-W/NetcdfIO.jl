@@ -1,6 +1,6 @@
 
 
-const NCIterable = Union{Dimensions,NCDataset,Groups}
+const NCIterable = Union{NCDataset,Groups}
 
 
 ############################################################
@@ -241,7 +241,6 @@ end
 
 """
     haskey(ds::NCDataset,name)
-    haskey(d::Dimensions,name)
 
 Return true if the NCDataset `ds` (or dimension/attribute list) has a variable (dimension/attribute) with the name `name`.
 For example:
@@ -260,4 +259,4 @@ end
 This example checks if the file `/tmp/test.nc` has a variable with the
 name `temperature` and a dimension with the name `lon`.
 """
-haskey(a::NCIterable,name::AbstractString) = name in keys(a)
+haskey(a::NCIterable,name::Union{AbstractString,Symbol}) = name in keys(a)

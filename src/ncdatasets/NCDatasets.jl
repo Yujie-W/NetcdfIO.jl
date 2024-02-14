@@ -19,19 +19,18 @@ using Dates: now
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
 
-include("error.jl");
 include("attribute.jl");
-
+include("dimension.jl");
+include("error.jl");
 
 include("CatArrays.jl");
 include("types.jl");
 include("netcdf_c.jl");
 include("dataset.jl");
-include("attributes.jl");
-include("dimensions.jl");
 include("groupes.jl");
 include("variable.jl");
 include("cfvariable.jl");
+
 include("precompile.jl");
 
 

@@ -96,7 +96,7 @@ julia> NCDataset("test_file.nc","c") do ds
 
 
 """
-function defVar(ds::NCDataset,name::Union{Symbol,AbstractString},vtype::DataType,dimnames;
+function defVar(ds::NCDataset,name::Union{AbstractString,Symbol},vtype::DataType,dimnames;
                 chunksizes = nothing,
                 shuffle = false,
                 deflatelevel = nothing,

@@ -15,18 +15,18 @@ Struct to store the attributes of a variable or a dataset
 $(TYPEDFIELDS)
 
 """
-mutable struct Attributes{TDS<:AbstractDataset}
+struct Attributes{TDS<:AbstractDataset}
     "Parent NetCDF dataset"
     ds::TDS
     "NetCDF variable id"
     varid::Cint
 end;
 
-get(attrs::Attributes, name::Union{Symbol,AbstractString}, default) = haskey(attrs, name) ? attrs[name] : default;
+get(attrs::Attributes, name::Union{AbstractString,Symbol}, default) = haskey(attrs, name) ? attrs[name] : default;
 
-getindex(attrs::Attributes, name::Union{Symbol,AbstractString}) = nc_get_att(attrs.ds.ncid, attrs.varid, name);
+getindex(attrs::Attributes, name::Union{AbstractString,Symbol}) = nc_get_att(attrs.ds.ncid, attrs.varid, name);
 
-haskey(attrs::Attributes, name::AbstractString) = name in keys(attrs);
+haskey(attrs::Attributes, name::Union{AbstractString,Symbol}) = name in keys(attrs);
 
 keys(attrs::Attributes) = (
     ncid = attrs.ds.ncid;
@@ -42,9 +42,10 @@ keys(attrs::Attributes) = (
     return names
 );
 
-setindex!(attrs::Attributes, data, name::Union{Symbol,AbstractString}) = (
+setindex!(attrs::Attributes, data, name::Union{AbstractString,Symbol}) = (
     # make sure that the file is in define mode
     defmode(attrs.ds);
+    nc_put_att(attrs.ds.ncid, attrs.varid, name, data);
 
-    return nc_put_att(attrs.ds.ncid, attrs.varid, name, data)
+    return nothing
 );

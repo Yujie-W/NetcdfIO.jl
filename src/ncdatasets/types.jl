@@ -11,9 +11,7 @@ mutable struct Groups{TDS<:AbstractDataset}
     ds::TDS
 end
 
-mutable struct Dimensions{TDS<:AbstractDataset}
-    ds::TDS
-end
+
 
 # Variable (as stored in NetCDF file, without using
 # add_offset, scale_factor and _FillValue)
