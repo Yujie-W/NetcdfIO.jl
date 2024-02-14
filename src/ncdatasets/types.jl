@@ -7,17 +7,6 @@ High-level interface is at the "High-level" section about actually
 loading/reading/making datasets.
 =#
 
-# Exception type for error thrown by the NetCDF library
-mutable struct NetCDFError <: Exception
-    code::Cint
-    msg::String
-end
-
-
-struct CFStdName
-    name::Symbol
-end
-
 # base type of attributes list
 # concrete types are Attributes (single NetCDF file) and
 

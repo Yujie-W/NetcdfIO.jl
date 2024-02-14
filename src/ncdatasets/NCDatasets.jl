@@ -16,6 +16,10 @@ using NetCDF_jll
 using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
 using CommonDataModel: name
 using Dates: now
+using DocStringExtensions: TYPEDEF, TYPEDFIELDS
+
+
+include("error.jl");
 
 
 include("CatArrays.jl");
