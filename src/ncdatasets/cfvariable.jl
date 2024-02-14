@@ -149,29 +149,3 @@ function defVar(ds::NCDataset,name::Union{Symbol, AbstractString},vtype::DataTyp
     # we cannot return v here
     return ds[name]
 end
-
-export defVar
-
-
-# more efficient implementation implementing a cache
-function boundsParentVar(ds::AbstractNCDataset,varname)
-    # iterating using variable ids instead of variable names
-    # is more efficient (but not possible for e.g. multi-file datasets)
-    eachvariable(ds::NCDataset) = (variable(ds,varid) for varid in nc_inq_varids(ds.ncid))
-    eachvariable(ds) = (variable(ds,vname) for vname in keys(ds))
-
-
-    # get from cache is available
-    if length(values(ds._boundsmap)) > 0
-        return get(ds._boundsmap,varname,"")
-    else
-        for v in eachvariable(ds)
-            bounds = get(v.attrib,"bounds","")
-            if bounds === varname
-                return name(v)
-            end
-        end
-
-        return ""
-    end
-end

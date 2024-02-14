@@ -15,9 +15,7 @@ using NetCDF_jll
 
 using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
 using CommonDataModel: name
-using DataStructures: OrderedDict
 using Dates: now
-using NetworkOptions: ca_roots
 
 
 include("CatArrays.jl");

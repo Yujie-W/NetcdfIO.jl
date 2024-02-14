@@ -211,5 +211,5 @@ function setindex!(v::Variable,data,indexes::Union{Int,Colon,AbstractRange{<:Int
 end
 
 
-getindex(v::Union{MFVariable,DeferVariable,Variable},ci::CartesianIndices) = v[ci.indices...]
-setindex!(v::Union{MFVariable,DeferVariable,Variable},data,ci::CartesianIndices) = setindex!(v,data,ci.indices...)
+getindex(v::Variable,ci::CartesianIndices) = v[ci.indices...]
+setindex!(v::Variable,data,ci::CartesianIndices) = setindex!(v,data,ci.indices...)
