@@ -7,9 +7,7 @@
 
 
 
-mutable struct Groups{TDS<:AbstractDataset}
-    ds::TDS
-end
+
 
 
 

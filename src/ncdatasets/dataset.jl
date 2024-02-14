@@ -1,6 +1,6 @@
 
 
-const NCIterable = Union{NCDataset,Groups}
+const NCIterable = Union{NCDataset}
 
 
 ############################################################

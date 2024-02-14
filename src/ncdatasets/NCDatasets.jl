@@ -22,12 +22,12 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 include("attribute.jl");
 include("dimension.jl");
 include("error.jl");
+include("group.jl");
 
 include("CatArrays.jl");
 include("types.jl");
 include("netcdf_c.jl");
 include("dataset.jl");
-include("groupes.jl");
 include("variable.jl");
 include("cfvariable.jl");
 
