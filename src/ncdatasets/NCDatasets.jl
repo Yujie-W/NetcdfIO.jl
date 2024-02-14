@@ -20,11 +20,11 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
 
 include("error.jl");
+include("attribute.jl");
 
 
 include("CatArrays.jl");
 include("types.jl");
-include("errorhandling.jl");
 include("netcdf_c.jl");
 include("dataset.jl");
 include("attributes.jl");

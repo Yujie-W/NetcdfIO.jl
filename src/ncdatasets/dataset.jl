@@ -1,6 +1,6 @@
 
 
-const NCIterable = Union{BaseAttributes,AbstractDimensions,AbstractNCDataset,AbstractGroups}
+const NCIterable = Union{Dimensions,NCDataset,Groups}
 
 
 ############################################################
@@ -48,7 +48,7 @@ function initboundsmap!(ds)
     ds._boundsmap = Dict{String,String}()
     for vname in keys(ds)
         v = variable(ds,vname)
-        bounds = get(v.attrib,"bounds",nothing)
+        bounds = get(v.attrib, "bounds", nothing)
 
         if !isnothing(bounds)
             ds._boundsmap[bounds] = vname
@@ -242,7 +242,6 @@ end
 """
     haskey(ds::NCDataset,name)
     haskey(d::Dimensions,name)
-    haskey(ds::Attributes,name)
 
 Return true if the NCDataset `ds` (or dimension/attribute list) has a variable (dimension/attribute) with the name `name`.
 For example:

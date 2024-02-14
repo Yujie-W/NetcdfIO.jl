@@ -25,7 +25,7 @@ julia> forecast_temp = forecast_group["temperature"]
 ```
 
 """
-function getindex(g::Groups,groupname::Union{Symbol, AbstractString})
+function getindex(g::Groups,groupname::Union{Symbol,AbstractString})
     grp_ncid = nc_inq_grp_ncid(g.ds.ncid,groupname)
     ds = NCDataset(grp_ncid,g.ds.iswritable,g.ds.isdefmode; parentdataset = g.ds)
     return ds

@@ -1,32 +1,3 @@
-#=
-Core type of `NCDatasets`
-the `Attributes` and `Group` parts as well.
-and the `Attributes` part of it.
-
-High-level interface is at the "High-level" section about actually
-loading/reading/making datasets.
-=#
-
-# base type of attributes list
-# concrete types are Attributes (single NetCDF file) and
-
-abstract type BaseAttributes
-end
-
-abstract type AbstractNCDataset <: AbstractDataset
-end
-
-abstract type AbstractNCVariable{T,N} <: AbstractVariable{T,N}
-end
-
-
-abstract type AbstractDimensions
-end
-
-abstract type AbstractGroups
-end
-
-
 ############################################################
 # Types and subtypes
 ############################################################
@@ -34,29 +5,26 @@ end
 # List of attributes (for a single NetCDF file)
 # all ids should be Cint
 
-mutable struct Attributes{TDS<:AbstractNCDataset} <: BaseAttributes
-    ds::TDS
-    varid::Cint
-end
 
-mutable struct Groups{TDS<:AbstractNCDataset} <: AbstractGroups
+
+mutable struct Groups{TDS<:AbstractDataset}
     ds::TDS
 end
 
-mutable struct Dimensions{TDS<:AbstractNCDataset} <: AbstractDimensions
+mutable struct Dimensions{TDS<:AbstractDataset}
     ds::TDS
 end
 
 # Variable (as stored in NetCDF file, without using
 # add_offset, scale_factor and _FillValue)
-mutable struct Variable{NetCDFType,N,TDS<:AbstractNCDataset} <: AbstractNCVariable{NetCDFType, N}
+mutable struct Variable{T,N,TDS<:AbstractDataset} <: AbstractVariable{T,N}
     ds::TDS
     varid::Cint
     dimids::NTuple{N,Cint}
     attrib::Attributes{TDS}
 end
 
-mutable struct NCDataset{TDS} <: AbstractNCDataset where TDS <: Union{AbstractNCDataset,Nothing}
+mutable struct NCDataset{TDS} <: AbstractDataset where TDS<:AbstractDataset
     # parent_dataset is nothing for the root dataset
     parentdataset::TDS
     ncid::Cint

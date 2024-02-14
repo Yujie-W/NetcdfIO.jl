@@ -26,7 +26,7 @@ NetCDFError(code::Cint) = NetCDFError(code, nc_strerror(code));
 showerror(io::IO, err::NetCDFError) = (
     println(io, "NetCDF error code: $(err.code)");
     println(io, "NetCDF error message:");
-    printstyled(io, err.msg, color=:red)
+    printstyled(io, err.msg, color=:red);
     println(io, "");
 );
 
