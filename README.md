@@ -28,7 +28,7 @@ NetcdfIO contains a number of wrapper functions for NCDatasets.jl. The use of th
 
 
 ## Installation
-```julia
+```
 using Pkg;
 Pkg.add("NetcdfIO");
 ```
@@ -36,3 +36,16 @@ Pkg.add("NetcdfIO");
 
 ## API
 See [`API`][ju-api] for more detailed information about how to use [`NetcdfIO.jl`][ju-url].
+
+
+## Test local coverage
+```
+using Pkg
+Pkg.test("NetcdfIO"; coverage=true);
+
+using Coverage
+coverage = process_folder();
+LCOV.writefile("lcov.info", coverage);
+
+Coverage.clean_folder(".");
+```

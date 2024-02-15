@@ -32,7 +32,8 @@ makedocs(
     format = format,
     clean = false,
     modules = [NetcdfIO],
-    pages = pages
+    pages = pages,
+    warnonly = [:cross_references, :missing_docs],
 );
 
 

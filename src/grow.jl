@@ -9,8 +9,8 @@
 #######################################################################################################################################################################################################
 """
 
-    grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool)
-    grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool)
+    grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)
+    grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)
 
 Grow the netcdf dataset, given
 - `ds` A `NCDatasets.Dataset` type dataset
@@ -46,7 +46,7 @@ grow_nc!("test.nc", "ind", 9, false);
 """
 function grow_nc! end
 
-grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool) = (
+grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
     # make sure the data to grow has -1 or the same dimensions as the target, e.g., a 3D dataset can grow with 2D or 3D input
     _dim_ds = length(size(ds[var_name]));
     _dim_in = length(size(in_data));
@@ -85,7 +85,7 @@ grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Int,S
     return nothing
 );
 
-grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool) = (
+grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
     _dset = Dataset(file, "a");
     grow_nc!(_dset, var_name, in_data, pending);
     close(_dset);

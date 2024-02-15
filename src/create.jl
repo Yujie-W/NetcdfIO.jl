@@ -81,7 +81,7 @@ create_nc!(file::String, dim_names::Vector{String}, dim_sizes::Vector) = (
 
     add_nc_dim!(ds::Dataset, dim_name::String, dim_size::Int)
     add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat)
-    add_nc_dim!(file::String, dim_name::String, dim_size::Union{Int, AbstractFloat})
+    add_nc_dim!(file::String, dim_name::String, dim_size::Union{AbstractFloat,Int})
 
 Add dimension information to netcdf dataset, given
 - `ds` A `NCDatasets.Dataset` type dataset
@@ -125,7 +125,7 @@ add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat) = (
     return nothing
 );
 
-add_nc_dim!(file::String, dim_name::String, dim_size::Union{Int, AbstractFloat}) = (
+add_nc_dim!(file::String, dim_name::String, dim_size::Union{AbstractFloat,Int}) = (
     _dset = Dataset(file, "a");
     add_nc_dim!(_dset, dim_name, dim_size);
     close(_dset);

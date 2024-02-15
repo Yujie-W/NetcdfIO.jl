@@ -153,11 +153,16 @@ function read_nc end
 
 read_nc(file::String, var_name::String; transform::Bool = true) = (
     _dset = Dataset(file, "r");
+    _dvar = read_nc(_dset, var_name; transform = transform);
+    close(_dset);
 
-    _fvar = find_variable(_dset, var_name);
+    return _dvar
+);
+
+read_nc(ds::Dataset, var_name::String; transform::Bool = true) = (
+    _fvar = find_variable(ds, var_name);
     if isnothing(_fvar)
-        close(_dset)
-        @error "$(var_name) does not exist in $(file)!";
+        @error "$(var_name) does not exist!";
     end;
 
     if transform
@@ -165,7 +170,6 @@ read_nc(file::String, var_name::String; transform::Bool = true) = (
     else
         _dvar = _fvar.var[:,:];
     end;
-    close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
         return _dvar
@@ -175,6 +179,8 @@ read_nc(file::String, var_name::String; transform::Bool = true) = (
 );
 
 read_nc(T, file::String, var_name::String; transform::Bool = true) = T.(read_nc(file, var_name; transform = transform));
+
+read_nc(T, ds::Dataset, var_name::String; transform::Bool = true) = T.(read_nc(ds, var_name; transform = transform));
 
 read_nc(file::String, var_name::String, indz::Int; transform::Bool = true) = (
     _ndim = size_nc(file, var_name)[1];
@@ -238,12 +244,18 @@ read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int; transfo
 read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = T.(read_nc(file, var_name, indx, indy, indz; transform = transform));
 
 read_nc(file::String, selections::Vector{String} = varname_nc(file); transform::Bool = true) = (
-    _dims = [size_nc(file, _var)[1] for _var in selections];
-    _lens = [size_nc(file, _var)[2][1] for _var in selections];
+    # open the dataset and get the dimensions
+    _dset = Dataset(file, "r");
+    _dims = [size_nc(_dset, _var)[1] for _var in selections];
+    _lens = [size_nc(_dset, _var)[2][1] for _var in selections];
     @assert all(_dims .== 1) "All variables need to be 1D!";
     @assert all(_lens .== _lens[1]) "Dimensions of the variables need to be the same!";
 
-    return DataFrame( [Pair(_var, read_nc(file, _var; transform = transform)) for _var in selections] )
+    # read the data and close the dataset
+    df = DataFrame( [Pair(_var, read_nc(_dset, _var; transform = transform)) for _var in selections] );
+    close(_dset);
+
+    return df
 );
 
 read_nc(file::String, var_name::String, dim_array::Vector; transform::Bool = true) = (

@@ -11,7 +11,13 @@
 #######################################################################################################################################################################################################
 """
 
-    save_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attribute::Dict{String,String}; var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"], compress::Int = 4, growable::Bool = false) where {T<:Union{AbstractFloat,Int,String},N}
+    save_nc!(file::String,
+             var_name::String,
+             var_data::Array{T,N},
+             var_attribute::Dict{String,String};
+             var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"],
+             compress::Int = 4,
+             growable::Bool = false) where {T<:Union{AbstractFloat,Integer,String},N}
 
 Save the 1D, 2D, or 3D data as netcdf file, given
 - `file` Path to save the dataset
@@ -64,7 +70,14 @@ save_nc!("test.nc", df);
 """
 function save_nc! end
 
-save_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attribute::Dict{String,String}; var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"], compress::Int = 4, growable::Bool = false) where {T<:Union{AbstractFloat,Int,String},N} = (
+save_nc!(file::String,
+         var_name::String,
+         var_data::Array{T,N},
+         var_attribute::Dict{String,String};
+         var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"],
+         compress::Int = 4,
+         growable::Bool = false
+) where {T<:Union{AbstractFloat,Integer,String},N} = (
     @assert 1 <= N <= 3 "Variable must be a 1D, 2D, or 3D dataset!";
     @assert 0 <= compress <= 9 "Compression rate must be within 0 to 9";
     @assert N == 1 || "lon" in var_dims "2D or 3D data must have a dimension named lon";
