@@ -40,7 +40,6 @@ See [`API`][ju-api] for more detailed information about how to use [`NetcdfIO.jl
 
 ## Test local coverage
 ```
-
 using Pkg
 Pkg.test("NetcdfIO"; coverage=true);
 
@@ -49,5 +48,4 @@ coverage = process_folder();
 LCOV.writefile("lcov.info", coverage);
 
 Coverage.clean_folder(".");
-
 ```

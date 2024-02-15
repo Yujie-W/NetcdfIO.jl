@@ -29,9 +29,8 @@ include("variable.jl");
 include("dataset.jl");
 
 
+# TODO: clean up these files after more testing
 include("netcdf_c.jl");
-include("cfvariable.jl");
-
 include("precompile.jl");
 
 

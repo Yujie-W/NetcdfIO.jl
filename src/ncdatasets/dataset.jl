@@ -3,6 +3,7 @@
 # Changes to the struct
 # General:
 #     2024-Feb-14: clean up the struct
+#     2024-Feb-14: simply the constructor and remove unnecessary options that I won't use
 #
 #######################################################################################################################################################################################################
 """
@@ -56,8 +57,33 @@ mutable struct NCDataset{TDS} <: AbstractDataset where TDS<:AbstractDataset
     );
 end;
 
-const Dataset = NCDataset;
+NCDataset(filename::AbstractString, mode::AbstractString) = (
+    @assert mode in ("r","a","c") "Unsupported mode: $(mode)!";
 
+    ncid = -1;
+    isdefmode = Ref(false);
+    iswritable = mode != "r";
+
+    if mode == "r"
+        ncmode = NC_NOWRITE;
+        ncid = nc_open(filename, ncmode);
+    end;
+
+    if mode == "a"
+        ncmode = NC_WRITE;
+        ncid = nc_open(filename, ncmode);
+    end;
+
+    if mode == "c"
+        ncmode = NC_CLOBBER | NC_NETCDF4
+        ncid = nc_create(filename, ncmode);
+        isdefmode[] = true;
+    end;
+
+    return NCDataset(ncid, iswritable, isdefmode)
+);
+
+const Dataset = NCDataset;
 
 close(ds::NCDataset) = (
     try
@@ -96,6 +122,50 @@ def_mode!(dset::NCDataset) = (
     return nothing
 );
 
+"""
+
+    defVar(dset::NCDataset,
+           name::Union{AbstractString,Symbol},
+           vtype::DataType,
+           dimnames::Vector{String};
+           deflatelevel::Union{Int,Nothing} = nothing,
+           attrib::Dict{String,String} = Dict{String,String}())
+
+Create a new variable in the dataset, given
+- `dset` A netcdf dataset
+- `name` Name of the variable
+- `vtype` Type of the variable, for example `Float64`, `Int32`, `String`, etc.
+- `dimnames` Dimension names in the netcdf file
+- `deflatelevel` Compression level fro NetCDF, default is `nothing`
+- `attrib` Variable attributes, default is an empty dictionary
+
+"""
+defVar(dset::NCDataset,
+       name::Union{AbstractString,Symbol},
+       vtype::DataType,
+       dimnames::Vector{String};
+       deflatelevel::Union{Int,Nothing} = nothing,
+       attrib::Dict{String,String} = Dict{String,String}()) = (
+    # make sure that the file is in define mode
+    def_mode!(dset);
+
+    dimids = Cint[nc_inq_dimid(dset.ncid, dimname) for dimname in dimnames[end:-1:1]];
+    typeid = (vtype <: Vector) ? nc_def_vlen(dset.ncid, nothing, NC_TYPES[eltype(vtype)]) : NC_TYPES[vtype];
+    varid = nc_def_var(dset.ncid, name, typeid, dimids);
+
+    if !isnothing(deflatelevel)
+        nc_def_var_deflate(dset.ncid, varid, false, true, deflatelevel);
+    end;
+
+    # note: element type of ds[name] potentially changed, so do not directly return v here
+    v = dset[name];
+    for (attname,attval) in attrib
+        v.attrib[attname] = attval;
+    end;
+
+    return dset[name]
+);
+
 haskey(dset::NCDataset, name::Union{AbstractString,Symbol}) = name in keys(dset);
 
 keys(dset::NCDataset) = String[nc_inq_varname(dset.ncid, varid) for varid in nc_inq_varids(dset.ncid)];
@@ -112,157 +182,3 @@ variable(dset::NCDataset, varid::Integer) = (
 );
 
 variable(dset::NCDataset, varname::AbstractString) = variable(dset, nc_inq_varid(dset.ncid, varname));
-
-
-
-
-
-
-
-
-############################################################
-# High-level
-############################################################
-
-"""
-    NCDataset(filename::AbstractString, mode = "r";
-              format::Symbol = :netcdf4,
-              share::Bool = false,
-              diskless::Bool = false,
-              persist::Bool = false,
-              memory::Union{Vector{UInt8},Nothing} = nothing,
-              attrib = [])
-
-Load, create, or even overwrite a NetCDF file at `filename`, depending on `mode`
-
-* `"r"` (default) : open an existing netCDF file or OPeNDAP URL
-   in read-only mode.
-* `"c"` : create a new NetCDF file at `filename` (an existing file with the same
-  name will be overwritten).
-* `"a"` : open `filename` into append mode (i.e. existing data in the netCDF
-  file is not overwritten and a variable can be added).
-
-
-If `share` is true, the `NC_SHARE` flag is set allowing to have multiple
-processes to read the file and one writer process. Likewise setting `diskless`
-or `persist` to `true` will enable the flags `NC_DISKLESS` or `NC_PERSIST` flag.
-More information is available in the [NetCDF C-API](https://www.unidata.ucar.edu/software/netcdf/docs/).
-
-Notice that this does not close the dataset, use `close` on the
-result (or see below the `do`-block).
-
-The optional parameter `attrib` is an iterable of attribute name and attribute
-value pairs, for example a `Dict`, `DataStructures.OrderedDict` or simply a
-vector of pairs (see example below).
-
-# Supported `format` values:
-
-* `:netcdf4` (default): HDF5-based NetCDF format.
-* `:netcdf4_classic`: Only netCDF 3 compatible API features will be used.
-* `:netcdf3_classic`: classic netCDF format supporting only files smaller than 2GB.
-* `:netcdf3_64bit_offset`: improved netCDF format supporting files larger than 2GB.
-* `:netcdf5_64bit_data`: improved netCDF format supporting 64-bit integer data types.
-
-
-Files can also be open and automatically closed with a `do` block.
-
-```julia
-NCDataset("file.nc") do ds
-    data = ds["temperature"][:,:]
-end
-```
-
-Here is an attribute example:
-```julia
-using DataStructures
-NCDataset("file.nc", "c", attrib = OrderedDict("title" => "my first netCDF file")) do ds
-   defVar(ds,"temp",[10.,20.,30.],("time",))
-end;
-```
-
-The NetCDF dataset can also be a `memory` as a vector of bytes. A non-empty string
-a `filename` is still required, for example:
-
-```julia
-using NCDataset, HTTP
-resp = HTTP.get("https://www.unidata.ucar.edu/software/netcdf/examples/ECMWF_ERA-40_subset.nc")
-ds = NCDataset("some_string","r",memory = resp.body)
-total_precipitation = ds["tp"][:,:,:]
-close(ds)
-```
-
-`Dataset` is an alias of `NCDataset`.
-"""
-function NCDataset(filename::AbstractString,
-                   mode::AbstractString = "r";
-                   format::Symbol = :netcdf4,
-                   share::Bool = false,
-                   diskless::Bool = false,
-                   persist::Bool = false,
-                   memory::Union{Vector{UInt8},Nothing} = nothing,
-                   attrib = [])
-
-    ncid = -1
-    isdefmode = Ref(false)
-
-    ncmode =
-        if mode == "r"
-            NC_NOWRITE
-        elseif mode == "a"
-            NC_WRITE
-        elseif mode == "c"
-            NC_CLOBBER
-        else
-            throw(NetCDFError(-1, "Unsupported mode '$(mode)' for filename '$(filename)'"))
-        end
-
-    if diskless
-        ncmode = ncmode | NC_DISKLESS
-
-        if persist
-            ncmode = ncmode | NC_PERSIST
-        end
-    end
-
-    if share
-        @debug "share mode"
-        ncmode = ncmode | NC_SHARE
-    end
-
-    @debug "ncmode: $ncmode"
-
-    if (mode == "r") || (mode == "a")
-        if isnothing(memory)
-            ncid = nc_open(filename,ncmode)
-        else
-            ncid = nc_open_mem(filename,ncmode,memory)
-        end
-    elseif mode == "c"
-        if format == :netcdf5_64bit_data
-            ncmode = ncmode | NC_64BIT_DATA
-        elseif format == :netcdf3_64bit_offset
-            ncmode = ncmode | NC_64BIT_OFFSET
-        elseif format == :netcdf4_classic
-            ncmode = ncmode | NC_NETCDF4 | NC_CLASSIC_MODEL
-        elseif format == :netcdf4
-            ncmode = ncmode | NC_NETCDF4
-        elseif format == :netcdf3_classic
-            # do nothing
-        else
-            throw(NetCDFError(-1, "Unkown format '$(format)' for filename '$(filename)'"))
-        end
-
-        ncid = nc_create(filename,ncmode)
-        isdefmode[] = true
-    end
-
-    iswritable = mode != "r"
-    ds = NCDataset(ncid,iswritable,isdefmode)
-
-    # set global attributes
-    for (attname,attval) in attrib
-        ds.attrib[attname] = attval
-    end
-
-    return ds
-end
