@@ -12,6 +12,8 @@ $(TYPEDEF)
 
 Struct to store the attributes of a variable or a dataset
 
+# Fields
+
 $(TYPEDFIELDS)
 
 """

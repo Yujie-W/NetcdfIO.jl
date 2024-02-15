@@ -24,11 +24,11 @@ include("dimension.jl");
 include("error.jl");
 include("group.jl");
 
-include("CatArrays.jl");
+include("variable.jl");
+
 include("types.jl");
 include("netcdf_c.jl");
 include("dataset.jl");
-include("variable.jl");
 include("cfvariable.jl");
 
 include("precompile.jl");

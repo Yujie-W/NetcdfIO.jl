@@ -12,6 +12,8 @@ $(TYPEDEF)
 
 Struct to store the dimension of a variable or a dataset
 
+# Fields
+
 $(TYPEDFIELDS)
 
 """

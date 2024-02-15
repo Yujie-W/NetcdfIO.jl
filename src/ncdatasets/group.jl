@@ -12,6 +12,8 @@ $(TYPEDEF)
 
 Struct to store the groups of a dataset
 
+# Fields
+
 $(TYPEDFIELDS)
 
 """

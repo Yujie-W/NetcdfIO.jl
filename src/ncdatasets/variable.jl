@@ -1,215 +1,242 @@
-#=
-Functionality and definitions
-related with the `Variables` types/subtypes
-=#
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General:
+#     2024-Feb-14: make the struct immutable
+#
+#######################################################################################################################################################################################################
+"""
 
+$(TYPEDEF)
 
+Struct to represent a NetCDF variable
 
-############################################################
-# Helper functions (internal)
-############################################################
-"Return all variable names"
-listVar(ncid) = String[nc_inq_varname(ncid,varid)
-                       for varid in nc_inq_varids(ncid)]
+# Fields
 
+$(TYPEDFIELDS)
 
 """
-    sz = size(var::Variable)
+struct Variable{T,N,TDS<:AbstractDataset} <: AbstractVariable{T,N}
+    "Parent NetCDF dataset"
+    ds::TDS
+    "NetCDF variable id"
+    varid::Cint
+    "NetCDF dimension ids"
+    dimids::NTuple{N,Cint}
+    "Attributes of the variable"
+    attrib::Attributes{TDS}
+end;
 
-Return a tuple of integers with the size of the variable `var`.
+getindex(var::Variable, indexes::Int...) = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
 
-!!! note
+    return nc_get_var1(eltype(var), var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]])
+);
 
-    Note that the size of a variable can change, i.e. for a variable with an
-    unlimited dimension.
-"""
-size(v::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(v.ds.ncid,v.dimids[i]),Val(N))
+getindex(var::Variable{T,N}, indexes::Colon...) where {T,N} = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
 
-
-############################################################
-# Obtaining variables
-############################################################
-
-function variable(ds::NCDataset,varid::Integer)
-    dimids = nc_inq_vardimid(ds.ncid,varid)
-    nctype = _jltype(ds.ncid,nc_inq_vartype(ds.ncid,varid))
-    ndims = length(dimids)
-    attrib = Attributes(ds,varid)
-
-    # reverse dimids to have the dimension order in Fortran style
-    return Variable{nctype,ndims,typeof(ds)}(ds,varid, (reverse(dimids)...,), attrib)
-end
-
-
-function _variable(ds::NCDataset,varname)
-    varid = nc_inq_varid(ds.ncid,varname)
-    return variable(ds,varid)
-end
-
-"""
-    v = variable(ds::NCDataset,varname::String)
-
-Return the NetCDF variable `varname` in the dataset `ds` as a
-`NCDataset.Variable`. No scaling or other transformations are applied when the
-variable `v` is indexed.
-"""
-variable(ds::NCDataset,varname::AbstractString) = _variable(ds,varname)
-
-
-function getindex(v::Variable,indexes::Int...)
-    datamode(v.ds)
-    return nc_get_var1(eltype(v),v.ds.ncid,v.varid,[i-1 for i in indexes[ndims(v):-1:1]])
-end
-
-function setindex!(v::Variable{T,N},data,indexes::Int...) where N where T
-    @debug "$(@__LINE__)"
-    datamode(v.ds)
-    # use zero-based indexes and reversed order
-    nc_put_var1(v.ds.ncid,v.varid,[i-1 for i in indexes[ndims(v):-1:1]],T(data))
-    return data
-end
-
-function getindex(v::Variable{T,N},indexes::Colon...) where {T,N}
-    datamode(v.ds)
-    data = Array{T,N}(undef,size(v))
-    nc_get_var!(v.ds.ncid,v.varid,data)
+    data = Array{T,N}(undef, size(var));
+    nc_get_var!(var.ds.ncid, var.varid, data);
 
     # special case for scalar NetCDF variable
-    if N == 0
-        return data[]
-    else
-        return data
-    end
-end
+    return N == 0 ? data[] : data
+);
 
-function setindex!(v::Variable{T,N},data::AbstractArray{T,N},indexes::Colon...) where {T,N}
-    datamode(v.ds) # make sure that the file is in data mode
+getindex(var::Variable{T,N}, indexes::TR...) where {T,N,TR<:Union{StepRange{Int,Int},UnitRange{Int}}} = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
 
-    nc_put_var(v.ds.ncid,v.varid,data)
-    return data
-end
-
-function setindex!(v::Variable{T,N},data::AbstractArray{T2,N},indexes::Colon...) where {T,T2,N}
-    datamode(v.ds) # make sure that the file is in data mode
-    tmp =
-        if T <: Integer
-            round.(T,data)
-        else
-            convert(Array{T,N},data)
-        end
-
-    nc_put_var(v.ds.ncid,v.varid,tmp)
-    return data
-end
-
-_normalizeindex(n,ind::Base.OneTo) = 1:1:ind.stop
-_normalizeindex(n,ind::Colon) = 1:1:n
-_normalizeindex(n,ind::Int) = ind:1:ind
-_normalizeindex(n,ind::UnitRange) = StepRange(ind)
-_normalizeindex(n,ind::StepRange) = ind
-_normalizeindex(n,ind) = error("unsupported index")
-
-# indexes can be longer than sz
-function normalizeindexes(sz,indexes)
-    return ntuple(i -> _normalizeindex(sz[i],indexes[i]), length(sz))
-end
-
-
-function ncsub(indexes::NTuple{N,T}) where N where T
-    rindexes = reverse(indexes)
-    count  = Int[length(i)  for i in rindexes]
-    start  = Int[first(i)-1 for i in rindexes]     # use zero-based indexes
-    stride = Int[step(i)    for i in rindexes]
-    jlshape = length.(indexes)::NTuple{N,Int}
-    return start,count,stride,jlshape
-end
-
-@inline start_count_stride(n,ind::AbstractRange) = (first(ind)-1,length(ind),step(ind))
-@inline start_count_stride(n,ind::Integer) = (ind-1,1,1)
-@inline start_count_stride(n,ind::Colon) = (0,n,1)
-
-@inline function ncsub2(sz,indexes...)
-    N = length(sz)
-
-    start = Vector{Int}(undef,N)
-    count = Vector{Int}(undef,N)
-    stride = Vector{Int}(undef,N)
-
-    for i = 1:N
-        ind = indexes[i]
-        ri = N-i+1
-        @inbounds start[ri],count[ri],stride[ri] = start_count_stride(sz[i],ind)
-    end
-
-    return start,count,stride
-end
-
-function getindex(v::Variable{T,N},indexes::TR...) where {T,N} where TR <: Union{StepRange{Int,Int},UnitRange{Int}}
-    start,count,stride,jlshape = ncsub(indexes[1:N])
-    data = Array{T,N}(undef,jlshape)
-
-    datamode(v.ds)
-    nc_get_vars!(v.ds.ncid,v.varid,start,count,stride,data)
-    return data
-end
-
-function setindex!(v::Variable{T,N},data::T,indexes::StepRange{Int,Int}...) where {T,N}
-    datamode(v.ds) # make sure that the file is in data mode
-    start,count,stride,jlshape = ncsub(indexes[1:ndims(v)])
-    tmp = fill(data,jlshape)
-    nc_put_vars(v.ds.ncid,v.varid,start,count,stride,tmp)
-    return data
-end
-
-function setindex!(v::Variable{T,N},data::Array{T,N},indexes::StepRange{Int,Int}...) where {T,N}
-    datamode(v.ds) # make sure that the file is in data mode
-    start,count,stride,jlshape = ncsub(indexes[1:ndims(v)])
-    nc_put_vars(v.ds.ncid,v.varid,start,count,stride,data)
-    return data
-end
-
-# data can be Array{T2,N} or BitArray{N}
-function setindex!(v::Variable{T,N},data::AbstractArray,indexes::StepRange{Int,Int}...) where {T,N}
-    datamode(v.ds) # make sure that the file is in data mode
-    start,count,stride,jlshape = ncsub(indexes[1:ndims(v)])
-
-    tmp = convert(Array{T,ndims(data)},data)
-    nc_put_vars(v.ds.ncid,v.varid,start,count,stride,tmp)
+    (start,count,stride,jlshape) = ncsub(indexes[1:N]);
+    data = Array{T,N}(undef, jlshape);
+    nc_get_vars!(var.ds.ncid, var.varid, start, count, stride, data);
 
     return data
-end
+);
 
+getindex(var::Variable{T,N}, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N} = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
 
-
-
-function getindex(v::Variable{T,N},indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N}
-    sz = size(v)
-    start,count,stride = ncsub2(sz,indexes...)
-    jlshape = _shape_after_slice(sz,indexes...)
-    data = Array{T}(undef,jlshape)
-
-    datamode(v.ds)
-    nc_get_vars!(v.ds.ncid,v.varid,start,count,stride,data)
+    sz = size(var);
+    (start,count,stride) = ncsub(sz, indexes...);
+    jlshape = _shape_after_slice(sz, indexes...);
+    data = Array{T}(undef, jlshape);
+    nc_get_vars!(var.ds.ncid, var.varid, start, count, stride, data);
 
     return data
-end
+);
 
-# NetCDF scalars indexed as []
-getindex(v::Variable{T, 0}) where T = v[1]
+getindex(var::Variable{T,0}) where {T} = var[1];
 
+getindex(var::Variable, ci::CartesianIndices) = var[ci.indices...];
 
+setindex!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
 
-function setindex!(v::Variable,data,indexes::Union{Int,Colon,AbstractRange{<:Integer}}...)
-    ind = normalizeindexes(size(v),indexes)
+    nc_put_var1(var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]], T(data));
+
+    return nothing
+);
+
+setindex!(var::Variable{T,N}, data::AbstractArray{T,N}, indexes::Colon...) where {T,N} = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
+
+    nc_put_var(var.ds.ncid, var.varid, data);
+
+    return nothing
+);
+
+setindex!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon...) where {T,T2,N} = (
+    # make sure the dataset is in data mode
+    datamode(var.ds);
+    tmp = T <: Integer ? round.(T,data) : convert(Array{T,N},data);
+    nc_put_var(var.ds.ncid, var.varid, tmp);
+
+    return nothing
+);
+
+setindex!(var::Variable, data, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) = (
+    ind = normalized_indexes(size(var), indexes);
 
     # make arrays out of scalars (arrays can have zero dimensions)
     if (ndims(data) == 0) && !(data isa AbstractArray)
-        data = fill(data,length.(ind))
-    end
+        data = fill(data, length.(ind));
+    end;
+    var[ind...] = data;
 
-    return v[ind...] = data
-end
+    return nothing
+);
+
+setindex!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,N} = (
+    # make sure that the file is in data mode
+    datamode(var.ds);
+
+    (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
+    tmp = fill(data, jlshape);
+    nc_put_vars(var.ds.ncid, var.varid, start, count, stride, tmp);
+
+    return nothing
+);
+
+setindex!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,Int}...) where {T,N} = (
+    # make sure that the file is in data mode
+    datamode(var.ds);
+
+    (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
+    nc_put_vars(var.ds.ncid, var.varid, start, count, stride, data);
+
+    return nothing
+);
+
+setindex!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{Int,Int}...) where {T,N} = (
+    # make sure that the file is in data mode
+    datamode(var.ds);
+
+    (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
+    tmp = convert(Array{T,ndims(data)}, data);
+    nc_put_vars(var.ds.ncid, var.varid, start, count, stride, tmp);
+
+    return nothing
+);
+
+setindex!(var::Variable, data, ci::CartesianIndices) = setindex!(var, data, ci.indices...);
+
+size(var::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(var.ds.ncid, var.dimids[i]), Val(N));
 
 
-getindex(v::Variable,ci::CartesianIndices) = v[ci.indices...]
-setindex!(v::Variable,data,ci::CartesianIndices) = setindex!(v,data,ci.indices...)
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General:
+#     2024-Feb-14: refine the types of the arguments
+#
+#######################################################################################################################################################################################################
+"""
+
+    normalized_index(sz::NTuple, index)
+
+Normalize the index to a tuple of StepRange, given
+- `sz` the size of the array
+- `index` the index to be normalized
+
+"""
+function normalized_indexes end;
+
+normalized_indexes(n::Int, ind::Base.OneTo) = 1:1:ind.stop;
+
+normalized_indexes(n::Int, ind::Colon) = 1:1:n;
+
+normalized_indexes(n::Int, ind::Int) = ind:1:ind;
+
+normalized_indexes(n::Int, ind::UnitRange) = StepRange(ind);
+
+normalized_indexes(n::Int, ind::StepRange) = ind;
+
+normalized_indexes(sz::NTuple, index) = ntuple(i -> normalized_indexes(sz[i], index[i]), length(sz));
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General:
+#     2024-Feb-14: combine ncsub and ncsub2 into one function
+#
+#######################################################################################################################################################################################################
+"""
+
+    ncsub(indexes::NTuple{N,T}) where {N,T}
+    ncsub(sz::NTuple{N,T}, indexes...) where {N,T}
+
+Return the start, count, stride, and shape of the slice, given
+- `indexes` the indexes of the slice
+- `sz` the size of the array
+
+"""
+function ncsub end;
+
+ncsub(indexes::NTuple{N,T}) where {N,T} = (
+    rindexes = reverse(indexes);
+    count = Int[length(i) for i in rindexes];
+    start = Int[first(i)-1 for i in rindexes]; # use zero-based indexes in netcdf_c
+    stride = Int[step(i) for i in rindexes];
+    jlshape = length.(indexes)::NTuple{N,Int};
+
+    return start,count,stride,jlshape
+);
+
+ncsub(sz::NTuple{N,T}, indexes...) where {N,T} = (
+    start = Vector{Int}(undef,N);
+    count = Vector{Int}(undef,N);
+    stride = Vector{Int}(undef,N);
+
+    for i = 1:N
+        ind = indexes[i];
+        ri = N - i + 1;
+        if ind isa AbstractRange
+            start[ri],count[ri],stride[ri] = (first(ind)-1, length(ind), step(ind));
+        elseif ind isa Integer
+            start[ri],count[ri],stride[ri] = (ind-1, 1, 1);
+        elseif ind isa Colon
+            start[ri],count[ri],stride[ri] = (0, sz[i], 1);
+        else
+            error("Invalid index type: $(typeof(ind))");
+        end;
+    end;
+
+    return start,count,stride
+);
+
+
+
+
+# TODO: understand this function or remove it in future versions
+_shape_after_slice(sz,indexes...) = __sh(sz,(),1,indexes...)
+__sh(sz,sh,n,i::Integer,indexes...) = __sh(sz,sh,               n+1,indexes...)
+__sh(sz,sh,n,i::Colon,  indexes...) = __sh(sz,(sh...,sz[n]),    n+1,indexes...)
+__sh(sz,sh,n,i,         indexes...) = __sh(sz,(sh...,length(i)),n+1,indexes...)
+__sh(sz,sh,n) = sh

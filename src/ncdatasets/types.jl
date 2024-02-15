@@ -11,14 +11,6 @@
 
 
 
-# Variable (as stored in NetCDF file, without using
-# add_offset, scale_factor and _FillValue)
-mutable struct Variable{T,N,TDS<:AbstractDataset} <: AbstractVariable{T,N}
-    ds::TDS
-    varid::Cint
-    dimids::NTuple{N,Cint}
-    attrib::Attributes{TDS}
-end
 
 mutable struct NCDataset{TDS} <: AbstractDataset where TDS<:AbstractDataset
     # parent_dataset is nothing for the root dataset

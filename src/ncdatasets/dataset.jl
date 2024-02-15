@@ -1,8 +1,3 @@
-
-
-const NCIterable = Union{NCDataset}
-
-
 ############################################################
 # Mappings
 ############################################################
@@ -212,7 +207,7 @@ end
 
 Return a list of all variables names in NCDataset `ds`.
 """
-keys(ds::NCDataset) = listVar(ds.ncid)
+keys(ds::NCDataset) = String[nc_inq_varname(ds.ncid, varid) for varid in nc_inq_varids(ds.ncid)];
 
 
 """
@@ -259,4 +254,35 @@ end
 This example checks if the file `/tmp/test.nc` has a variable with the
 name `temperature` and a dimension with the name `lon`.
 """
-haskey(a::NCIterable,name::Union{AbstractString,Symbol}) = name in keys(a)
+haskey(ds::NCDataset,name::Union{AbstractString,Symbol}) = name in keys(ds)
+
+
+
+############################################################
+# Obtaining variables
+############################################################
+
+function variable(ds::NCDataset,varid::Integer)
+    dimids = nc_inq_vardimid(ds.ncid,varid)
+    nctype = _jltype(ds.ncid,nc_inq_vartype(ds.ncid,varid))
+    ndims = length(dimids)
+    attrib = Attributes(ds,varid)
+
+    # reverse dimids to have the dimension order in Fortran style
+    return Variable{nctype,ndims,typeof(ds)}(ds,varid, (reverse(dimids)...,), attrib)
+end
+
+
+function _variable(ds::NCDataset,varname)
+    varid = nc_inq_varid(ds.ncid,varname)
+    return variable(ds,varid)
+end
+
+"""
+    v = variable(ds::NCDataset,varname::String)
+
+Return the NetCDF variable `varname` in the dataset `ds` as a
+`NCDataset.Variable`. No scaling or other transformations are applied when the
+variable `v` is indexed.
+"""
+variable(ds::NCDataset,varname::AbstractString) = _variable(ds,varname)
