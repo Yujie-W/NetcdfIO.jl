@@ -6,7 +6,6 @@ version = "0.2.7"
 [deps]
 CommonDataModel = "1fbeeb36-5f17-413c-809b-666fb144f157"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 NetCDF_jll = "7243133f-43d8-5620-bbf4-c2c921802cf3"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -46,7 +46,7 @@ keys(attrs::Attributes) = (
 
 setindex!(attrs::Attributes, data, name::Union{AbstractString,Symbol}) = (
     # make sure that the file is in define mode
-    defmode(attrs.ds);
+    def_mode!(attrs.ds);
     nc_put_att(attrs.ds.ncid, attrs.varid, name, data);
 
     return nothing

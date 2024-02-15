@@ -105,16 +105,16 @@ function defVar(ds::NCDataset,name::Union{AbstractString,Symbol},vtype::DataType
                 nofill = false,
                 typename = nothing,
                 attrib = ())
-    defmode(ds) # make sure that the file is in define mode
+    def_mode!(ds) # make sure that the file is in define mode
     dimids = Cint[nc_inq_dimid(ds.ncid,dimname) for dimname in dimnames[end:-1:1]]
 
     typeid =
         if vtype <: Vector
             # variable-length type
-            typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
+            typeid = nc_def_vlen(ds.ncid, typename, NC_TYPES[eltype(vtype)])
         else
             # base-type
-            ncType[vtype]
+            NC_TYPES[vtype]
         end
 
     varid = nc_def_var(ds.ncid,name,typeid,dimids)

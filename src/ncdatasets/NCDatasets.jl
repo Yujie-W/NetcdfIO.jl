@@ -15,20 +15,21 @@ using NetCDF_jll
 
 using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
 using CommonDataModel: name
-using Dates: now
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
 
 include("attribute.jl");
+include("config.jl");
 include("dimension.jl");
 include("error.jl");
 include("group.jl");
 
 include("variable.jl");
 
-include("types.jl");
-include("netcdf_c.jl");
 include("dataset.jl");
+
+
+include("netcdf_c.jl");
 include("cfvariable.jl");
 
 include("precompile.jl");

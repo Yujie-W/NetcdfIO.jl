@@ -1,55 +1,124 @@
-############################################################
-# Mappings
-############################################################
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General:
+#     2024-Feb-14: clean up the struct
+#
+#######################################################################################################################################################################################################
+"""
 
-# Mapping between NetCDF types and Julia types
-const jlType = Dict(
-    NC_BYTE   => Int8,
-    NC_UBYTE  => UInt8,
-    NC_SHORT  => Int16,
-    NC_USHORT => UInt16,
-    NC_INT    => Int32,
-    NC_UINT   => UInt32,
-    NC_INT64  => Int64,
-    NC_UINT64 => UInt64,
-    NC_FLOAT  => Float32,
-    NC_DOUBLE => Float64,
-    NC_CHAR   => Char,
-    NC_STRING => String
-)
+$(TYPEDEF)
 
-# Inverse mapping
-const ncType = Dict(value => key for (key, value) in jlType)
+Struct for a NetCDF dataset
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+mutable struct NCDataset{TDS} <: AbstractDataset where TDS<:AbstractDataset
+    "Parent dataset (nothing for the root dataset)"
+    parentdataset::TDS
+    "NetCDF dataset id"
+    ncid::Cint
+    "Whether the NetCDF is writable"
+    iswritable::Bool
+    "Whether the NetCDF is in define mode (i.e. metadata can be added, but not data)"
+    isdefmode::Ref{Bool}
+    "Attributes of the dataset"
+    attrib::Attributes{NCDataset{TDS}}
+    "Dimensions of the dataset"
+    dim::Dimensions{NCDataset{TDS}}
+    "Groups of the dataset"
+    group::Groups{NCDataset{TDS}}
+
+    # constructor
+    NCDataset(ncid::Integer, iswritable::Bool, isdefmode::Ref{Bool}; parentdataset = nothing) = (
+        ds = new{typeof(parentdataset)}();
+        ds.parentdataset = parentdataset;
+        ds.ncid = ncid;
+        ds.iswritable = iswritable;
+        ds.isdefmode = isdefmode;
+        ds.attrib = Attributes(ds, NC_GLOBAL);
+        ds.dim = Dimensions(ds);
+        ds.group = Groups(ds);
+
+        @inline _finalize(ds) = (
+            # only close open root group
+            if (ds.ncid != -1) && isnothing(ds.parentdataset)
+                close(ds)
+            end;
+        );
+
+        finalizer(_finalize, ds);
+
+        return ds
+    );
+end;
+
+const Dataset = NCDataset;
 
 
-"Make sure that a dataset is in data mode"
-function datamode(ds)
-    if ds.isdefmode[]
-        nc_enddef(ds.ncid)
-        ds.isdefmode[] = false
-    end
-end
+close(ds::NCDataset) = (
+    try
+        nc_close(ds.ncid);
+    catch err
+        # like Base, allow close on closed file
+        if err isa NetCDFError
+            if err.code == NC_EBADID
+                return nothing
+            end;
+        end;
+        rethrow();
+    end;
 
-"Make sure that a dataset is in define mode"
-function defmode(ds)
-    if !ds.isdefmode[]
-        nc_redef(ds.ncid)
-        ds.isdefmode[] = true
-    end
-end
+    # prevent finalize to close file as ncid can reused for future files
+    ds.ncid = -1;
 
-"Initialize the ds._boundsmap variable"
-function initboundsmap!(ds)
-    ds._boundsmap = Dict{String,String}()
-    for vname in keys(ds)
-        v = variable(ds,vname)
-        bounds = get(v.attrib, "bounds", nothing)
+    return nothing
+);
 
-        if !isnothing(bounds)
-            ds._boundsmap[bounds] = vname
-        end
-    end
-end
+data_mode!(dset::NCDataset) = (
+    if dset.isdefmode[]
+        nc_enddef(dset.ncid);
+        dset.isdefmode[] = false
+    end;
+
+    return nothing
+);
+
+def_mode!(dset::NCDataset) = (
+    if !dset.isdefmode[]
+        nc_redef(dset.ncid);
+        dset.isdefmode[] = true;
+    end;
+
+    return nothing
+);
+
+haskey(dset::NCDataset, name::Union{AbstractString,Symbol}) = name in keys(dset);
+
+keys(dset::NCDataset) = String[nc_inq_varname(dset.ncid, varid) for varid in nc_inq_varids(dset.ncid)];
+
+variable(dset::NCDataset, varid::Integer) = (
+    dimids = nc_inq_vardimid(dset.ncid, varid);
+    T = _jltype(dset.ncid, nc_inq_vartype(dset.ncid, varid));
+    N = length(dimids);
+    attrib = Attributes(dset, varid);
+    TDS = typeof(dset);
+
+    # reverse dimids to have the dimension order in Fortran style
+    return Variable{T,N,TDS}(dset, varid, (reverse(dimids)...,), attrib)
+);
+
+variable(dset::NCDataset, varname::AbstractString) = variable(dset, nc_inq_varid(dset.ncid, varname));
+
+
+
+
+
+
+
 
 ############################################################
 # High-level
@@ -197,92 +266,3 @@ function NCDataset(filename::AbstractString,
 
     return ds
 end
-
-
-############################################################
-# High-level: user convenience
-############################################################
-"""
-    keys(ds::NCDataset)
-
-Return a list of all variables names in NCDataset `ds`.
-"""
-keys(ds::NCDataset) = String[nc_inq_varname(ds.ncid, varid) for varid in nc_inq_varids(ds.ncid)];
-
-
-"""
-    close(ds::NCDataset)
-
-Close the NCDataset `ds`. All pending changes will be written
-to the disk.
-"""
-function close(ds::NCDataset)
-    try
-        nc_close(ds.ncid)
-    catch err
-        # like Base, allow close on closed file
-        if isa(err,NetCDFError)
-            if err.code == NC_EBADID
-                return ds
-            end
-        end
-        rethrow()
-    end
-    # prevent finalize to close file as ncid can reused for future files
-    ds.ncid = -1
-    return ds
-end
-
-
-"""
-    haskey(ds::NCDataset,name)
-
-Return true if the NCDataset `ds` (or dimension/attribute list) has a variable (dimension/attribute) with the name `name`.
-For example:
-
-```julia
-ds = NCDataset("/tmp/test.nc","r")
-if haskey(ds,"temperature")
-    println("The file has a variable 'temperature'")
-end
-
-if haskey(ds.dim,"lon")
-    println("The file has a dimension 'lon'")
-end
-```
-
-This example checks if the file `/tmp/test.nc` has a variable with the
-name `temperature` and a dimension with the name `lon`.
-"""
-haskey(ds::NCDataset,name::Union{AbstractString,Symbol}) = name in keys(ds)
-
-
-
-############################################################
-# Obtaining variables
-############################################################
-
-function variable(ds::NCDataset,varid::Integer)
-    dimids = nc_inq_vardimid(ds.ncid,varid)
-    nctype = _jltype(ds.ncid,nc_inq_vartype(ds.ncid,varid))
-    ndims = length(dimids)
-    attrib = Attributes(ds,varid)
-
-    # reverse dimids to have the dimension order in Fortran style
-    return Variable{nctype,ndims,typeof(ds)}(ds,varid, (reverse(dimids)...,), attrib)
-end
-
-
-function _variable(ds::NCDataset,varname)
-    varid = nc_inq_varid(ds.ncid,varname)
-    return variable(ds,varid)
-end
-
-"""
-    v = variable(ds::NCDataset,varname::String)
-
-Return the NetCDF variable `varname` in the dataset `ds` as a
-`NCDataset.Variable`. No scaling or other transformations are applied when the
-variable `v` is indexed.
-"""
-variable(ds::NCDataset,varname::AbstractString) = _variable(ds,varname)

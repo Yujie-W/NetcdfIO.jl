@@ -7,200 +7,7 @@
 # This file is originally based netcdf_c.jl from NetCDF.jl
 #
 #######################################################################################################################################################################################################
-const NC_NAT = 0
-const NC_BYTE = 1
-const NC_CHAR = 2
-const NC_SHORT = 3
-const NC_INT = 4
-const NC_LONG = NC_INT
-const NC_FLOAT = 5
-const NC_DOUBLE = 6
-const NC_UBYTE = 7
-const NC_USHORT = 8
-const NC_UINT = 9
-const NC_INT64 = 10
-const NC_UINT64 = 11
-const NC_STRING = 12
-const NC_MAX_ATOMIC_TYPE = NC_STRING
-const NC_VLEN = 13
-const NC_OPAQUE = 14
-const NC_ENUM = 15
-const NC_COMPOUND = 16
-const NC_FIRSTUSERTYPEID = 32
 
-const NC_FILL = 0
-const NC_NOFILL = 0x0100
-const NC_NOWRITE = 0x0000
-const NC_WRITE = 0x0001
-const NC_CLOBBER = 0x0000
-const NC_NOCLOBBER = 0x0004
-const NC_DISKLESS = 0x0008
-const NC_MMAP = 0x0010
-const NC_64BIT_DATA = 0x0020
-const NC_CDF5 = NC_64BIT_DATA
-const NC_CLASSIC_MODEL = 0x0100
-const NC_64BIT_OFFSET = 0x0200
-const NC_LOCK = 0x0400
-const NC_SHARE = 0x0800
-const NC_NETCDF4 = 0x1000
-const NC_MPIIO = 0x2000
-const NC_MPIPOSIX = 0x4000
-const NC_PERSIST = 0x4000
-const NC_INMEMORY = 0x8000
-const NC_PNETCDF = NC_MPIIO
-const NC_FORMAT_CLASSIC = 1
-const NC_FORMAT_64BIT_OFFSET = 2
-const NC_FORMAT_64BIT = NC_FORMAT_64BIT_OFFSET
-const NC_FORMAT_NETCDF4 = 3
-const NC_FORMAT_NETCDF4_CLASSIC = 4
-const NC_FORMAT_64BIT_DATA = 5
-const NC_FORMAT_CDF5 = NC_FORMAT_64BIT_DATA
-const NC_FORMATX_NC3 = 1
-const NC_FORMATX_NC_HDF5 = 2
-const NC_FORMATX_NC4 = NC_FORMATX_NC_HDF5
-const NC_FORMATX_NC_HDF4 = 3
-const NC_FORMATX_PNETCDF = 4
-const NC_FORMATX_DAP2 = 5
-const NC_FORMATX_DAP4 = 6
-const NC_FORMATX_UNDEFINED = 0
-const NC_FORMAT_NC3 = NC_FORMATX_NC3
-const NC_FORMAT_NC_HDF5 = NC_FORMATX_NC_HDF5
-const NC_FORMAT_NC4 = NC_FORMATX_NC4
-const NC_FORMAT_NC_HDF4 = NC_FORMATX_NC_HDF4
-const NC_FORMAT_PNETCDF = NC_FORMATX_PNETCDF
-const NC_FORMAT_DAP2 = NC_FORMATX_DAP2
-const NC_FORMAT_DAP4 = NC_FORMATX_DAP4
-const NC_FORMAT_UNDEFINED = NC_FORMATX_UNDEFINED
-const NC_SIZEHINT_DEFAULT = 0
-
-const NC_UNLIMITED = Cint(0)
-const NC_GLOBAL = Cint(-1)
-const NC_MAX_DIMS = 1024
-const NC_MAX_ATTRS = 8192
-const NC_MAX_VARS = 8192
-const NC_MAX_NAME = 256
-const NC_MAX_VAR_DIMS = 1024
-const NC_MAX_HDF4_NAME = 64
-const NC_ENDIAN_NATIVE = 0
-const NC_ENDIAN_LITTLE = 1
-const NC_ENDIAN_BIG = 2
-const NC_CHUNKED = 0
-const NC_CONTIGUOUS = 1
-const NC_NOCHECKSUM = 0
-const NC_FLETCHER32 = 1
-const NC_NOSHUFFLE = 0
-const NC_SHUFFLE = 1
-
-const NC_NOERR = 0
-const NC2_ERR = -1
-const NC_EBADID = -33
-const NC_ENFILE = -34
-const NC_EEXIST = -35
-const NC_EINVAL = -36
-const NC_EPERM = -37
-const NC_ENOTINDEFINE = -38
-const NC_EINDEFINE = -39
-const NC_EINVALCOORDS = -40
-const NC_EMAXDIMS = -41
-const NC_ENAMEINUSE = -42
-const NC_ENOTATT = -43
-const NC_EMAXATTS = -44
-const NC_EBADTYPE = -45
-const NC_EBADDIM = -46
-const NC_EUNLIMPOS = -47
-const NC_EMAXVARS = -48
-const NC_ENOTVAR = -49
-const NC_EGLOBAL = -50
-const NC_ENOTNC = -51
-const NC_ESTS = -52
-const NC_EMAXNAME = -53
-const NC_EUNLIMIT = -54
-const NC_ENORECVARS = -55
-const NC_ECHAR = -56
-const NC_EEDGE = -57
-const NC_ESTRIDE = -58
-const NC_EBADNAME = -59
-const NC_ERANGE = -60
-const NC_ENOMEM = -61
-const NC_EVARSIZE = -62
-const NC_EDIMSIZE = -63
-const NC_ETRUNC = -64
-const NC_EAXISTYPE = -65
-const NC_EDAP = -66
-const NC_ECURL = -67
-const NC_EIO = -68
-const NC_ENODATA = -69
-const NC_EDAPSVC = -70
-const NC_EDAS = -71
-const NC_EDDS = -72
-const NC_EDATADDS = -73
-const NC_EDAPURL = -74
-const NC_EDAPCONSTRAINT = -75
-const NC_ETRANSLATION = -76
-const NC_EACCESS = -77
-const NC_EAUTH = -78
-const NC_ENOTFOUND = -90
-const NC_ECANTREMOVE = -91
-const NC4_FIRST_ERROR = -100
-const NC_EHDFERR = -101
-const NC_ECANTREAD = -102
-const NC_ECANTWRITE = -103
-const NC_ECANTCREATE = -104
-const NC_EFILEMETA = -105
-const NC_EDIMMETA = -106
-const NC_EATTMETA = -107
-const NC_EVARMETA = -108
-const NC_ENOCOMPOUND = -109
-const NC_EATTEXISTS = -110
-const NC_ENOTNC4 = -111
-const NC_ESTRICTNC3 = -112
-const NC_ENOTNC3 = -113
-const NC_ENOPAR = -114
-const NC_EPARINIT = -115
-const NC_EBADGRPID = -116
-const NC_EBADTYPID = -117
-const NC_ETYPDEFINED = -118
-const NC_EBADFIELD = -119
-const NC_EBADCLASS = -120
-const NC_EMAPTYPE = -121
-const NC_ELATEFILL = -122
-const NC_ELATEDEF = -123
-const NC_EDIMSCALE = -124
-const NC_ENOGRP = -125
-const NC_ESTORAGE = -126
-const NC_EBADCHUNK = -127
-const NC_ENOTBUILT = -128
-const NC_EDISKLESS = -129
-const NC_ECANTEXTEND = -130
-const NC_EMPI = -131
-const NC4_LAST_ERROR = -131
-const DIM_WITHOUT_VARIABLE = "This is a netCDF dimension but not a netCDF variable."
-const NC_HAVE_NEW_CHUNKING_API = 1
-const NC_EURL = NC_EDAPURL
-const NC_ECONSTRAINT = NC_EDAPCONSTRAINT
-
-const NC_ENTOOL = NC_EMAXNAME
-const NC_EXDR = -32
-const NC_SYSERR = -31
-const NC_FATAL = 1
-
-# default fill values
-
-const NC_FILL_BYTE   = Int8(-127)
-const NC_FILL_CHAR   = '\0'
-const NC_FILL_SHORT  = Int16(-32767)
-const NC_FILL_INT    = Int32(-2147483647)
-const NC_FILL_FLOAT  = 9.9692099683868690f+36
-const NC_FILL_DOUBLE = 9.9692099683868690e+36
-const NC_FILL_UBYTE  = UInt8(255)
-const NC_FILL_USHORT = UInt16(65535)
-const NC_FILL_UINT   = UInt32(4294967295)
-const NC_FILL_INT64  = Int64(-9223372036854775806)
-const NC_FILL_UINT64 = UInt64(18446744073709551614)
-const NC_FILL_STRING = ""
-
-
-const nc_type = Cint
 
 # type is immutable to ensure that it has the memory same layout
 # as the C struct nc_vlen_t
@@ -209,22 +16,6 @@ struct nc_vlen_t{T}
     len::Csize_t
     p::Ptr{T}
 end
-
-const nclong = Cint
-
-const NCSymbols = Dict{Cint,Symbol}(
-    NC_CONTIGUOUS => :contiguous,
-    NC_CHUNKED => :chunked
-)
-# Inverse mapping
-const NCConstants = Dict(value => key for (key, value) in NCSymbols)
-
-const NCChecksumSymbols = Dict{Cint,Symbol}(
-    NC_FLETCHER32 => :fletcher32,
-    NC_NOCHECKSUM => :nochecksum
-)
-# Inverse mapping
-const NCChecksumConstants = Dict(value => key for (key, value) in NCChecksumSymbols)
 
 
 function convert(::Type{Array{nc_vlen_t{T},N}},data::Array{Vector{T},N}) where {T,N}
@@ -373,18 +164,18 @@ end
 
 
 function nc_def_compound(ncid::Integer,size::Integer,name)
-    typeidp = Ref{nc_type}()
-    check_status!(ccall((:nc_def_compound,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{nc_type}),ncid,size,name,typeidp))
+    typeidp = Ref{NC_TYPE}()
+    check_status!(ccall((:nc_def_compound,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{NC_TYPE}),ncid,size,name,typeidp))
     return typeidp[]
 end
 
 function nc_insert_compound(ncid::Integer,xtype::Integer,name,offset::Integer,field_typeid::Integer)
-    check_status!(ccall((:nc_insert_compound,libnetcdf),Cint,(Cint,nc_type,Cstring,Csize_t,nc_type),ncid,xtype,name,offset,field_typeid))
+    check_status!(ccall((:nc_insert_compound,libnetcdf),Cint,(Cint,NC_TYPE,Cstring,Csize_t,NC_TYPE),ncid,xtype,name,offset,field_typeid))
 end
 
 function nc_insert_array_compound(ncid::Integer,xtype::Integer,name,offset::Integer,field_typeid::Integer,dim_sizes)
     ndims = length(dim_sizes)
-    check_status!(ccall((:nc_insert_array_compound,libnetcdf),Cint,(Cint,nc_type,Cstring,Cint,nc_type,Cint,Ptr{Cint}),ncid,xtype,name,offset,field_typeid,ndims,dim_sizes))
+    check_status!(ccall((:nc_insert_array_compound,libnetcdf),Cint,(Cint,NC_TYPE,Cstring,Cint,NC_TYPE,Cint,Ptr{Cint}),ncid,xtype,name,offset,field_typeid,ndims,dim_sizes))
 end
 
 
@@ -393,71 +184,71 @@ function nc_inq_compound(ncid::Integer,xtype::Integer)
     sizep = Ref{Csize_t}()
     nfieldsp = Ref{Csize_t}()
 
-    check_status!(ccall((:nc_inq_compound,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,name,sizep,nfieldsp))
+    check_status!(ccall((:nc_inq_compound,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{UInt8},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,name,sizep,nfieldsp))
 
     return unsafe_string(pointer(name)), sizep[], nfieldsp[]
 end
 
 function nc_inq_compound_name(ncid::Integer,xtype::Integer)
     name = zeros(UInt8,NC_MAX_NAME+1)
-    check_status!(ccall((:nc_inq_compound_name,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8}),ncid,xtype,name))
+    check_status!(ccall((:nc_inq_compound_name,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{UInt8}),ncid,xtype,name))
     return unsafe_string(pointer(name))
 end
 
 function nc_inq_compound_size(ncid::Integer,xtype::Integer)
     sizep = Ref{Csize_t}()
-    check_status!(ccall((:nc_inq_compound_size,libnetcdf),Cint,(Cint,nc_type,Ptr{Csize_t}),ncid,xtype,sizep))
+    check_status!(ccall((:nc_inq_compound_size,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{Csize_t}),ncid,xtype,sizep))
     return sizep[]
 end
 
 function nc_inq_compound_nfields(ncid::Integer,xtype::Integer)
     nfieldsp = Ref{Csize_t}()
-    check_status!(ccall((:nc_inq_compound_nfields,libnetcdf),Cint,(Cint,nc_type,Ptr{Csize_t}),ncid,xtype,nfieldsp))
+    check_status!(ccall((:nc_inq_compound_nfields,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{Csize_t}),ncid,xtype,nfieldsp))
     return nfieldsp[]
 end
 
 
 function nc_inq_compound_fieldname(ncid::Integer,xtype::Integer,fieldid::Integer)
     name = zeros(UInt8,NC_MAX_NAME+1)
-    check_status!(ccall((:nc_inq_compound_fieldname,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{UInt8}),ncid,xtype,fieldid,name))
+    check_status!(ccall((:nc_inq_compound_fieldname,libnetcdf),Cint,(Cint,NC_TYPE,Cint,Ptr{UInt8}),ncid,xtype,fieldid,name))
     return unsafe_string(pointer(name))
 end
 
 function nc_inq_compound_fieldindex(ncid::Integer,xtype::Integer,name)
     fieldidp = Ref{Cint}()
-    check_status!(ccall((:nc_inq_compound_fieldindex,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{Cint}),ncid,xtype,name,fieldidp))
+    check_status!(ccall((:nc_inq_compound_fieldindex,libnetcdf),Cint,(Cint,NC_TYPE,Cstring,Ptr{Cint}),ncid,xtype,name,fieldidp))
     return fieldidp[]
 end
 
 function nc_inq_compound_fieldoffset(ncid::Integer,xtype::Integer,fieldid::Integer)
     offsetp = Ref{Cint}()
-    check_status!(ccall((:nc_inq_compound_fieldoffset,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{Cint}),ncid,xtype,fieldid,offsetp))
+    check_status!(ccall((:nc_inq_compound_fieldoffset,libnetcdf),Cint,(Cint,NC_TYPE,Cint,Ptr{Cint}),ncid,xtype,fieldid,offsetp))
     return offsetp[]
 end
 
 function nc_inq_compound_fieldtype(ncid::Integer,xtype::Integer,fieldid::Integer)
-    field_typeidp = Ref{nc_type}()
-    check_status!(ccall((:nc_inq_compound_fieldtype,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{nc_type}),ncid,xtype,fieldid,field_typeidp))
+    field_typeidp = Ref{NC_TYPE}()
+    check_status!(ccall((:nc_inq_compound_fieldtype,libnetcdf),Cint,(Cint,NC_TYPE,Cint,Ptr{NC_TYPE}),ncid,xtype,fieldid,field_typeidp))
     return field_typeidp[]
 end
 
 function nc_inq_compound_fieldndims(ncid::Integer,xtype::Integer,fieldid::Integer)
     ndimsp = Ref{Cint}()
-    check_status!(ccall((:nc_inq_compound_fieldndims,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{Cint}),ncid,xtype,fieldid,ndimsp))
+    check_status!(ccall((:nc_inq_compound_fieldndims,libnetcdf),Cint,(Cint,NC_TYPE,Cint,Ptr{Cint}),ncid,xtype,fieldid,ndimsp))
     return ndimsp[]
 end
 
 function nc_inq_compound_fielddim_sizes(ncid::Integer,xtype::Integer,fieldid::Integer)
     ndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
     dim_sizes = zeros(Cint,ndims)
-    check_status!(ccall((:nc_inq_compound_fielddim_sizes,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{Cint}),ncid,xtype,fieldid,dim_sizes))
+    check_status!(ccall((:nc_inq_compound_fielddim_sizes,libnetcdf),Cint,(Cint,NC_TYPE,Cint,Ptr{Cint}),ncid,xtype,fieldid,dim_sizes))
     return dim_sizes
 end
 
 function nc_def_vlen(ncid::Integer,name,base_typeid::Integer)
-    xtypep = Ref(nc_type(0))
+    xtypep = Ref(NC_TYPE(0))
 
-    check_status!(ccall((:nc_def_vlen,libnetcdf),Cint,(Cint,Cstring,nc_type,Ptr{nc_type}),ncid,name,base_typeid,xtypep))
+    check_status!(ccall((:nc_def_vlen,libnetcdf),Cint,(Cint,Cstring,NC_TYPE,Ptr{NC_TYPE}),ncid,name,base_typeid,xtypep))
 
     return xtypep[]
 end
@@ -467,10 +258,10 @@ datum_size is sizeof(nc_vlen_t)
 """
 function nc_inq_vlen(ncid::Integer,xtype::Integer)
     datum_sizep = Ref(Csize_t(0))
-    base_nc_typep = Ref(nc_type(0))
+    base_nc_typep = Ref(NC_TYPE(0))
     name = zeros(UInt8,NC_MAX_NAME+1)
 
-    check_status!(ccall((:nc_inq_vlen,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Csize_t},Ptr{nc_type}),ncid,xtype,name,datum_sizep,base_nc_typep))
+    check_status!(ccall((:nc_inq_vlen,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{UInt8},Ptr{Csize_t},Ptr{NC_TYPE}),ncid,xtype,name,datum_sizep,base_nc_typep))
 
     return unsafe_string(pointer(name)),datum_sizep[],base_nc_typep[]
 end
@@ -486,11 +277,11 @@ end
 function nc_inq_user_type(ncid::Integer,xtype::Integer)
     name = Vector{UInt8}(undef,NC_MAX_NAME+1)
     sizep = Ref(Csize_t(0))
-    base_nc_typep = Ref(nc_type(0))
+    base_nc_typep = Ref(NC_TYPE(0))
     nfieldsp = Ref(Csize_t(0))
     classp = Ref(Cint(0))
 
-    check_status!(ccall((:nc_inq_user_type,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Csize_t},Ptr{nc_type},Ptr{Csize_t},Ptr{Cint}),ncid,xtype,name,sizep,base_nc_typep,nfieldsp,classp))
+    check_status!(ccall((:nc_inq_user_type,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{UInt8},Ptr{Csize_t},Ptr{NC_TYPE},Ptr{Csize_t},Ptr{Cint}),ncid,xtype,name,sizep,base_nc_typep,nfieldsp,classp))
 
     return unsafe_string(pointer(name)),sizep[],base_nc_typep[],nfieldsp[],classp[]
 end
@@ -517,29 +308,29 @@ nc_put_att(ncid::Integer,varid::Integer,name::Union{AbstractString,Symbol},data:
     nc_put_att(ncid,varid,name,Int32.(data))
 
 function nc_put_att(ncid::Integer,varid::Integer,name::Union{AbstractString,Symbol},data::Number)
-    check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,nc_type,Csize_t,Ptr{Nothing}),
-                ncid,varid,name,ncType[typeof(data)],1,[data]))
+    check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}),
+                ncid,varid,name,NC_TYPES[typeof(data)],1,[data]))
 end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::Union{AbstractString,Symbol},data::Char)
     # UInt8('α')
     # ERROR: InexactError: trunc(UInt8, 945)
-    check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,nc_type,Csize_t,Ptr{Nothing}),
-                ncid,varid,name,ncType[typeof(data)],1,[UInt8(data)]))
+    check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}),
+                ncid,varid,name,NC_TYPES[typeof(data)],1,[UInt8(data)]))
 end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::Union{AbstractString,Symbol},data::Vector{T}) where T <: AbstractString
     check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,
-                                              nc_type,Csize_t,Ptr{Nothing}),
-                ncid,varid,name,ncType[eltype(data)],length(data),pointer.(data)))
+                                              NC_TYPE,Csize_t,Ptr{Nothing}),
+                ncid,varid,name,NC_TYPES[eltype(data)],length(data),pointer.(data)))
 end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::Union{AbstractString,Symbol},data::Vector{T}) where {T}
-    nc_put_att(ncid,varid,name,ncType[T],data)
+    nc_put_att(ncid,varid,name,NC_TYPES[T],data)
 end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::Union{AbstractString,Symbol},typeid::Integer,data::Vector)
-    check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,nc_type,Csize_t,Ptr{Nothing}),
+    check_status!(ccall((:nc_put_att,libnetcdf),Cint,(Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}),
                 ncid,varid,name,typeid,length(data),data))
 end
 
@@ -583,7 +374,7 @@ function nc_get_att(ncid::Integer,varid::Integer,name)
             return str
         end
     else
-        val = Vector{jlType[xtype]}(undef,len)
+        val = Vector{JL_TYPES[xtype]}(undef,len)
         check_status!(ccall((:nc_get_att,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{Nothing}),ncid,varid,name,val))
 
         if len == 1
@@ -597,40 +388,40 @@ end
 # Enum
 
 function nc_def_enum(ncid::Integer,base_typeid::Integer,name)
-    typeidp = Ref(nc_type(0))
-    check_status!(ccall((:nc_def_enum,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{nc_type}),ncid,base_typeid,name,typeidp))
+    typeidp = Ref(NC_TYPE(0))
+    check_status!(ccall((:nc_def_enum,libnetcdf),Cint,(Cint,NC_TYPE,Cstring,Ptr{NC_TYPE}),ncid,base_typeid,name,typeidp))
 
     return typeidp[]
 end
 
 function nc_inq_enum(ncid::Integer,xtype::Integer)
 
-    base_nc_typep = Ref(nc_type(0))
+    base_nc_typep = Ref(NC_TYPE(0))
     base_sizep = Ref(Csize_t(0))
     num_membersp = Ref(Csize_t(0))
     cname = zeros(UInt8,NC_MAX_NAME+1)
 
-    check_status!(ccall((:nc_inq_enum,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{nc_type},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,cname,base_nc_typep,base_sizep,num_membersp))
+    check_status!(ccall((:nc_inq_enum,libnetcdf),Cint,(Cint,NC_TYPE,Ptr{UInt8},Ptr{NC_TYPE},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,cname,base_nc_typep,base_sizep,num_membersp))
 
     type_name = unsafe_string(pointer(cname))
     base_nc_type = base_nc_typep[]
     num_members = num_membersp[]
     base_size = base_sizep[]
 
-    return type_name,jlType[base_nc_type],base_size,num_members
+    return type_name,JL_TYPES[base_nc_type],base_size,num_members
 end
 
 
 function nc_insert_enum(ncid::Integer,xtype::Integer,name,value, T = nc_inq_enum(ncid,xtype)[2])
     valuep = Ref{T}(value)
-    check_status!(ccall((:nc_insert_enum,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{Nothing}),ncid,xtype,name,valuep))
+    check_status!(ccall((:nc_insert_enum,libnetcdf),Cint,(Cint,NC_TYPE,Cstring,Ptr{Nothing}),ncid,xtype,name,valuep))
 end
 
 function nc_inq_enum_member(ncid::Integer,xtype::Integer,idx::Integer, T::Type = nc_inq_enum(ncid,xtype)[2])
     valuep = Ref{T}()
     cmember_name = zeros(UInt8,NC_MAX_NAME+1)
 
-    check_status!(ccall((:nc_inq_enum_member,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{UInt8},Ptr{Nothing}),ncid,xtype,idx,cmember_name,valuep))
+    check_status!(ccall((:nc_inq_enum_member,libnetcdf),Cint,(Cint,NC_TYPE,Cint,Ptr{UInt8},Ptr{Nothing}),ncid,xtype,idx,cmember_name,valuep))
 
     member_name = unsafe_string(pointer(cmember_name))
 
@@ -639,7 +430,7 @@ end
 
 function nc_inq_enum_ident(ncid::Integer,xtype::Integer,value)
     cidentifier = zeros(UInt8,NC_MAX_NAME+1)
-    check_status!(ccall((:nc_inq_enum_ident,libnetcdf),Cint,(Cint,nc_type,Clonglong,Ptr{UInt8}),ncid,xtype,Clonglong(value),cidentifier))
+    check_status!(ccall((:nc_inq_enum_ident,libnetcdf),Cint,(Cint,NC_TYPE,Clonglong,Ptr{UInt8}),ncid,xtype,Clonglong(value),cidentifier))
     identifier = unsafe_string(pointer(cidentifier))
     return identifier
 end
@@ -992,18 +783,18 @@ end
 # end
 
 function nc_def_var_fletcher32(ncid::Integer,varid::Integer,fletcher32)
-    check_status!(ccall((:nc_def_var_fletcher32,libnetcdf),Cint,(Cint,Cint,Cint),ncid,varid,NCChecksumConstants[fletcher32]))
+    check_status!(ccall((:nc_def_var_fletcher32,libnetcdf),Cint,(Cint,Cint,Cint),ncid,varid,NC_CHECKSUM_CONSTANTS[fletcher32]))
 end
 
 function nc_inq_var_fletcher32(ncid::Integer,varid::Integer)
     fletcher32p = Ref(Cint(0))
     check_status!(ccall((:nc_inq_var_fletcher32,libnetcdf),Cint,(Cint,Cint,Ptr{Cint}),ncid,varid,fletcher32p))
-    return NCChecksumSymbols[fletcher32p[]]
+    return NC_CHECKSUMS[fletcher32p[]]
 end
 
 function nc_def_var_chunking(ncid::Integer,varid::Integer,storage,chunksizes)
 
-    check_status!(ccall((:nc_def_var_chunking,libnetcdf),Cint,(Cint,Cint,Cint,Ptr{Csize_t}),ncid,varid,NCConstants[storage],chunksizes))
+    check_status!(ccall((:nc_def_var_chunking,libnetcdf),Cint,(Cint,Cint,Cint,Ptr{Csize_t}),ncid,varid,NC_CONSTANTS[storage],chunksizes))
 end
 
 function nc_inq_var_chunking(ncid::Integer,varid::Integer)
@@ -1013,7 +804,7 @@ function nc_inq_var_chunking(ncid::Integer,varid::Integer)
 
     check_status!(ccall((:nc_inq_var_chunking,libnetcdf),Cint,(Cint,Cint,Ptr{Cint},Ptr{Csize_t}),ncid,varid,storagep,chunksizes))
 
-    return NCSymbols[storagep[]],Int.(chunksizes)
+    return NC_SYMBOLS[storagep[]],Int.(chunksizes)
 end
 
 
@@ -1041,7 +832,7 @@ no_fill,fill_value = nc_inq_var_fill(ncid::Integer,varid::Integer)
 no_fill is a boolean and fill_value the fill value (in the appropriate type)
 """
 function nc_inq_var_fill(ncid::Integer,varid::Integer)
-    T = jlType[nc_inq_vartype(ncid,varid)]
+    T = JL_TYPES[nc_inq_vartype(ncid,varid)]
     no_fillp = Ref(Cint(0))
 
     if T == String
@@ -1166,18 +957,18 @@ end
 
 # check presence of attribute without raising an error
 function _nc_has_att(ncid::Integer,varid::Integer,name)
-    xtypep = Ref(nc_type(0))
+    xtypep = Ref(NC_TYPE(0))
     lenp = Ref(Csize_t(0))
-    code = ccall((:nc_inq_att,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{nc_type},Ptr{Csize_t}),ncid,varid,name,xtypep,lenp)
+    code = ccall((:nc_inq_att,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{NC_TYPE},Ptr{Csize_t}),ncid,varid,name,xtypep,lenp)
     return code == NC_NOERR
 end
 
 
 function nc_inq_att(ncid::Integer,varid::Integer,name)
-    xtypep = Ref(nc_type(0))
+    xtypep = Ref(NC_TYPE(0))
     lenp = Ref(Csize_t(0))
 
-    check_status!(ccall((:nc_inq_att,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{nc_type},Ptr{Csize_t}),ncid,varid,name,xtypep,lenp))
+    check_status!(ccall((:nc_inq_att,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{NC_TYPE},Ptr{Csize_t}),ncid,varid,name,xtypep,lenp))
 
     return xtypep[],lenp[]
 end
@@ -1210,7 +1001,7 @@ end
 function nc_def_var(ncid::Integer,name,xtype::Integer,dimids::Vector{Cint})
     varidp = Ref(Cint(0))
 
-    check_status!(ccall((:nc_def_var,libnetcdf),Cint,(Cint,Cstring,nc_type,Cint,Ptr{Cint},Ptr{Cint}),ncid,name,xtype,length(dimids),dimids,varidp))
+    check_status!(ccall((:nc_def_var,libnetcdf),Cint,(Cint,Cstring,NC_TYPE,Cint,Ptr{Cint},Ptr{Cint}),ncid,name,xtype,length(dimids),dimids,varidp))
 
     return varidp[]
 end
@@ -1222,13 +1013,13 @@ function _jltype(ncid,xtype)
             name,size,base_nc_type,nfields,class = nc_inq_user_type(ncid,xtype)
             # assume here variable-length type
             if class == NC_VLEN
-                Vector{jlType[base_nc_type]}
+                Vector{JL_TYPES[base_nc_type]}
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing
             end
         else
-            jlType[xtype]
+            JL_TYPES[xtype]
         end
 
     return jltype
@@ -1242,9 +1033,9 @@ function nc_inq_var(ncid::Integer,varid::Integer)
     cname = zeros(UInt8,NC_MAX_NAME+1)
     dimids = zeros(Cint,ndims)
     nattsp = Ref(Cint(0))
-    xtypep = Ref(nc_type(0))
+    xtypep = Ref(NC_TYPE(0))
 
-    check_status!(ccall((:nc_inq_var,libnetcdf),Cint,(Cint,Cint,Ptr{UInt8},Ptr{nc_type},Ptr{Cint},Ptr{Cint},Ptr{Cint}),ncid,varid,cname,xtypep,ndimsp,dimids,nattsp))
+    check_status!(ccall((:nc_inq_var,libnetcdf),Cint,(Cint,Cint,Ptr{UInt8},Ptr{NC_TYPE},Ptr{Cint},Ptr{Cint},Ptr{Cint}),ncid,varid,cname,xtypep,ndimsp,dimids,nattsp))
 
     name = unsafe_string(pointer(cname))
 
@@ -1280,8 +1071,8 @@ function nc_inq_varname(ncid::Integer,varid::Integer)
 end
 
 function nc_inq_vartype(ncid::Integer,varid::Integer)
-    xtypep = Ref(nc_type(0))
-    check_status!(ccall((:nc_inq_vartype,libnetcdf),Cint,(Cint,Cint,Ptr{nc_type}),ncid,varid,xtypep))
+    xtypep = Ref(NC_TYPE(0))
+    check_status!(ccall((:nc_inq_vartype,libnetcdf),Cint,(Cint,Cint,Ptr{NC_TYPE}),ncid,varid,xtypep))
     return xtypep[]
 end
 

@@ -29,14 +29,14 @@ end;
 
 getindex(var::Variable, indexes::Int...) = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     return nc_get_var1(eltype(var), var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]])
 );
 
 getindex(var::Variable{T,N}, indexes::Colon...) where {T,N} = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     data = Array{T,N}(undef, size(var));
     nc_get_var!(var.ds.ncid, var.varid, data);
@@ -47,7 +47,7 @@ getindex(var::Variable{T,N}, indexes::Colon...) where {T,N} = (
 
 getindex(var::Variable{T,N}, indexes::TR...) where {T,N,TR<:Union{StepRange{Int,Int},UnitRange{Int}}} = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     (start,count,stride,jlshape) = ncsub(indexes[1:N]);
     data = Array{T,N}(undef, jlshape);
@@ -58,7 +58,7 @@ getindex(var::Variable{T,N}, indexes::TR...) where {T,N,TR<:Union{StepRange{Int,
 
 getindex(var::Variable{T,N}, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N} = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     sz = size(var);
     (start,count,stride) = ncsub(sz, indexes...);
@@ -75,7 +75,7 @@ getindex(var::Variable, ci::CartesianIndices) = var[ci.indices...];
 
 setindex!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     nc_put_var1(var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]], T(data));
 
@@ -84,7 +84,7 @@ setindex!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
 
 setindex!(var::Variable{T,N}, data::AbstractArray{T,N}, indexes::Colon...) where {T,N} = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     nc_put_var(var.ds.ncid, var.varid, data);
 
@@ -93,7 +93,7 @@ setindex!(var::Variable{T,N}, data::AbstractArray{T,N}, indexes::Colon...) where
 
 setindex!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon...) where {T,T2,N} = (
     # make sure the dataset is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
     tmp = T <: Integer ? round.(T,data) : convert(Array{T,N},data);
     nc_put_var(var.ds.ncid, var.varid, tmp);
 
@@ -114,7 +114,7 @@ setindex!(var::Variable, data, indexes::Union{Int,Colon,AbstractRange{<:Integer}
 
 setindex!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,N} = (
     # make sure that the file is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
     tmp = fill(data, jlshape);
@@ -125,7 +125,7 @@ setindex!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,
 
 setindex!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,Int}...) where {T,N} = (
     # make sure that the file is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
     nc_put_vars(var.ds.ncid, var.varid, start, count, stride, data);
@@ -135,7 +135,7 @@ setindex!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,Int}...) 
 
 setindex!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{Int,Int}...) where {T,N} = (
     # make sure that the file is in data mode
-    datamode(var.ds);
+    data_mode!(var.ds);
 
     (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
     tmp = convert(Array{T,ndims(data)}, data);

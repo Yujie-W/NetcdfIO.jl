@@ -28,7 +28,7 @@ keys(dims::Dimensions) = String[nc_inq_dimname(dims.ds.ncid, dimid) for dimid in
 
 setindex!(dims::Dimensions, len::Union{Int,AbstractFloat}, name::Union{AbstractString,Symbol}) = (
     # make sure that the file is in define mode
-    defmode(dims.ds);
+    def_mode!(dims.ds);
     nc_def_dim(dims.ds.ncid, name, (isinf(len) ? NC_UNLIMITED : len));
 
     return nothing
