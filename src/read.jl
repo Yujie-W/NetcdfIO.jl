@@ -151,14 +151,6 @@ df_new = read_nc("test.nc", ["A", "B"]);
 """
 function read_nc end
 
-read_nc(file::String, var_name::String; transform::Bool = true) = (
-    _dset = Dataset(file, "r");
-    _dvar = read_nc(_dset, var_name; transform = transform);
-    close(_dset);
-
-    return _dvar
-);
-
 read_nc(ds::Dataset, var_name::String; transform::Bool = true) = (
     _fvar = find_variable(ds, var_name);
     if isnothing(_fvar)
@@ -178,22 +170,28 @@ read_nc(ds::Dataset, var_name::String; transform::Bool = true) = (
     return replace(_dvar, missing=>NaN)
 );
 
-read_nc(T, file::String, var_name::String; transform::Bool = true) = T.(read_nc(file, var_name; transform = transform));
+read_nc(file::String, var_name::String; transform::Bool = true) = (
+    _dset = Dataset(file, "r");
+    _dvar = read_nc(_dset, var_name; transform = transform);
+    close(_dset);
+
+    return _dvar
+);
 
 read_nc(T, ds::Dataset, var_name::String; transform::Bool = true) = T.(read_nc(ds, var_name; transform = transform));
 
-read_nc(file::String, var_name::String, indz::Int; transform::Bool = true) = (
-    _ndim = size_nc(file, var_name)[1];
+read_nc(T, file::String, var_name::String; transform::Bool = true) = T.(read_nc(file, var_name; transform = transform));
+
+read_nc(ds::Dataset, var_name::String, indz::Int; transform::Bool = true) = (
+    _ndim = size_nc(ds, var_name)[1];
     @assert _ndim in [1,3] "The dataset must be a 1D or 3D array to use this method!";
 
-    _dset = Dataset(file, "r");
-    _fvar = find_variable(_dset, var_name);
+    _fvar = find_variable(ds, var_name);
     if transform
         _dvar = (_ndim == 1 ? _fvar[indz] : _fvar[:,:,indz]);
     else
         _dvar = (_ndim == 1 ? _fvar.var[indz] : _fvar.var[:,:,indz]);
     end;
-    close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
         return _dvar
@@ -202,20 +200,28 @@ read_nc(file::String, var_name::String, indz::Int; transform::Bool = true) = (
     return replace(_dvar, missing=>NaN)
 );
 
+read_nc(file::String, var_name::String, indz::Int; transform::Bool = true) = (
+    _dset = Dataset(file, "r");
+    _dvar = read_nc(_dset, var_name, indz; transform = transform);
+    close(_dset);
+
+    return _dvar
+);
+
+read_nc(T, ds::Dataset, var_name::String, indz::Int; transform::Bool = true) = T.(read_nc(ds, var_name, indz; transform = transform));
+
 read_nc(T, file::String, var_name::String, indz::Int; transform::Bool = true) = T.(read_nc(file, var_name, indz; transform = transform));
 
-read_nc(file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true) = (
-    _ndim = size_nc(file, var_name)[1];
+read_nc(ds::Dataset, var_name::String, indx::Int, indy::Int; transform::Bool = true) = (
+    _ndim = size_nc(ds, var_name)[1];
     @assert 2 <= _ndim <= 3 "The dataset must be a 2D or 3D array to use this method!";
 
-    _dset = Dataset(file, "r");
-    _fvar = find_variable(_dset, var_name);
+    _fvar = find_variable(ds, var_name);
     if transform
         _dvar = (_ndim==2 ? _fvar[indx,indy] : _fvar[indx,indy,:]);
     else
         _dvar = (_ndim==2 ? _fvar.var[indx,indy] : _fvar.var[indx,indy,:]);
     end;
-    close(_dset);
 
     if sum(ismissing.(_dvar)) == 0
         return _dvar
@@ -224,22 +230,40 @@ read_nc(file::String, var_name::String, indx::Int, indy::Int; transform::Bool = 
     return replace(_dvar, missing=>NaN)
 );
 
+read_nc(file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true) = (
+    _dset = Dataset(file, "r");
+    _dvar = read_nc(_dset, var_name, indx, indy; transform = transform);
+    close(_dset);
+
+    return _dvar
+);
+
+read_nc(T, ds::Dataset, var_name::String, indx::Int, indy::Int; transform::Bool = true) = T.(read_nc(ds, var_name, indx, indy; transform = transform));
+
 read_nc(T, file::String, var_name::String, indx::Int, indy::Int; transform::Bool = true) = T.(read_nc(file, var_name, indx, indy; transform = transform));
 
-read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = (
-    @assert size_nc(file, var_name)[1] == 3 "The dataset must be a 3D array to use this method!";
+read_nc(ds::Dataset, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = (
+    @assert size_nc(ds, var_name)[1] == 3 "The dataset must be a 3D array to use this method!";
 
-    _dset = Dataset(file, "r");
-    _fvar = find_variable(_dset, var_name);
+    _fvar = find_variable(ds, var_name);
     if transform
         _dvar = _fvar[indx,indy,indz];
     else
         _dvar = _fvar.var[indx,indy,indz];
     end;
-    close(_dset);
 
     return ismissing(_dvar) ? NaN : _dvar
 );
+
+read_nc(file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = (
+    _dset = Dataset(file, "r");
+    _dvar = read_nc(_dset, var_name, indx, indy, indz; transform = transform);
+    close(_dset);
+
+    return _dvar
+);
+
+read_nc(T, ds::Dataset, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = T.(read_nc(ds, var_name, indx, indy, indz; transform = transform));
 
 read_nc(T, file::String, var_name::String, indx::Int, indy::Int, indz::Int; transform::Bool = true) = T.(read_nc(file, var_name, indx, indy, indz; transform = transform));
 
