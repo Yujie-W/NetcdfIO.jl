@@ -42,6 +42,7 @@ end
 #     2022-Feb-03: add recursive variable query feature
 #     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
 #     2022-Feb-04: allow to read value from 1D array as well
+#     2025-Nov-10: use NTuple to create indexes for the variable reading
 # Bug fixes
 #     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
 #     2022-Jan-20: add dimension control to avoid errors
@@ -157,10 +158,11 @@ read_nc(ds::Dataset, var_name::String; transform::Bool = true) = (
         @error "$(var_name) does not exist!";
     end;
 
+    indexes = ntuple(i -> Colon(), ndims(_fvar));
     if transform
-        _dvar = _fvar[:,:];
+        _dvar = _fvar[indexes...];
     else
-        _dvar = _fvar.var[:,:];
+        _dvar = _fvar.var[indexes...];
     end;
 
     if sum(ismissing.(_dvar)) == 0
@@ -187,10 +189,11 @@ read_nc(ds::Dataset, var_name::String, indz::Int; transform::Bool = true) = (
     @assert _ndim in [1,3] "The dataset must be a 1D or 3D array to use this method!";
 
     _fvar = find_variable(ds, var_name);
+    indexes = (ntuple(i -> Colon(), _ndim-1)..., indz);
     if transform
-        _dvar = (_ndim == 1 ? _fvar[indz] : _fvar[:,:,indz]);
+        _dvar = _fvar[indexes...];
     else
-        _dvar = (_ndim == 1 ? _fvar.var[indz] : _fvar.var[:,:,indz]);
+        _dvar = _fvar.var[indexes...];
     end;
 
     if sum(ismissing.(_dvar)) == 0

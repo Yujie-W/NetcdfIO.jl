@@ -72,14 +72,12 @@ grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integ
     end;
 
     # if the unlimited dimension has grown already
-    if !pending
-        if _dim_ds == 1
-            ds[var_name][end+1-_n:end] = in_data;
-        elseif _dim_ds == 2
-            ds[var_name][:,end+1-_n:end] = in_data;
-        elseif _dim_ds == 3
-            ds[var_name][:,:,end+1-_n:end] = in_data;
-        end;
+    if _dim_ds == 1
+        ds[var_name][end+1-_n:end] = in_data;
+    elseif _dim_ds == 2
+        ds[var_name][:,end+1-_n:end] = in_data;
+    elseif _dim_ds == 3
+        ds[var_name][:,:,end+1-_n:end] = in_data;
     end;
 
     return nothing

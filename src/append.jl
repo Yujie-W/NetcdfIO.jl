@@ -5,6 +5,7 @@
 #     2021-Dec-24: move the function from PkgUtility to NetcdfIO
 #     2022-Jan-28: remove the complicated funtion to create var and dim at the same time
 #     2022-Jan-28: add method to add data to Dataset
+#     2025-Nov-10: use axes to get the indexes of the variable instead of [:,:] which is only meant for 2D variable
 #
 #######################################################################################################################################################################################################
 """
@@ -50,7 +51,7 @@ append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::
     end;
 
     _ds_var = defVar(ds, var_name, T, dim_names; attrib = var_attributes, deflatelevel = compress);
-    _ds_var[:,:] = var_data;
+    _ds_var[axes(var_data)...] = var_data;
 
     return nothing
 );
