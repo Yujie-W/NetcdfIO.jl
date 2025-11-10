@@ -3,6 +3,7 @@
 # Changes to the struct
 # General:
 #     2024-Feb-14: make the struct immutable
+#     2025-Nov-15: add readblock! and writeblock! methods to use DiskArrays as used in CommonDataModel
 #
 #######################################################################################################################################################################################################
 """
@@ -73,6 +74,8 @@ getindex(var::Variable{T,0}) where {T} = var[1];
 
 getindex(var::Variable, ci::CartesianIndices) = var[ci.indices...];
 
+readblock!(var::Variable, data, indexes...) = (data = getindex(var, indexes...); return nothing;);
+
 setindex!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
     # make sure the dataset is in data mode
     data_mode!(var.ds);
@@ -100,7 +103,7 @@ setindex!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon...) wher
     return nothing
 );
 
-setindex!(var::Variable, data, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) = (
+setindex!(var::Variable, data::AbstractArray, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) = (
     ind = normalized_indexes(size(var), indexes);
 
     # make arrays out of scalars (arrays can have zero dimensions)
@@ -145,6 +148,8 @@ setindex!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{Int,Int}..
 );
 
 setindex!(var::Variable, data, ci::CartesianIndices) = setindex!(var, data, ci.indices...);
+
+writeblock!(var::Variable, data, indexes...) = setindex!(var, data, indexes...);
 
 size(var::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(var.ds.ncid, var.dimids[i]), Val(N));
 

@@ -10,6 +10,7 @@ module NCDatasets
 
 import Base: close, convert, haskey, get, getindex, keys, setindex!, showerror, size
 import CommonDataModel: defVar, variable
+import DiskArrays: readblock!, writeblock!
 
 using NetCDF_jll
 

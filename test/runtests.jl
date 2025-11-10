@@ -128,9 +128,6 @@ using Test
         @test true;
         NetcdfIO.grow_nc!("test.nc", "d3d", rand(36,18), false);
         @test true;
-
-        # do not delete the file so as to test other functions
-        # rm("test.nc"; force=true);
     end;
 
     @testset "Info" begin
@@ -138,9 +135,6 @@ using Test
         @test NetcdfIO.varname_nc("test.nc") == ["lat", "lon", "ind", "d2d", "d3d"];
         @test NetcdfIO.size_nc("test.nc", "d2d") == (2, (36,15));
         @test NetcdfIO.size_nc("test.nc", "d3d") == (3, (36,18,15));
-
-        # do not delete the file so as to test other functions
-        # rm("test.nc"; force=true);
     end;
 
     @testset "Read" begin
@@ -185,12 +179,12 @@ using Test
         rm("test.nc"; force=true);
 
         # the case with groups
-        if homedir() == "/home/wyujie"
-            fn = "/home/wyujie/DATASERVER/satellite/OCO3/L2_Lite_SIF/B10309r/2022/oco3_LtSIF_220323_B10309r_220520223132s.nc4";
-            vn = "SIF_771nm";
-            NetcdfIO.read_nc(fn, vn);
-            @test true;
-        end;
+        # if homedir() == "/home/wyujie"
+        #     fn = "/home/wyujie/DATASERVER/satellite/OCO3/L2_Lite_SIF/B10309r/2022/oco3_LtSIF_220323_B10309r_220520223132s.nc4";
+        #     vn = "SIF_771nm";
+        #     NetcdfIO.read_nc(fn, vn);
+        #     @test true;
+        # end;
     end;
 
     @testset "Save" begin
