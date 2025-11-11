@@ -129,7 +129,7 @@ def_mode!(dset::NCDataset) = (
            vtype::DataType,
            dimnames::Vector{String};
            deflatelevel::Union{Int,Nothing} = nothing,
-           attrib::Dict{String,String} = Dict{String,String}())
+           attrib::Dict{String,Any} = Dict{String,Any}())
 
 Create a new variable in the dataset, given
 - `dset` A netcdf dataset
@@ -145,7 +145,7 @@ defVar(dset::NCDataset,
        vtype::DataType,
        dimnames::Vector{String};
        deflatelevel::Union{Int,Nothing} = nothing,
-       attrib::Dict{String,String} = Dict{String,String}()) = (
+       attrib::Dict{String,Any} = Dict{String,Any}()) = (
     # make sure that the file is in define mode
     def_mode!(dset);
 
