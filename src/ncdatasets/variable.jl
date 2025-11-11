@@ -62,51 +62,47 @@ readblock_netcdf!(var::Variable{T,N}, data, indexes::Union{Int,Colon,AbstractRan
 );
 
 
-
-
-setindex!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
-    # make sure the dataset is in data mode
+writeblock!(var::Variable, data, indexes...) = (
     data_mode!(var.ds);
-
-    nc_put_var1(var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]], T(data));
+    writeblock_netcdf!(var, data, indexes...);
 
     return nothing
 );
 
-setindex!(var::Variable{T,N}, data::AbstractArray{T,N}, indexes::Colon...) where {T,N} = (
-    # make sure the dataset is in data mode
-    data_mode!(var.ds);
+writeblock!(var::Variable, data, ci::CartesianIndices) = writeblock!(var, data, ci.indices...);
 
-    nc_put_var(var.ds.ncid, var.varid, data);
-
-    return nothing
-);
-
-setindex!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon...) where {T,T2,N} = (
-    # make sure the dataset is in data mode
-    data_mode!(var.ds);
-    tmp = T <: Integer ? round.(T,data) : convert(Array{T,N},data);
-    nc_put_var(var.ds.ncid, var.varid, tmp);
-
-    return nothing
-);
-
-setindex!(var::Variable, data::AbstractArray, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) = (
+writeblock_netcdf!(var::Variable, data::AbstractArray, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) = (
     ind = normalized_indexes(size(var), indexes);
 
     # make arrays out of scalars (arrays can have zero dimensions)
     if (ndims(data) == 0) && !(data isa AbstractArray)
         data = fill(data, length.(ind));
     end;
-    var[ind...] = data;
+    writeblock_netcdf!(var, data, ind...);
 
     return nothing
 );
 
-setindex!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,N} = (
-    # make sure that the file is in data mode
-    data_mode!(var.ds);
+writeblock_netcdf!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
+    nc_put_var1(var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]], T(data));
 
+    return nothing
+);
+
+writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray{T,N}, indexes::Colon...) where {T,N} = (
+    nc_put_var(var.ds.ncid, var.varid, data);
+
+    return nothing
+);
+
+writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon...) where {T,T2,N} = (
+    tmp = T <: Integer ? round.(T,data) : convert(Array{T,N},data);
+    nc_put_var(var.ds.ncid, var.varid, tmp);
+
+    return nothing
+);
+
+writeblock_netcdf!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,N} = (
     (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
     tmp = fill(data, jlshape);
     nc_put_vars(var.ds.ncid, var.varid, start, count, stride, tmp);
@@ -114,30 +110,21 @@ setindex!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,
     return nothing
 );
 
-setindex!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,Int}...) where {T,N} = (
-    # make sure that the file is in data mode
-    data_mode!(var.ds);
-
-    (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
+writeblock_netcdf!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,Int}...) where {T,N} = (
+    (start,count,stride,_) = ncsub(indexes[1:ndims(var)]);
     nc_put_vars(var.ds.ncid, var.varid, start, count, stride, data);
 
     return nothing
 );
 
-setindex!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{Int,Int}...) where {T,N} = (
-    # make sure that the file is in data mode
-    data_mode!(var.ds);
-
-    (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
+writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{Int,Int}...) where {T,N} = (
+    (start,count,stride,_) = ncsub(indexes[1:ndims(var)]);
     tmp = convert(Array{T,ndims(data)}, data);
     nc_put_vars(var.ds.ncid, var.varid, start, count, stride, tmp);
 
     return nothing
 );
 
-setindex!(var::Variable, data, ci::CartesianIndices) = setindex!(var, data, ci.indices...);
-
-writeblock!(var::Variable, data, indexes...) = setindex!(var, data, indexes...);
 
 size(var::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(var.ds.ncid, var.dimids[i]), Val(N));
 
@@ -223,13 +210,3 @@ ncsub(sz::NTuple{N,T}, indexes...) where {N,T} = (
 
     return start,count,stride
 );
-
-
-
-
-# TODO: understand this function or remove it in future versions
-_shape_after_slice(sz,indexes...) = __sh(sz,(),1,indexes...)
-__sh(sz,sh,n,i::Integer,indexes...) = __sh(sz,sh,               n+1,indexes...)
-__sh(sz,sh,n,i::Colon,  indexes...) = __sh(sz,(sh...,sz[n]),    n+1,indexes...)
-__sh(sz,sh,n,i,         indexes...) = __sh(sz,(sh...,length(i)),n+1,indexes...)
-__sh(sz,sh,n) = sh
