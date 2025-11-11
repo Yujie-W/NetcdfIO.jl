@@ -7,10 +7,10 @@ using DocStringExtensions: METHODLIST
 
 
 # constants
-const ATTR_LAT   = Dict("description" => "Latitude", "unit" => "°");
-const ATTR_LON   = Dict("description" => "Longitude", "unit" => "°");
-const ATTR_CYC   = Dict("description" => "Cycle index", "unit" => "-");
-const ATTR_ABOUT = Dict("about" => "This is a file generated using NetcdfIO.jl");
+const ATTR_LAT   = Dict{String,Any}("description" => "Latitude", "unit" => "°");
+const ATTR_LON   = Dict{String,Any}("description" => "Longitude", "unit" => "°");
+const ATTR_CYC   = Dict{String,Any}("description" => "Cycle index", "unit" => "-");
+const ATTR_ABOUT = Dict{String,Any}("about" => "This is a file generated using NetcdfIO.jl");
 const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 
 

@@ -10,8 +10,8 @@
 #######################################################################################################################################################################################################
 """
 
-    append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,String}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}
-    append_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,String}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}
+    append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,Any}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}
+    append_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,Any}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}
 
 Append data to existing netcdf dataset, given
 - `ds` A `NCDatasets.Dataset` type dataset
@@ -28,18 +28,18 @@ Append data to existing netcdf dataset, given
 create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
 
 dset = Dataset("test.nc", "a");
-append_nc!(dset, "str", ["A" for i in 1:18], Dict("longname" => "test strings"), ["lat"]);
-append_nc!(dset, "d3d", rand(36,18,5), Dict("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+append_nc!(dset, "str", ["A" for i in 1:18], Dict{String,Any}("longname" => "test strings"), ["lat"]);
+append_nc!(dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
 close(dset);
 
-append_nc!("test.nc", "lat", collect(1:18), Dict("longname" => "latitude"), ["lat"]);
-append_nc!("test.nc", "d2d", rand(36,18), Dict("longname" => "a 2d dataset"), ["lon", "lat"]);
+append_nc!("test.nc", "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
+append_nc!("test.nc", "d2d", rand(36,18), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "lat"]);
 ```
 
 """
 function append_nc! end
 
-append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,String}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
+append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,Any}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
     # only if variable does not exist create the variable
     @assert !(var_name in keys(ds)) "You can only add new variable to the dataset!";
     @assert length(dim_names) ==  N "Dimension must be match!";
@@ -56,7 +56,7 @@ append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::
     return nothing
 );
 
-append_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,String}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
+append_nc!(file::String, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,Any}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
     _dset = Dataset(file, "a");
     append_nc!(_dset, var_name, var_data, var_attributes, dim_names; compress = compress);
     close(_dset);

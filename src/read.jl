@@ -119,7 +119,7 @@ Read parts of the data specified in an array
 # Examples
 ```julia
 # read data labeled as test from test.nc
-save_nc!("test.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
+save_nc!("test.nc", "test", rand(36,18,12), Dict{String,Any}("description" => "Random randoms"));
 data = read_nc("test.nc", "test");
 data = read_nc(Float32, "test.nc", "test");
 
@@ -128,8 +128,8 @@ data = read_nc("test.nc", "test", 1);
 data = read_nc(Float32, "test.nc", "test", 1);
 
 # read the data (time series) at a grid
-save_nc!("test1.nc", "test", rand(36,18), Dict("description" => "Random randoms"));
-save_nc!("test2.nc", "test", rand(36,18,12), Dict("description" => "Random randoms"));
+save_nc!("test1.nc", "test", rand(36,18), Dict{String,Any}("description" => "Random randoms"));
+save_nc!("test2.nc", "test", rand(36,18,12), Dict{String,Any}("description" => "Random randoms"));
 data1 = read_nc("test1.nc", "test", 1, 1);
 data2 = read_nc("test2.nc", "test", 1, 1);
 data1 = read_nc(Float32, "test1.nc", "test", 1, 1);

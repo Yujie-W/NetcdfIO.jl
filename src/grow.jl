@@ -26,11 +26,11 @@ Note that if there are more variables to grow at the same time, set `pending` to
 ```julia
 create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
 dset = Dataset("test.nc", "a");
-append_nc!(dset, "lat", collect(1:18), Dict("longname" => "latitude"), ["lat"]);
-append_nc!(dset, "lon", collect(1:36), Dict("longname" => "longitude"), ["lon"]; compress=4);
-append_nc!(dset, "ind", collect(1:5), Dict("longname" => "index"), ["ind"]);
-append_nc!(dset, "d2d", rand(36,18), Dict("longname" => "a 2d dataset"), ["lon", "lat"]);
-append_nc!(dset, "d3d", rand(36,18,5), Dict("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+append_nc!(dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
+append_nc!(dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
+append_nc!(dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);
+append_nc!(dset, "d2d", rand(36,18), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "lat"]);
+append_nc!(dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
 grow_nc!(dset, "ind", 6, true);
 grow_nc!(dset, "d3d", rand(36,18), false);
 grow_nc!(dset, "d3d", rand(36,18), true);
