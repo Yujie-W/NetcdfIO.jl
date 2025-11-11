@@ -28,53 +28,41 @@ struct Variable{T,N,TDS<:AbstractDataset} <: AbstractVariable{T,N}
     attrib::Attributes{TDS}
 end;
 
-getindex(var::Variable, indexes::Int...) = (
-    # make sure the dataset is in data mode
+readblock!(var::Variable, data, indexes...) = (
     data_mode!(var.ds);
+    readblock_netcdf!(var, data, indexes...);
 
-    return nc_get_var1(eltype(var), var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]])
+    return data
 );
 
-getindex(var::Variable{T,N}, indexes::Colon...) where {T,N} = (
-    # make sure the dataset is in data mode
-    data_mode!(var.ds);
+readblock_netcdf!(var::Variable, data, indexes::Int...) = (
+    data .= nc_get_var1(eltype(var), var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]]);
 
-    data = Array{T,N}(undef, size(var));
+    return nothing
+);
+
+readblock_netcdf!(var::Variable{T,N}, data, indexes::Colon...) where {T,N} = (
     nc_get_var!(var.ds.ncid, var.varid, data);
 
-    # special case for scalar NetCDF variable
-    return N == 0 ? data[] : data
+    return nothing
 );
 
-getindex(var::Variable{T,N}, indexes::TR...) where {T,N,TR<:Union{StepRange{Int,Int},UnitRange{Int}}} = (
-    # make sure the dataset is in data mode
-    data_mode!(var.ds);
-
-    (start,count,stride,jlshape) = ncsub(indexes[1:N]);
-    data = Array{T,N}(undef, jlshape);
+readblock_netcdf!(var::Variable{T,N}, data, indexes::TR...) where {T,N,TR<:Union{StepRange{Int,Int},UnitRange{Int}}} = (
+    (start,count,stride,_) = ncsub(indexes[1:N]);
     nc_get_vars!(var.ds.ncid, var.varid, start, count, stride, data);
 
-    return data
+    return nothing
 );
 
-getindex(var::Variable{T,N}, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N} = (
-    # make sure the dataset is in data mode
-    data_mode!(var.ds);
-
-    sz = size(var);
-    (start,count,stride) = ncsub(sz, indexes...);
-    jlshape = _shape_after_slice(sz, indexes...);
-    data = Array{T}(undef, jlshape);
+readblock_netcdf!(var::Variable{T,N}, data, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N} = (
+    (start,count,stride) = ncsub(size(var), indexes...);
     nc_get_vars!(var.ds.ncid, var.varid, start, count, stride, data);
 
-    return data
+    return nothing
 );
 
-getindex(var::Variable{T,0}) where {T} = var[1];
 
-getindex(var::Variable, ci::CartesianIndices) = var[ci.indices...];
 
-readblock!(var::Variable, data, indexes...) = (data = getindex(var, indexes...); return nothing;);
 
 setindex!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
     # make sure the dataset is in data mode
