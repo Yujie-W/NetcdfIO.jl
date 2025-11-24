@@ -9,6 +9,7 @@ using NetCDF_jll
 using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
 using CommonDataModel: name
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
+using OrderedCollections: OrderedDict
 
 
 include("attribute.jl");

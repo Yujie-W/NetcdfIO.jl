@@ -12,28 +12,6 @@ Grow the netcdf dataset, given
 
 Note that if there are more variables to grow at the same time, set `pending` to `true` only for the first time you call this function, and set `pending` to `false` for the rest variables.
 
----
-# Examples
-```julia
-create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
-dset = Dataset("test.nc", "a");
-append_nc!(dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
-append_nc!(dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
-append_nc!(dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);
-append_nc!(dset, "d2d", rand(36,18), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "lat"]);
-append_nc!(dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
-grow_nc!(dset, "ind", 6, true);
-grow_nc!(dset, "d3d", rand(36,18), false);
-grow_nc!(dset, "d3d", rand(36,18), true);
-grow_nc!(dset, "ind", 7, false);
-close(dset);
-
-grow_nc!("test.nc", "ind", 8, true);
-grow_nc!("test.nc", "d3d", rand(36,18), false);
-grow_nc!("test.nc", "d3d", rand(36,18), true);
-grow_nc!("test.nc", "ind", 9, false);
-```
-
 """
 function grow_nc! end
 

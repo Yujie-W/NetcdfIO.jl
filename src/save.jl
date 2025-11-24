@@ -3,7 +3,7 @@
     save_nc!(file::String,
              var_name::String,
              var_data::Array{T,N},
-             var_attribute::Dict{String,Any};
+             var_attribute::Union{Dict{String,Any}, OrderedDict{String,Any}};
              var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"],
              compress::Int = 4,
              growable::Bool = false) where {T<:Union{AbstractFloat,Integer,String},N}
@@ -23,7 +23,12 @@ Note that this is a wrapper function of create_nc and append_nc:
 - If var_data is 3D, and no var_dims are given, the dims are set to lon, lat, and ind
 
 #
-    save_nc!(file::String, df::DataFrame, var_names::Vector{String}, var_attributes::Vector{Dict{String,Any}}; compress::Int = 4, growable::Bool = false)
+    save_nc!(file::String,
+             df::DataFrame,
+             var_names::Vector{String},
+             var_attributes::Union{Vector{Dict{String,Any}},Vector{OrderedDict{String,Any}}};
+             compress::Int = 4,
+             growable::Bool = false)
     save_nc!(file::String, df::DataFrame; compress::Int = 4, growable::Bool = false)
 
 Save DataFrame to NetCDF, given
@@ -34,35 +39,13 @@ Save DataFrame to NetCDF, given
 - `compress` Compression level fro NetCDF, default is 4
 - `growable` If true, make index growable, default is false
 
----
-# Examples
-```julia
-# save 1D, 2D, and 3D data
-data1 = rand(12) .+ 273.15;
-data2 = rand(36,18) .+ 273.15;
-data3 = rand(36,18,12) .+ 273.15;
-
-save_nc!("data1.nc", "data1", data1, Dict{String,Any}("description" => "Random temperature", "unit" => "K"));
-save_nc!("data2.nc", "data2", data2, Dict{String,Any}("description" => "Random temperature", "unit" => "K"));
-save_nc!("data3.nc", "data3", data3, Dict{String,Any}("description" => "Random temperature", "unit" => "K"));
-
-# save DataFrame
-df = DataFrame();
-df[!,"A"] = rand(5);
-df[!,"B"] = rand(5);
-df[!,"C"] = rand(5);
-save_nc!("dataf.nc", df, ["A","B"], [Dict{String,Any}("A" => "Attribute A"), Dict{String,Any}("B" => "Attribute B")]);
-
-save_nc!("test.nc", df);
-```
-
 """
 function save_nc! end
 
 save_nc!(file::String,
          var_name::String,
          var_data::Array{T,N},
-         var_attribute::Dict{String,Any};
+         var_attribute::Union{Dict{String,Any}, OrderedDict{String,Any}};
          var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"],
          compress::Int = 4,
          growable::Bool = false
@@ -125,7 +108,12 @@ save_nc!(file::String,
     return nothing
 );
 
-save_nc!(file::String, df::DataFrame, var_names::Vector{String}, var_attributes::Vector{Dict{String,Any}}; compress::Int = 4, growable::Bool = false) = (
+save_nc!(file::String,
+         df::DataFrame,
+         var_names::Vector{String},
+         var_attributes::Union{Vector{Dict{String,Any}},Vector{OrderedDict{String,Any}}};
+         compress::Int = 4,
+         growable::Bool = false) = (
     @assert 0 <= compress <= 9 "Compression rate must be within 0 to 9";
     @assert length(var_names) == length(var_attributes) "Variable name and attributes lengths must match!";
 
@@ -153,9 +141,10 @@ save_nc!(file::String, df::DataFrame, var_names::Vector{String}, var_attributes:
     return nothing
 );
 
+# TODO : use attribute parser to generate variable attributes automatically
 save_nc!(file::String, df::DataFrame; compress::Int = 4, growable::Bool = false) = (
     _var_names = names(df);
-    _var_attrs = [Dict{String,Any}(_vn => _vn) for _vn in _var_names];
+    _var_attrs = [OrderedDict{String,Any}(_vn => _vn) for _vn in _var_names];
 
     save_nc!(file, df, _var_names, _var_attrs; compress=compress, growable = growable);
 

@@ -1,6 +1,7 @@
 using DataFrames
 using NetcdfIO
 using NetcdfIO.NCDatasets
+using OrderedCollections: OrderedDict
 using Test
 
 
@@ -51,7 +52,7 @@ using Test
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
         _dset = NCDatasets.Dataset("test.nc", "a");
 
-        NetcdfIO.append_nc!(_dset, "str", ["A" for i in 1:18], Dict{String,Any}("longname" => "test strings"), ["lat"]);
+        NetcdfIO.append_nc!(_dset, "str", ["A" for i in 1:18], OrderedDict{String,Any}("longname" => "test strings"), ["lat"]);
         @test true;
         NetcdfIO.append_nc!(_dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
         @test true;
@@ -192,7 +193,7 @@ using Test
         data2 = rand(36,18) .+ 273.15;
         data3 = rand(36,18,12) .+ 273.15;
 
-        NetcdfIO.save_nc!("data1.nc", "data1", data1, Dict{String,Any}("description" => "Random temperature", "unit" => "K"));
+        NetcdfIO.save_nc!("data1.nc", "data1", data1, OrderedDict{String,Any}("description" => "Random temperature", "unit" => "K"));
         @test true;
         NetcdfIO.save_nc!("data2.nc", "data2", data2, Dict{String,Any}("description" => "Random temperature", "unit" => "K"));
         @test true;
@@ -203,6 +204,8 @@ using Test
         _df[!,"A"] = rand(5);
         _df[!,"B"] = rand(5);
         _df[!,"C"] = rand(5);
+        NetcdfIO.save_nc!("datae.nc", _df, ["A","B"], [OrderedDict{String,Any}("A" => "Attribute A"), OrderedDict{String,Any}("B" => "Attribute B")]);
+        @test true;
         NetcdfIO.save_nc!("dataf.nc", _df, ["A","B"], [Dict{String,Any}("A" => "Attribute A"), Dict{String,Any}("B" => "Attribute B")]);
         @test true;
         NetcdfIO.save_nc!("datag.nc", _df);
@@ -211,6 +214,7 @@ using Test
         rm("data1.nc"; force=true);
         rm("data2.nc"; force=true);
         rm("data3.nc"; force=true);
+        rm("datae.nc"; force=true);
         rm("dataf.nc"; force=true);
         rm("datag.nc"; force=true);
     end;

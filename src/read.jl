@@ -93,40 +93,6 @@ Read parts of the data specified in an array
 - `dim_array` Vector containing the parts of the data to read
 - `transform` If true, transform the data using NCDatasets rules, otherwise read the raw data
 
----
-# Examples
-```julia
-# read data labeled as test from test.nc
-save_nc!("test.nc", "test", rand(36,18,12), Dict{String,Any}("description" => "Random randoms"));
-data = read_nc("test.nc", "test");
-data = read_nc(Float32, "test.nc", "test");
-
-# read 1st layer data labeled as test from test.nc
-data = read_nc("test.nc", "test", 1);
-data = read_nc(Float32, "test.nc", "test", 1);
-
-# read the data (time series) at a grid
-save_nc!("test1.nc", "test", rand(36,18), Dict{String,Any}("description" => "Random randoms"));
-save_nc!("test2.nc", "test", rand(36,18,12), Dict{String,Any}("description" => "Random randoms"));
-data1 = read_nc("test1.nc", "test", 1, 1);
-data2 = read_nc("test2.nc", "test", 1, 1);
-data1 = read_nc(Float32, "test1.nc", "test", 1, 1);
-data2 = read_nc(Float32, "test2.nc", "test", 1, 1);
-
-# read the data at a grid
-data = read_nc("test.nc", "test", 1, 1, 1);
-data = read_nc(Float32, "test.nc", "test", 1, 1, 1);
-
-# read the data as a DataFrame
-df_raw = DataFrame();
-df_raw[!,"A"] = rand(5);
-df_raw[!,"B"] = rand(5);
-df_raw[!,"C"] = rand(5);
-save_nc!("test.nc", df_raw);
-df_new = read_nc("test.nc");
-df_new = read_nc("test.nc", ["A", "B"]);
-```
-
 """
 function read_nc end
 
