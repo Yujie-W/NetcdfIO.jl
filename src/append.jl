@@ -41,8 +41,8 @@ append_nc!(ds::Dataset,
         compress = 0;
     end;
 
-    _ds_var = defVar(ds, var_name, T, dim_names; attrib = var_attributes, deflatelevel = compress);
-    _ds_var[axes(var_data)...] = var_data;
+    ds_var = defVar(ds, var_name, T, dim_names; attrib = var_attributes, deflatelevel = compress);
+    ds_var[axes(var_data)...] = var_data;
 
     return nothing
 );
@@ -53,9 +53,9 @@ append_nc!(file::String,
            var_attributes::Union{Dict{String,Any},OrderedDict{String,Any}},
            dim_names::Vector{String};
            compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
-    _dset = Dataset(file, "a");
-    append_nc!(_dset, var_name, var_data, var_attributes, dim_names; compress = compress);
-    close(_dset);
+    dset = Dataset(file, "a");
+    append_nc!(dset, var_name, var_data, var_attributes, dim_names; compress = compress);
+    close(dset);
 
     return nothing
 );

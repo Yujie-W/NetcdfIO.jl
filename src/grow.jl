@@ -17,64 +17,60 @@ function grow_nc! end
 
 grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
     # make sure the data to grow has -1 or the same dimensions as the target, e.g., a 3D dataset can grow with 2D or 3D input
-    _dim_ds = length(size(ds[var_name]));
-    _dim_in = length(size(in_data));
-    @assert _dim_in in [_dim_ds, _dim_ds - 1] "Data to grow must have same or -1 dimensions compared to data in the netcdf file!";
-    @assert _dim_ds <= 3 "This function only supports 1D to 3D datasets!";
+    dim_ds = length(size(ds[var_name]));
+    dim_in = length(size(in_data));
+    @assert dim_in in [dim_ds, dim_ds - 1] "Data to grow must have same or -1 dimensions compared to data in the netcdf file!";
+    @assert dim_ds <= 3 "This function only supports 1D to 3D datasets!";
 
     # calculate how many layers to add
-    if _dim_in < _dim_ds
-        _n = 1;
-    else
-        _n = (typeof(in_data) <: Array ? size(in_data)[end] : 1);
-    end;
+    n = (dim_in < dim_ds) ? 1 : (typeof(in_data) <: Array ? size(in_data)[end] : 1);
 
     # if the data need to pend to the end (grow in unlimited dimension)
     if pending
-        if _dim_ds == 1
-            ds[var_name][end+1:end+_n] = in_data;
-        elseif _dim_ds == 2
-            ds[var_name][:,end+1:end+_n] = in_data;
-        elseif _dim_ds == 3
-            ds[var_name][:,:,end+1:end+_n] = in_data;
+        if dim_ds == 1
+            ds[var_name][end+1:end+n] = in_data;
+        elseif dim_ds == 2
+            ds[var_name][:,end+1:end+n] = in_data;
+        elseif dim_ds == 3
+            ds[var_name][:,:,end+1:end+n] = in_data;
         end;
     end;
 
     # if the unlimited dimension has grown already
-    if _dim_ds == 1
-        ds[var_name][end+1-_n:end] = in_data;
-    elseif _dim_ds == 2
-        ds[var_name][:,end+1-_n:end] = in_data;
-    elseif _dim_ds == 3
-        ds[var_name][:,:,end+1-_n:end] = in_data;
+    if dim_ds == 1
+        ds[var_name][end+1-n:end] = in_data;
+    elseif dim_ds == 2
+        ds[var_name][:,end+1-n:end] = in_data;
+    elseif dim_ds == 3
+        ds[var_name][:,:,end+1-n:end] = in_data;
     end;
 
     return nothing
 );
 
 grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
-    _dset = Dataset(file, "a");
-    grow_nc!(_dset, var_name, in_data, pending);
-    close(_dset);
+    dset = Dataset(file, "a");
+    grow_nc!(dset, var_name, in_data, pending);
+    close(dset);
 
     return nothing
 );
 
 grow_nc!(ds::Dataset, df::DataFrame) = (
-    _dim_ind = size_nc(ds, "ind");
-    grow_nc!(ds, "ind", collect(axes(df,1) .+ _dim_ind[2][1]), true);
+    dim_ind = size_nc(ds, "ind");
+    grow_nc!(ds, "ind", collect(axes(df,1) .+ dim_ind[2][1]), true);
 
-    for _var in names(df)
-        grow_nc!(ds, _var, df[:,_var], false);
+    for var in names(df)
+        grow_nc!(ds, var, df[:,var], false);
     end;
 
     return nothing
 );
 
 grow_nc!(file::String, in_data::DataFrame) = (
-    _dset = Dataset(file, "a");
-    grow_nc!(_dset, in_data);
-    close(_dset);
+    dset = Dataset(file, "a");
+    grow_nc!(dset, in_data);
+    close(dset);
 
     return nothing
 );

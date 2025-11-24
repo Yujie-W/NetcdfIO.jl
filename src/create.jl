@@ -13,43 +13,35 @@ Create an empty netcdf file with dimensions, given
 - `dim_names` Dimension names in the netcdf file
 - `dim_sizes` Sizes of the dimensions (must be Integer or Inf), the dimension is growable if size is Integer 0
 
----
-## Examples
-```julia
-create_nc!("test.nc");
-create_nc!("test1.nc", String["lon", "lat", "ind"], [36, 18, 0]);
-create_nc!("test2.nc", String["lon", "lat", "ind"], [36, 18, Inf]);
-```
-
 """
 function create_nc! end
 
 create_nc!(file::String) = (
     # create a dataset using "c" mode
-    _dset = Dataset(file, "c");
+    dset = Dataset(file, "c");
 
     # global title attribute
-    for (_title,_notes) in ATTR_ABOUT
-        _dset.attrib[_title] = _notes;
+    for (attr,note) in ATTR_ABOUT
+        dset.attrib[attr] = note;
     end;
 
-    close(_dset);
+    close(dset);
 
     return nothing
 );
 
 create_nc!(file::String, dim_names::Vector{String}, dim_sizes::Vector) = (
     # create a dataset using "c" mode
-    _dset = Dataset(file, "c");
+    dset = Dataset(file, "c");
 
     # global title attribute
-    for (_title,_notes) in ATTR_ABOUT
-        _dset.attrib[_title] = _notes;
+    for (attr,note) in ATTR_ABOUT
+        dset.attrib[attr] = note;
     end;
 
-    add_nc_dim!.([_dset], dim_names, dim_sizes);
+    add_nc_dim!.([dset], dim_names, dim_sizes);
 
-    close(_dset);
+    close(dset);
 
     return nothing
 );
@@ -65,19 +57,6 @@ Add dimension information to netcdf dataset, given
 - `ds` A `NCDatasets.Dataset` type dataset
 - `dim_name` Dimension name
 - `dim_size` Integer dimension size (0 for Inf, growable)
-
----
-# Examples
-```julia
-ds = Dataset("test.nc", "a");
-add_nc_dim!(ds, "lat", 180);
-add_nc_dim!(ds, "ind", 0);
-add_nc_dim!(ds, "idx", Inf);
-close(ds);
-
-add_nc_dim!("test.nc", "lon", 360);
-add_nc_dim!("test.nc", "idy", Inf);
-```
 
 """
 function add_nc_dim! end
@@ -97,16 +76,16 @@ add_nc_dim!(ds::Dataset, dim_name::String, dim_size::Int) = (
 );
 
 add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat) = (
-    _size = (dim_size == Inf ? 0 : Int(dim_size));
-    add_nc_dim!(ds, dim_name, _size);
+    sizes = (dim_size == Inf ? 0 : Int(dim_size));
+    add_nc_dim!(ds, dim_name, sizes);
 
     return nothing
 );
 
 add_nc_dim!(file::String, dim_name::String, dim_size::Union{AbstractFloat,Int}) = (
-    _dset = Dataset(file, "a");
-    add_nc_dim!(_dset, dim_name, dim_size);
-    close(_dset);
+    dset = Dataset(file, "a");
+    add_nc_dim!(dset, dim_name, dim_size);
+    close(dset);
 
     return nothing
 );

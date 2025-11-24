@@ -14,6 +14,7 @@ add_nc_dim!
 ## Append new variables
 ```@docs
 append_nc!
+detect_attribute
 ```
 
 

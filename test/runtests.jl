@@ -32,40 +32,40 @@ using Test
         NetcdfIO.add_nc_dim!("test.nc", "dim4", Inf);
         @test true;
 
-        _dset = NCDatasets.Dataset("test.nc", "a");
+        dset = NCDatasets.Dataset("test.nc", "a");
 
-        NetcdfIO.add_nc_dim!(_dset, "dim5", 0);
+        NetcdfIO.add_nc_dim!(dset, "dim5", 0);
         @test true;
-        NetcdfIO.add_nc_dim!(_dset, "dim6", 10);
+        NetcdfIO.add_nc_dim!(dset, "dim6", 10);
         @test true;
-        NetcdfIO.add_nc_dim!(_dset, "dim7", 10.0);
+        NetcdfIO.add_nc_dim!(dset, "dim7", 10.0);
         @test true;
-        NetcdfIO.add_nc_dim!(_dset, "dim8", Inf);
+        NetcdfIO.add_nc_dim!(dset, "dim8", Inf);
         @test true;
 
-        close(_dset);
+        close(dset);
 
         rm("test.nc"; force=true);
     end;
 
     @testset "Append" begin
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
-        _dset = NCDatasets.Dataset("test.nc", "a");
+        dset = NCDatasets.Dataset("test.nc", "a");
 
-        NetcdfIO.append_nc!(_dset, "str", ["A" for i in 1:18], OrderedDict{String,Any}("longname" => "test strings"), ["lat"]);
+        NetcdfIO.append_nc!(dset, "str", ["A" for i in 1:18], OrderedDict{String,Any}("longname" => "test strings"), ["lat"]);
         @test true;
-        NetcdfIO.append_nc!(_dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
+        NetcdfIO.append_nc!(dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
         @test true;
-        NetcdfIO.append_nc!(_dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
+        NetcdfIO.append_nc!(dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
         @test true;
-        NetcdfIO.append_nc!(_dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);
+        NetcdfIO.append_nc!(dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);
         @test true;
-        NetcdfIO.append_nc!(_dset, "d2d", rand(36,18), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "lat"]);
+        NetcdfIO.append_nc!(dset, "d2d", rand(36,18), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "lat"]);
         @test true;
-        NetcdfIO.append_nc!(_dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+        NetcdfIO.append_nc!(dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
         @test true;
 
-        close(_dset);
+        close(dset);
 
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
 
@@ -87,43 +87,43 @@ using Test
 
     @testset "Grow" begin
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
-        _dset = NCDatasets.Dataset("test.nc", "a");
-        NetcdfIO.append_nc!(_dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
-        NetcdfIO.append_nc!(_dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
-        NetcdfIO.append_nc!(_dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);
-        NetcdfIO.append_nc!(_dset, "d2d", rand(36,5), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "ind"]);
-        NetcdfIO.append_nc!(_dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
+        dset = NCDatasets.Dataset("test.nc", "a");
+        NetcdfIO.append_nc!(dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
+        NetcdfIO.append_nc!(dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
+        NetcdfIO.append_nc!(dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);
+        NetcdfIO.append_nc!(dset, "d2d", rand(36,5), Dict{String,Any}("longname" => "a 2d dataset"), ["lon", "ind"]);
+        NetcdfIO.append_nc!(dset, "d3d", rand(36,18,5), Dict{String,Any}("longname" => "a 3d dataset"), ["lon", "lat", "ind"]);
 
-        NetcdfIO.grow_nc!(_dset, "ind", 6, true);
+        NetcdfIO.grow_nc!(dset, "ind", 6, true);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", 6, false);
+        NetcdfIO.grow_nc!(dset, "ind", 6, false);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", [8,9], true);
+        NetcdfIO.grow_nc!(dset, "ind", [8,9], true);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", [7,8], false);
+        NetcdfIO.grow_nc!(dset, "ind", [7,8], false);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "d2d", rand(36), true);
+        NetcdfIO.grow_nc!(dset, "d2d", rand(36), true);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", 9, false);
-        NetcdfIO.grow_nc!(_dset, "d2d", rand(36), false);
+        NetcdfIO.grow_nc!(dset, "ind", 9, false);
+        NetcdfIO.grow_nc!(dset, "d2d", rand(36), false);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "d2d", rand(36,2), true);
+        NetcdfIO.grow_nc!(dset, "d2d", rand(36,2), true);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", [10,11], false);
-        NetcdfIO.grow_nc!(_dset, "d2d", rand(36,2), false);
+        NetcdfIO.grow_nc!(dset, "ind", [10,11], false);
+        NetcdfIO.grow_nc!(dset, "d2d", rand(36,2), false);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "d3d", rand(36,18), true);
+        NetcdfIO.grow_nc!(dset, "d3d", rand(36,18), true);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", 12, false);
-        NetcdfIO.grow_nc!(_dset, "d3d", rand(36,18), false);
+        NetcdfIO.grow_nc!(dset, "ind", 12, false);
+        NetcdfIO.grow_nc!(dset, "d3d", rand(36,18), false);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "d3d", rand(36,18, 2), true);
+        NetcdfIO.grow_nc!(dset, "d3d", rand(36,18, 2), true);
         @test true;
-        NetcdfIO.grow_nc!(_dset, "ind", [13,14], false);
-        NetcdfIO.grow_nc!(_dset, "d3d", rand(36,18, 2), false);
+        NetcdfIO.grow_nc!(dset, "ind", [13,14], false);
+        NetcdfIO.grow_nc!(dset, "d3d", rand(36,18, 2), false);
         @test true;
 
-        close(_dset);
+        close(dset);
 
         NetcdfIO.grow_nc!("test.nc", "ind", 15, true);
         @test true;

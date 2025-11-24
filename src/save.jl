@@ -57,53 +57,52 @@ save_nc!(file::String,
     @assert N < 3 || "ind" in var_dims "3D data must have a dimension named ind";
 
     # create the file
-    _dset = Dataset(file, "c");
+    dset = Dataset(file, "c");
 
     # global title attribute
-    for (_title,_notes) in ATTR_ABOUT
-        _dset.attrib[_title] = _notes;
+    for (attr, note) in ATTR_ABOUT
+        dset.attrib[attr] = note;
     end;
 
     # the case if the dimension is 1D
     if N==1
-        _n_ind = (growable ? Inf : length(var_data));
-        _inds  = collect(eachindex(var_data));
-        add_nc_dim!(_dset, "ind", _n_ind);
-        append_nc!(_dset, "ind", _inds, detect_attribute("ind"), ["ind"]; compress=compress);
-        append_nc!(_dset, var_name, var_data, var_attribute, ["ind"]; compress=compress);
-
-        close(_dset);
+        n_ind = (growable ? Inf : length(var_data));
+        inds  = collect(eachindex(var_data));
+        add_nc_dim!(dset, "ind", n_ind);
+        append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress=compress);
+        append_nc!(dset, var_name, var_data, var_attribute, ["ind"]; compress=compress);
+        close(dset);
 
         return nothing
     end;
 
     # if the dimension is 2D or 3D
-    _lon = findfirst(isequal("lon"), var_dims);
-    _lat = findfirst(isequal("lat"), var_dims);
+    lon = findfirst(isequal("lon"), var_dims);
+    lat = findfirst(isequal("lat"), var_dims);
 
-    _n_lon   = size(var_data, _lon);
-    _n_lat   = size(var_data, _lat);
-    _res_lon = 360 / _n_lon;
-    _res_lat = 180 / _n_lat;
-    _lons    = collect(_res_lon/2:_res_lon:360) .- 180;
-    _lats    = collect(_res_lat/2:_res_lat:180) .- 90;
-    add_nc_dim!(_dset, "lon", _n_lon);
-    add_nc_dim!(_dset, "lat", _n_lat);
-    append_nc!(_dset, "lon", _lons, detect_attribute("lon"), ["lon"]; compress=compress);
-    append_nc!(_dset, "lat", _lats, detect_attribute("lat"), ["lat"]; compress=compress);
+    n_lon   = size(var_data, lon);
+    n_lat   = size(var_data, lat);
+    res_lon = 360 / n_lon;
+    res_lat = 180 / n_lat;
+    lons    = collect(res_lon/2:res_lon:360) .- 180;
+    lats    = collect(res_lat/2:res_lat:180) .- 90;
+    add_nc_dim!(dset, "lon", n_lon);
+    add_nc_dim!(dset, "lat", n_lat);
+    append_nc!(dset, "lon", lons, detect_attribute("lon"), ["lon"]; compress=compress);
+    append_nc!(dset, "lat", lats, detect_attribute("lat"), ["lat"]; compress=compress);
 
     if N==2
-        append_nc!(_dset, var_name, var_data, var_attribute, var_dims; compress=compress);
+        append_nc!(dset, var_name, var_data, var_attribute, var_dims; compress=compress);
     elseif N==3
-        _ind = findfirst(isequal("ind"), var_dims);
-        _n_ind = (growable ? Inf : size(var_data, _ind));
-        _inds  = collect(1:_n_ind);
-        add_nc_dim!(_dset, "ind", _n_ind);
-        append_nc!(_dset, "ind", _inds, detect_attribute("ind"), ["ind"]; compress=compress);
-        append_nc!(_dset, var_name, var_data, var_attribute, var_dims; compress=compress);
+        ind = findfirst(isequal("ind"), var_dims);
+        n_ind = (growable ? Inf : size(var_data, ind));
+        inds  = collect(1:n_ind);
+        add_nc_dim!(dset, "ind", n_ind);
+        append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress=compress);
+        append_nc!(dset, var_name, var_data, var_attribute, var_dims; compress=compress);
     end;
 
-    close(_dset);
+    close(dset);
 
     return nothing
 );
@@ -118,25 +117,25 @@ save_nc!(file::String,
     @assert length(var_names) == length(var_attributes) "Variable name and attributes lengths must match!";
 
     # create the file
-    _dset = Dataset(file, "c");
+    dset = Dataset(file, "c");
 
     # global title attribute
-    for (_title,_notes) in ATTR_ABOUT
-        _dset.attrib[_title] = _notes;
+    for (attr,note) in ATTR_ABOUT
+        dset.attrib[attr] = note;
     end;
 
     # define dimension related variables
-    _n_ind = (growable ? Inf : size(df)[1]);
-    _inds  = collect(1:size(df)[1]);
+    n_ind = (growable ? Inf : size(df)[1]);
+    inds  = collect(1:size(df)[1]);
 
     # save the variables
-    add_nc_dim!(_dset, "ind", _n_ind);
-    append_nc!(_dset, "ind", _inds, detect_attribute("ind"), ["ind"]; compress=compress);
-    for _i in eachindex(var_names)
-        append_nc!(_dset, var_names[_i], df[:, var_names[_i]], var_attributes[_i], ["ind"]; compress = compress);
+    add_nc_dim!(dset, "ind", n_ind);
+    append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress=compress);
+    for i in eachindex(var_names)
+        append_nc!(dset, var_names[i], df[:, var_names[i]], var_attributes[i], ["ind"]; compress = compress);
     end;
 
-    close(_dset);
+    close(dset);
 
     return nothing
 );
