@@ -1,13 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General:
-#     2021-Dec-24: move the function from PkgUtility to NetcdfIO
-#     2022-Jan-28: remove the complicated funtion to create var and dim at the same time
-#     2022-Jan-28: add method to add data to Dataset
-#     2025-Nov-10: use axes to get the indexes of the variable instead of [:,:] which is only meant for 2D variable
-#
-#######################################################################################################################################################################################################
 """
 
     append_nc!(ds::Dataset, var_name::String, var_data::Array{T,N}, var_attributes::Dict{String,Any}, dim_names::Vector{String}; compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}

@@ -1,15 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General:
-#     2022-Jan-27: define the function to create an empty growable netcdf file
-#     2022-Jan-28: add input sizes to signal which dimensions are growable
-#     2022-Jan-28: add global attributes to the generated file
-#     2022-Jan-28: add general function create_nc! for multiple dispatch
-#     2022-Jan-28: add the basic function to create an empty netcdf file
-#     2022-Jan-28: add global attributes to the generated file
-#
-#######################################################################################################################################################################################################
 """
 
     create_nc!(file::String)
@@ -67,16 +55,6 @@ create_nc!(file::String, dim_names::Vector{String}, dim_sizes::Vector) = (
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General:
-#     2022-Jan-28: add general function add_nc_dim! for multiple dispatch
-#     2022-Jan-28: add method to add dim information to Dataset using Int
-#     2022-Jan-28: add method to add dim information to Dataset using Inf
-#     2022-Jan-28: add method to add dim information to file directly
-#
-#######################################################################################################################################################################################################
 """
 
     add_nc_dim!(ds::Dataset, dim_name::String, dim_size::Int)

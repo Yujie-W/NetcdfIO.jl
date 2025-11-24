@@ -1,11 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# NCDatasets.jl are copied from the original NCDatasets.jl, with the following changes:
-#     1. Add support to change the libnetcdf library dynamically
-#     2. Remove unnecessary code that is not used by NetcdfIO
-#     3. Clean up the code that is already moved to CommonDataModel.jl
-#
-#######################################################################################################################################################################################################
 module NCDatasets
 
 import Base: close, convert, haskey, get, getindex, keys, setindex!, showerror, size

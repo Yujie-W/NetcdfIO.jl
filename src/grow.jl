@@ -1,12 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General
-#     2022-Jan-27: define the function to grow a netcdf file
-#     2022-Jan-28: add the function to grow semi-automatically with respect to data dimensions
-#     2023-Jul-06: add method to grow dataframe type dataset
-#
-#######################################################################################################################################################################################################
 """
 
     grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)

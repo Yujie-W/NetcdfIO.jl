@@ -1,10 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General
-#     2022-Feb-03: add recursive variable query feature
-#
-#######################################################################################################################################################################################################
 """
 
     find_variable(ds::Dataset, var_name::String)
@@ -34,21 +27,6 @@ function find_variable(ds::Dataset, var_name::String)
 end
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General
-#     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
-#     2022-Feb-03: add recursive variable query feature
-#     2022-Feb-03: add option to read raw data to avoid NCDatasets transform errors
-#     2022-Feb-04: allow to read value from 1D array as well
-#     2025-Nov-10: use NTuple to create indexes for the variable reading
-# Bug fixes
-#     2021-Dec-24: fix the bug that reads integer as float (e.g., ind)
-#     2022-Jan-20: add dimension control to avoid errors
-#     2023-Jul-25: add option to read any portion of the data
-#
-#######################################################################################################################################################################################################
 """
 
     read_nc(file::String, var_name::String; transform::Bool = true)

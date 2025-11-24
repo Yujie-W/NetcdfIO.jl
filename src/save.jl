@@ -1,14 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General
-#     2021-Dec-24: migrate the function from PkgUtility to NetcdfIO
-#     2022-Jan-28: remove the complicated funtion to create var and dim at the same time
-#     2022-Jan-28: add global attributes to the generated file
-# Bug fixes
-#     2023-Jul-06: allow data frame to be growable by fix the index values from Inf to actual length
-#
-#######################################################################################################################################################################################################
 """
 
     save_nc!(file::String,

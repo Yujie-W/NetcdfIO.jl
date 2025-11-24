@@ -1,14 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General
-#     2023-Sep-01: use dlsym method to call libnetcdf functions for nc_open and nc_inq_varids (more to do in the future)
-#
-# This file is originally based netcdf_c.jl from NetCDF.jl
-#
-#######################################################################################################################################################################################################
-
-
 # type is immutable to ensure that it has the memory same layout
 # as the C struct nc_vlen_t
 
