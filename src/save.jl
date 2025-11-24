@@ -69,7 +69,7 @@ save_nc!(file::String,
         _n_ind = (growable ? Inf : length(var_data));
         _inds  = collect(eachindex(var_data));
         add_nc_dim!(_dset, "ind", _n_ind);
-        append_nc!(_dset, "ind", _inds, ATTR_CYC, ["ind"]; compress=compress);
+        append_nc!(_dset, "ind", _inds, detect_attribute("ind"), ["ind"]; compress=compress);
         append_nc!(_dset, var_name, var_data, var_attribute, ["ind"]; compress=compress);
 
         close(_dset);
@@ -89,8 +89,8 @@ save_nc!(file::String,
     _lats    = collect(_res_lat/2:_res_lat:180) .- 90;
     add_nc_dim!(_dset, "lon", _n_lon);
     add_nc_dim!(_dset, "lat", _n_lat);
-    append_nc!(_dset, "lon", _lons, ATTR_LON, ["lon"]; compress=compress);
-    append_nc!(_dset, "lat", _lats, ATTR_LAT, ["lat"]; compress=compress);
+    append_nc!(_dset, "lon", _lons, detect_attribute("lon"), ["lon"]; compress=compress);
+    append_nc!(_dset, "lat", _lats, detect_attribute("lat"), ["lat"]; compress=compress);
 
     if N==2
         append_nc!(_dset, var_name, var_data, var_attribute, var_dims; compress=compress);
@@ -99,7 +99,7 @@ save_nc!(file::String,
         _n_ind = (growable ? Inf : size(var_data, _ind));
         _inds  = collect(1:_n_ind);
         add_nc_dim!(_dset, "ind", _n_ind);
-        append_nc!(_dset, "ind", _inds, ATTR_CYC, ["ind"]; compress=compress);
+        append_nc!(_dset, "ind", _inds, detect_attribute("ind"), ["ind"]; compress=compress);
         append_nc!(_dset, var_name, var_data, var_attribute, var_dims; compress=compress);
     end;
 
@@ -131,7 +131,7 @@ save_nc!(file::String,
 
     # save the variables
     add_nc_dim!(_dset, "ind", _n_ind);
-    append_nc!(_dset, "ind", _inds, ATTR_CYC, ["ind"]; compress=compress);
+    append_nc!(_dset, "ind", _inds, detect_attribute("ind"), ["ind"]; compress=compress);
     for _i in eachindex(var_names)
         append_nc!(_dset, var_names[_i], df[:, var_names[_i]], var_attributes[_i], ["ind"]; compress = compress);
     end;
@@ -141,12 +141,11 @@ save_nc!(file::String,
     return nothing
 );
 
-# TODO : use attribute parser to generate variable attributes automatically
 save_nc!(file::String, df::DataFrame; compress::Int = 4, growable::Bool = false) = (
-    _var_names = names(df);
-    _var_attrs = [OrderedDict{String,Any}(_vn => _vn) for _vn in _var_names];
+    var_names = names(df);
+    var_attrs = [detect_attribute(vn; showwarning = false) for vn in var_names];
 
-    save_nc!(file, df, _var_names, _var_attrs; compress=compress, growable = growable);
+    save_nc!(file, df, var_names, var_attrs; compress=compress, growable = growable);
 
     return nothing
 );
