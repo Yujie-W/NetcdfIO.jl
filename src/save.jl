@@ -84,8 +84,8 @@ save_nc!(file::String,
     n_lat   = size(var_data, lat);
     res_lon = 360 / n_lon;
     res_lat = 180 / n_lat;
-    lons    = collect(res_lon/2:res_lon:360) .- 180;
-    lats    = collect(res_lat/2:res_lat:180) .- 90;
+    lons    = collect(Float32, res_lon/2:res_lon:360) .- 180;
+    lats    = collect(Float32, res_lat/2:res_lat:180) .- 90;
     add_nc_dim!(dset, "lon", n_lon);
     add_nc_dim!(dset, "lat", n_lat);
     append_nc!(dset, "lon", lons, detect_attribute("lon"), ["lon"]; compress=compress);

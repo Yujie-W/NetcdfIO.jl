@@ -23,7 +23,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
     if varname in ["lat", "LAT", "latitude", "Latitude"]
         return OrderedDict{String,Any}(
             "about" => "Latitude from -90 to 90 degrees",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -31,7 +31,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
     if varname in ["lon", "LON", "longitude", "Longitude"]
         return OrderedDict{String,Any}(
             "about" => "Longitude from -180 to 180 degrees",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -39,7 +39,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
     if varname in ["cycle", "CYC", "ind", "IND", "index", "Index"]
         return OrderedDict{String,Any}(
             "about" => "Time index",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -48,7 +48,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
         return OrderedDict{String,Any}(
             "about" => "Evapotranspiration",
             "unit" => "mol m⁻² s⁻¹",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -57,7 +57,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
         return OrderedDict{String,Any}(
             "about" => "Gross Primary Production",
             "unit" => "μmol m⁻² s⁻¹",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -66,7 +66,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
         return OrderedDict{String,Any}(
             "about" => "Solar-Induced chlorophyll Fluorescence at $wavelength nm",
             "unit" => "W m⁻² sr⁻¹ μm⁻¹",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -82,7 +82,7 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
         return OrderedDict{String,Any}(
             "about" => "Solar-Induced chlorophyll Fluorescence at $wl nm",
             "unit" => "W m⁻² sr⁻¹ μm⁻¹",
-            "input varname" => varname,
+            "input_varname" => varname,
         )
     end;
 
@@ -97,6 +97,6 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
     end;
 
     return OrderedDict{String,Any}(
-        "input varname" => varname
+        "input_varname" => varname
     )
 end;
