@@ -200,15 +200,15 @@ using Test
         NetcdfIO.save_nc!("data3.nc", "data3", data3, Dict{String,Any}("description" => "Random temperature", "unit" => "K"));
         @test true;
 
-        _df = DataFrame();
-        _df[!,"A"] = rand(5);
-        _df[!,"B"] = rand(5);
-        _df[!,"C"] = rand(5);
-        NetcdfIO.save_nc!("datae.nc", _df, ["A","B"], [OrderedDict{String,Any}("A" => "Attribute A"), OrderedDict{String,Any}("B" => "Attribute B")]);
+        df = DataFrame();
+        df[!,"A"] = rand(5);
+        df[!,"B"] = rand(5);
+        df[!,"C"] = rand(5);
+        NetcdfIO.save_nc!("datae.nc", df, ["A","B"], [OrderedDict{String,Any}("A" => "Attribute A"), OrderedDict{String,Any}("B" => "Attribute B")]);
         @test true;
-        NetcdfIO.save_nc!("dataf.nc", _df, ["A","B"], [Dict{String,Any}("A" => "Attribute A"), Dict{String,Any}("B" => "Attribute B")]);
+        NetcdfIO.save_nc!("dataf.nc", df, ["A","B"], [Dict{String,Any}("A" => "Attribute A"), Dict{String,Any}("B" => "Attribute B")]);
         @test true;
-        NetcdfIO.save_nc!("datag.nc", _df);
+        NetcdfIO.save_nc!("datag.nc", df);
         @test true;
 
         rm("data1.nc"; force=true);

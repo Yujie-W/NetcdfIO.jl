@@ -17,14 +17,15 @@ include("ncdatasets/NCDatasets.jl");
 using .NCDatasets: Dataset, defVar
 
 
-include("append.jl");
-include("attributes.jl");
-include("create.jl");
-include("grow.jl");
-include("info.jl");
-include("libnetcdf.jl");
-include("read.jl");
-include("save.jl");
+include("general-attributes.jl");
+include("general-switch-libnetcdf.jl");
+include("read-info.jl");
+include("read-recursive.jl");
+include("read-var.jl");
+include("write-append.jl");
+include("write-create.jl");
+include("write-grow.jl");
+include("write-save.jl");
 
 
 end # module

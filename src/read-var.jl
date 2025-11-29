@@ -1,34 +1,5 @@
 """
 
-    find_variable(ds::Dataset, var_name::String)
-
-Return the path to dataset if it exists, given
-- `ds` NCDatasets.Dataset type dataset
-- `var_name` Variable to read
-
-"""
-function find_variable(ds::Dataset, var_name::String)
-    # if var_name is in the current dataset, return it
-    if var_name in keys(ds)
-        return ds[var_name]
-    end;
-
-    # loop through the groups and find the data
-    _dvar = nothing;
-    for _group in keys(ds.group)
-        _dvar = find_variable(ds.group[_group], var_name)
-        if !isnothing(_dvar)
-            break;
-        end;
-    end;
-
-    # return the variable if it exists, otherwise return nothing
-    return _dvar
-end
-
-
-"""
-
     read_nc(file::String, var_name::String; transform::Bool = true)
     read_nc(T, file::String, var_name::String; transform::Bool = true)
 
