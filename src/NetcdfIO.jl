@@ -16,9 +16,9 @@ include("ncdatasets/NCDatasets.jl");
 
 using .NCDatasets: Dataset, defVar
 
-
 include("general-attributes.jl");
 include("general-switch-libnetcdf.jl");
+include("read-attributes.jl");
 include("read-info.jl");
 include("read-recursive.jl");
 include("read-var.jl");
