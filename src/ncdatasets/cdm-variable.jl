@@ -1,61 +1,55 @@
-"""
+# extensions to Base functions for Variables
+size(var::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(parent_ncid(var), var.dimids[i]), Val(N));
 
-$(TYPEDEF)
+# extensions to CommonDataModel for Variables
+variable(dset::NCDataset, varid::Integer) = (
+    dimids = nc_inq_vardimid(dset.ncid, varid);
+    T = _jltype(dset.ncid, nc_inq_vartype(dset.ncid, varid));
+    N = length(dimids);
+    TDS = typeof(dset);
 
-Struct to represent a NetCDF variable
+    # reverse dimids to have the dimension order in Fortran style
+    return Variable{T,N,TDS}(dset, varid, (reverse(dimids)...,))
+);
 
-# Fields
+variable(dset::NCDataset, varname::AbstractString) = variable(dset, nc_inq_varid(dset.ncid, varname));
 
-$(TYPEDFIELDS)
-
-"""
-struct Variable{T,N,TDS<:AbstractDataset} <: AbstractVariable{T,N}
-    "Parent NetCDF dataset"
-    ds::TDS
-    "NetCDF variable id"
-    varid::Cint
-    "NetCDF dimension ids"
-    dimids::NTuple{N,Cint}
-    "Attributes of the variable"
-    attrib::Attributes{TDS}
-end;
-
+# extensions to DiskArrays for Variables
 readblock!(var::Variable, data, indexes...) = (
-    data_mode!(var.ds);
+    data_mode!(parent_dataset(var));
     readblock_netcdf!(var, data, indexes...);
 
     return data
 );
 
 readblock_netcdf!(var::Variable, data, indexes::Int...) = (
-    data .= nc_get_var1(eltype(var), var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]]);
+    data .= nc_get_var1(eltype(var), parent_ncid(var), var.varid, [i-1 for i in indexes[ndims(var):-1:1]]);
 
     return nothing
 );
 
 readblock_netcdf!(var::Variable{T,N}, data, indexes::Colon...) where {T,N} = (
-    nc_get_var!(var.ds.ncid, var.varid, data);
+    nc_get_var!(parent_ncid(var), var.varid, data);
 
     return nothing
 );
 
 readblock_netcdf!(var::Variable{T,N}, data, indexes::TR...) where {T,N,TR<:Union{StepRange{Int,Int},UnitRange{Int}}} = (
     (start,count,stride,_) = ncsub(indexes[1:N]);
-    nc_get_vars!(var.ds.ncid, var.varid, start, count, stride, data);
+    nc_get_vars!(parent_ncid(var), var.varid, start, count, stride, data);
 
     return nothing
 );
 
 readblock_netcdf!(var::Variable{T,N}, data, indexes::Union{Int,Colon,AbstractRange{<:Integer}}...) where {T,N} = (
     (start,count,stride) = ncsub(size(var), indexes...);
-    nc_get_vars!(var.ds.ncid, var.varid, start, count, stride, data);
+    nc_get_vars!(parent_ncid(var), var.varid, start, count, stride, data);
 
     return nothing
 );
 
-
 writeblock!(var::Variable, data, indexes...) = (
-    data_mode!(var.ds);
+    data_mode!(parent_dataset(var));
     writeblock_netcdf!(var, data, indexes...);
 
     return nothing
@@ -76,20 +70,20 @@ writeblock_netcdf!(var::Variable, data::AbstractArray, indexes::Union{Int,Colon,
 );
 
 writeblock_netcdf!(var::Variable{T,N}, data, indexes::Int...) where {T,N} = (
-    nc_put_var1(var.ds.ncid, var.varid, [i-1 for i in indexes[ndims(var):-1:1]], T(data));
+    nc_put_var1(parent_ncid(var), var.varid, [i-1 for i in indexes[ndims(var):-1:1]], T(data));
 
     return nothing
 );
 
 writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray{T,N}, indexes::Colon...) where {T,N} = (
-    nc_put_var(var.ds.ncid, var.varid, data);
+    nc_put_var(parent_ncid(var), var.varid, data);
 
     return nothing
 );
 
 writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon...) where {T,T2,N} = (
     tmp = T <: Integer ? round.(T,data) : convert(Array{T,N},data);
-    nc_put_var(var.ds.ncid, var.varid, tmp);
+    nc_put_var(parent_ncid(var), var.varid, tmp);
 
     return nothing
 );
@@ -97,14 +91,14 @@ writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray{T2,N}, indexes::Colon
 writeblock_netcdf!(var::Variable{T,N}, data::T, indexes::StepRange{Int,Int}...) where {T,N} = (
     (start,count,stride,jlshape) = ncsub(indexes[1:ndims(var)]);
     tmp = fill(data, jlshape);
-    nc_put_vars(var.ds.ncid, var.varid, start, count, stride, tmp);
+    nc_put_vars(parent_ncid(var), var.varid, start, count, stride, tmp);
 
     return nothing
 );
 
 writeblock_netcdf!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,Int}...) where {T,N} = (
     (start,count,stride,_) = ncsub(indexes[1:ndims(var)]);
-    nc_put_vars(var.ds.ncid, var.varid, start, count, stride, data);
+    nc_put_vars(parent_ncid(var), var.varid, start, count, stride, data);
 
     return nothing
 );
@@ -112,15 +106,13 @@ writeblock_netcdf!(var::Variable{T,N}, data::Array{T,N}, indexes::StepRange{Int,
 writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{Int,Int}...) where {T,N} = (
     (start,count,stride,_) = ncsub(indexes[1:ndims(var)]);
     tmp = convert(Array{T,ndims(data)}, data);
-    nc_put_vars(var.ds.ncid, var.varid, start, count, stride, tmp);
+    nc_put_vars(parent_ncid(var), var.varid, start, count, stride, tmp);
 
     return nothing
 );
 
 
-size(var::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(var.ds.ncid, var.dimids[i]), Val(N));
-
-
+# indexing and slicing utilities functions to read and write data
 """
 
     normalized_index(sz::NTuple, index)

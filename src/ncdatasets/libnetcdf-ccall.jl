@@ -22,9 +22,7 @@ function nc_inq_libvers()
 end
 
 
-function nc_strerror(ncerr::Integer)
-    unsafe_string(ccall((:nc_strerror,libnetcdf),Cstring,(Cint,),ncerr))
-end
+
 
 
 function nc_create(path,cmode::Integer)

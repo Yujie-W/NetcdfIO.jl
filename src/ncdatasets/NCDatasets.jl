@@ -1,31 +1,30 @@
 module NCDatasets
 
 import Base: close, convert, haskey, get, getindex, keys, setindex!, showerror, size
-import CommonDataModel: defVar, variable
+import CommonDataModel: attrib, attribnames, defVar, dim, dimnames, group, groupnames, variable
 import DiskArrays: readblock!, writeblock!
 
 using NetCDF_jll
 
-using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
-using CommonDataModel: name
+using CommonDataModel: AbstractDataset, AbstractVariable, Attributes, CFVariable, Dimensions, Groups
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using OrderedCollections: OrderedDict
 
 
-include("attribute.jl");
-include("config.jl");
-include("dimension.jl");
-include("error.jl");
-include("group.jl");
+include("libnetcdf-const.jl");
+include("libnetcdf-ccall.jl");
+include("libnetcdf-error.jl");
 
-include("variable.jl");
+include("dataset-type.jl");
+include("dataset-mode.jl");
+include("dataset-parent-id.jl");
+include("dataset-variable.jl");
 
-include("dataset.jl");
-
-
-# TODO: clean up these files after more testing
-include("netcdf_c.jl");
-include("precompile.jl");
+include("cdm-attribute.jl");
+include("cdm-dataset.jl");
+include("cdm-dimension.jl");
+include("cdm-group.jl");
+include("cdm-variable.jl");
 
 
 end # module

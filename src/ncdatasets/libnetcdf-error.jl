@@ -1,14 +1,8 @@
-"""
+""" Get netcdf error string from error code """
+nc_strerror(ncerr::Integer) = unsafe_string(ccall((:nc_strerror,libnetcdf), Cstring, (Cint,), ncerr));
 
-$(TYPEDEF)
 
-Struct for netcdf error
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
+""" Struct for netcdf error """
 mutable struct NetCDFError <: Exception
     "Error code from NetCDF library"
     code::Cint
@@ -26,19 +20,5 @@ showerror(io::IO, err::NetCDFError) = (
 );
 
 
-"""
-
-    check_status!(code::Cint)
-
-Check the NetCDF status code, raising an error if nonzero, given
-- `code` NetCDF status code
-
-"""
-function check_status!(code::Cint)
-    # if code is not 0, throw an error
-    if code != Cint(0)
-        throw(NetCDFError(code))
-    end;
-
-    return nothing
-end;
+""" Check the status code from a libnetcdf function call """
+check_status!(code::Cint) = code == Cint(0) ? nothing : throw(NetCDFError(code));
