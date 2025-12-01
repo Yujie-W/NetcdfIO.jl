@@ -3,6 +3,7 @@ group(ds::NCDataset, groupname::Union{AbstractString,Symbol}) = NCDataset(nc_inq
 
 groupnames(ds::NCDataset) = String[nc_inq_grpname(ncid) for ncid in nc_inq_grps(ds.ncid)];
 
+
 # extensions to Base functions for Groups
 getindex(grps::Groups, name::Union{AbstractString,Symbol}) = (
     grp_ncid = nc_inq_grp_ncid(grps.ds.ncid, name);

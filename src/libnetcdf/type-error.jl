@@ -1,16 +1,16 @@
+# julia implementation of libnetcdf functions
 """ Get netcdf error string from error code """
 nc_strerror(ncerr::Integer) = unsafe_string(ccall((:nc_strerror, NetCDF_jll.libnetcdf), Cstring, (Cint,), ncerr));
 
 
+# type definition and error handling
 """ Struct for netcdf error """
-mutable struct NetCDFError <: Exception
+Base.@kwdef mutable struct NetCDFError <: Exception
     "Error code from NetCDF library"
     code::Cint
     "Error message from NetCDF library"
-    msg::String
+    msg::String = nc_strerror(code)
 end;
-
-NetCDFError(code::Cint) = NetCDFError(code, nc_strerror(code));
 
 showerror(io::IO, err::NetCDFError) = (
     println(io, "NetCDF error code: $(err.code)");
@@ -21,4 +21,6 @@ showerror(io::IO, err::NetCDFError) = (
 
 
 """ Check the status code from a libnetcdf function call """
-check_status!(code::Cint) = code == Cint(0) ? nothing : throw(NetCDFError(code));
+function check_status!(code::Cint)
+    return code == Cint(0) ? nothing : throw(NetCDFError(code))
+end;

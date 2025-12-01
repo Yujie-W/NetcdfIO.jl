@@ -1,5 +1,3 @@
-
-
 # extensions to Base functions for NCDataset
 close(ds::NCDataset) = (
     try

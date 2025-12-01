@@ -3,6 +3,7 @@ dim(ds::NCDataset, name::Union{AbstractString,Symbol}) = nc_inq_dimlen(ds.ncid, 
 
 dimnames(ds::NCDataset) = String[nc_inq_dimname(ds.ncid, dimid) for dimid in nc_inq_dimids(ds.ncid, false)];
 
+
 # extensions to Base functions for Dimensions
 haskey(dims::Dimensions, name::Union{AbstractString,Symbol}) = name in keys(dims);
 

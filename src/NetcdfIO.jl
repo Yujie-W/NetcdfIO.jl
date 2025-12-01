@@ -17,8 +17,16 @@ const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 
 # libnetcdf functions and constants (local changes made from NCDataset.jl)
 include("libnetcdf/const.jl");
-include("libnetcdf/ccall.jl");
-include("libnetcdf/error.jl");
+include("libnetcdf/type-error.jl");
+include("libnetcdf/type-vlen.jl");
+include("libnetcdf/dataset-attribute.jl");
+include("libnetcdf/dataset-dim.jl");
+include("libnetcdf/dataset-group.jl");
+include("libnetcdf/dataset-io.jl");
+include("libnetcdf/variable-define.jl");
+include("libnetcdf/variable-info.jl");
+include("libnetcdf/variable-read.jl");
+include("libnetcdf/variable-write.jl");
 
 # ncdataset types (local changes made from NCDataset.jl)
 include("ncdataset/type.jl");
@@ -32,6 +40,7 @@ include("cdm-extension/dataset.jl");
 include("cdm-extension/dimension.jl");
 include("cdm-extension/group.jl");
 include("cdm-extension/variable.jl");
+include("cdm-extension/variable-diskarray.jl");
 
 # core NetcdfIO functionalities
 include("netcdfio/general-attributes.jl");
