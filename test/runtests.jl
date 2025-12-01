@@ -1,6 +1,5 @@
 using DataFrames
 using NetcdfIO
-using NetcdfIO.NCDatasets
 using OrderedCollections: OrderedDict
 using Test
 
@@ -32,7 +31,7 @@ using Test
         NetcdfIO.add_nc_dim!("test.nc", "dim4", Inf);
         @test true;
 
-        dset = NCDatasets.Dataset("test.nc", "a");
+        dset = NetcdfIO.Dataset("test.nc", "a");
 
         NetcdfIO.add_nc_dim!(dset, "dim5", 0);
         @test true;
@@ -50,7 +49,7 @@ using Test
 
     @testset "Append" begin
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 5]);
-        dset = NCDatasets.Dataset("test.nc", "a");
+        dset = NetcdfIO.Dataset("test.nc", "a");
 
         NetcdfIO.append_nc!(dset, "str", ["A" for i in 1:18], OrderedDict{String,Any}("longname" => "test strings"), ["lat"]);
         @test true;
@@ -87,7 +86,7 @@ using Test
 
     @testset "Grow" begin
         NetcdfIO.create_nc!("test.nc", String["lon", "lat", "ind"], [36, 18, 0]);
-        dset = NCDatasets.Dataset("test.nc", "a");
+        dset = NetcdfIO.Dataset("test.nc", "a");
         NetcdfIO.append_nc!(dset, "lat", collect(1:18), Dict{String,Any}("longname" => "latitude"), ["lat"]);
         NetcdfIO.append_nc!(dset, "lon", collect(1:36), Dict{String,Any}("longname" => "longitude"), ["lon"]; compress=4);
         NetcdfIO.append_nc!(dset, "ind", collect(1:5), Dict{String,Any}("longname" => "index"), ["ind"]);

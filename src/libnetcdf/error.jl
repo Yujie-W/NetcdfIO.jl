@@ -1,5 +1,5 @@
 """ Get netcdf error string from error code """
-nc_strerror(ncerr::Integer) = unsafe_string(ccall((:nc_strerror,libnetcdf), Cstring, (Cint,), ncerr));
+nc_strerror(ncerr::Integer) = unsafe_string(ccall((:nc_strerror, NetCDF_jll.libnetcdf), Cstring, (Cint,), ncerr));
 
 
 """ Struct for netcdf error """
