@@ -97,15 +97,15 @@ writeblock_netcdf!(var::Variable{T,N}, data::AbstractArray, indexes::StepRange{I
 
 
 # indexing and slicing utilities functions to read and write data
-"""
-
-    normalized_index(sz::NTuple, index)
-
-Normalize the index to a tuple of StepRange, given
-- `sz` the size of the array
-- `index` the index to be normalized
-
-"""
+# """
+#
+#     normalized_index(sz::NTuple, index)
+#
+# Normalize the index to a tuple of StepRange, given
+# - `sz` the size of the array
+# - `index` the index to be normalized
+#
+# """
 function normalized_indexes end;
 
 normalized_indexes(n::Int, ind::Base.OneTo) = 1:1:ind.stop;
@@ -121,16 +121,16 @@ normalized_indexes(n::Int, ind::StepRange) = ind;
 normalized_indexes(sz::NTuple, index) = ntuple(i -> normalized_indexes(sz[i], index[i]), length(sz));
 
 
-"""
-
-    ncsub(indexes::NTuple{N,T}) where {N,T}
-    ncsub(sz::NTuple{N,T}, indexes...) where {N,T}
-
-Return the start, count, stride, and shape of the slice, given
-- `indexes` the indexes of the slice
-- `sz` the size of the array
-
-"""
+# """
+#
+#     ncsub(indexes::NTuple{N,T}) where {N,T}
+#     ncsub(sz::NTuple{N,T}, indexes...) where {N,T}
+#
+# Return the start, count, stride, and shape of the slice, given
+# - `indexes` the indexes of the slice
+# - `sz` the size of the array
+#
+# """
 function ncsub end;
 
 ncsub(indexes::NTuple{N,T}) where {N,T} = (

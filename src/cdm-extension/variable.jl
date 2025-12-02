@@ -16,7 +16,7 @@ variable(dset::NCDataset, varid::Integer) = (
 variable(dset::NCDataset, varname::AbstractString) = variable(dset, nc_inq_varid(dset.ncid, varname));
 
 
-""" Function to map NetCDF types to Julia types """
+# Function to map NetCDF types to Julia types
 function _jltype(ncid::Integer, xtype::Integer)
     return if xtype >= NC_FIRSTUSERTYPEID
         _,_,base_nc_type,_,class = nc_inq_user_type(ncid, xtype);
