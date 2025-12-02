@@ -39,9 +39,4 @@ makedocs(
 
 
 # deploy the docs to Github gh-pages
-deploydocs(
-    repo = "github.com/Yujie-W/NetcdfIO.jl.git",
-    target = "build",
-    devbranch = "main",
-    push_preview = true
-);
+deploydocs(repo = "github.com/Yujie-W/NetcdfIO.jl.git", devbranch = "main");
