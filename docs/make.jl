@@ -4,8 +4,9 @@ using NetcdfIO
 
 # define default docs pages
 pages = Pair{Any,Any}[
-    "Home" => "index.md",
-    "API"  => "API.md"
+    "Home"       => "index.md",
+    "libnetcdf"  => "libnetcdf.md",
+    "ncdatasets" => "ncdatasets.md",
 ];
 
 

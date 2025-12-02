@@ -2,32 +2,57 @@ module NetcdfIO
 
 import NetCDF_jll
 
+import Base: close, convert, haskey, get, getindex, keys, setindex!, showerror, size
+import CommonDataModel: attrib, attribnames, defVar, dim, dimnames, group, groupnames, variable
+import DiskArrays: readblock!, writeblock!
+
+using CommonDataModel: AbstractDataset, AbstractVariable, Attributes, CFVariable, Dimensions, Groups
 using DataFrames: DataFrame
-using DocStringExtensions: METHODLIST
+using DocStringExtensions: METHODLIST, TYPEDEF, TYPEDFIELDS
+using OrderedCollections: OrderedDict
 
 
 # constants
-const ATTR_LAT   = Dict{String,Any}("description" => "Latitude", "unit" => "°");
-const ATTR_LON   = Dict{String,Any}("description" => "Longitude", "unit" => "°");
-const ATTR_CYC   = Dict{String,Any}("description" => "Cycle index", "unit" => "-");
-const ATTR_ABOUT = Dict{String,Any}("about" => "This is a file generated using NetcdfIO.jl");
 const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 
+# libnetcdf functions and constants (local changes made from NCDataset.jl)
+include("libnetcdf/const.jl");
+include("libnetcdf/type-error.jl");
+include("libnetcdf/type-vlen.jl");
+include("libnetcdf/dataset-attribute.jl");
+include("libnetcdf/dataset-dim.jl");
+include("libnetcdf/dataset-group.jl");
+include("libnetcdf/dataset-io.jl");
+include("libnetcdf/variable-define.jl");
+include("libnetcdf/variable-info.jl");
+include("libnetcdf/variable-read.jl");
+include("libnetcdf/variable-write.jl");
 
-# local NCDatasets.jl
-include("ncdatasets/NCDatasets.jl");
+# ncdataset types (local changes made from NCDataset.jl)
+include("ncdataset/type.jl");
+include("ncdataset/mode.jl");
+include("ncdataset/parent-id.jl");
+include("ncdataset/variable.jl");
 
-using .NCDatasets: Dataset, defVar
+# extensions to use the CommonDataModel (local changes made from NCDataset.jl)
+include("cdm-extension/attribute.jl");
+include("cdm-extension/dataset.jl");
+include("cdm-extension/dimension.jl");
+include("cdm-extension/group.jl");
+include("cdm-extension/variable.jl");
+include("cdm-extension/variable-diskarray.jl");
 
-
-# my wrapper functions
-include("append.jl");
-include("create.jl");
-include("grow.jl");
-include("info.jl");
-include("libnetcdf.jl");
-include("read.jl");
-include("save.jl");
+# core NetcdfIO functionalities
+include("netcdfio/general-attributes.jl");
+include("netcdfio/general-switch-libnetcdf.jl");
+include("netcdfio/read-attributes.jl");
+include("netcdfio/read-info.jl");
+include("netcdfio/read-recursive.jl");
+include("netcdfio/read-var.jl");
+include("netcdfio/write-append.jl");
+include("netcdfio/write-create.jl");
+include("netcdfio/write-grow.jl");
+include("netcdfio/write-save.jl");
 
 
 end # module
