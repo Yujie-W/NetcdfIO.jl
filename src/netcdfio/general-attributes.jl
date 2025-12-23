@@ -13,7 +13,9 @@ Return an ordered dictionary of variable attributes, given
 - `showwarning` If true, show a warning when the variable name is not recognized, default is true
 
 """
-function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = nothing; showwarning::Bool = true)
+function detect_attribute end;
+
+detect_attribute(varname::String, wavelength::Union{Int,Nothing} = nothing; showwarning::Bool = true) = (
     #
     #
     # with exact match for dimension-related names
@@ -203,4 +205,6 @@ function detect_attribute(varname::String, wavelength::Union{Int,Nothing} = noth
     return OrderedDict{String,Any}(
         "input_varname" => varname
     )
-end;
+);
+
+detect_attribute(varname::Symbol, wavelength::Union{Int,Nothing} = nothing; args...) = detect_attribute(String(varname), wavelength; args...);

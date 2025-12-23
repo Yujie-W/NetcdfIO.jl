@@ -1,7 +1,7 @@
 """
 
     save_nc!(file::String,
-             var_name::String,
+             var_name::UnionNameTypes,
              var_data::Array{T,N},
              var_attribute::Union{Dict{String,Any}, OrderedDict{String,Any}};
              var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"],
@@ -25,8 +25,8 @@ Note that this is a wrapper function of create_nc and append_nc:
 #
     save_nc!(file::String,
              df::DataFrame,
-             var_names::Vector{String},
-             var_attributes::Union{Vector{Dict{String,Any}},Vector{OrderedDict{String,Any}}};
+             var_names::Vector{<:UnionNameTypes},
+             var_attributes::UnionAttrVecTypes;
              compress::Int = 4,
              growable::Bool = false)
     save_nc!(file::String, df::DataFrame; compress::Int = 4, growable::Bool = false)
@@ -43,7 +43,7 @@ Save DataFrame to NetCDF, given
 function save_nc! end
 
 save_nc!(file::String,
-         var_name::String,
+         var_name::UnionNameTypes,
          var_data::Array{T,N},
          var_attribute::Union{Dict{String,Any}, OrderedDict{String,Any}};
          var_dims::Vector{String} = N == 2 ? ["lon", "lat"] : ["lon", "lat", "ind"],
@@ -65,12 +65,12 @@ save_nc!(file::String,
     end;
 
     # the case if the dimension is 1D
-    if N==1
+    if N == 1
         n_ind = (growable ? Inf : length(var_data));
         inds  = collect(eachindex(var_data));
         add_nc_dim!(dset, "ind", n_ind);
-        append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress=compress);
-        append_nc!(dset, var_name, var_data, var_attribute, ["ind"]; compress=compress);
+        append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress = compress);
+        append_nc!(dset, var_name, var_data, var_attribute, ["ind"]; compress = compress);
         close(dset);
 
         return nothing
@@ -88,18 +88,18 @@ save_nc!(file::String,
     lats    = collect(Float32, res_lat/2:res_lat:180) .- 90;
     add_nc_dim!(dset, "lon", n_lon);
     add_nc_dim!(dset, "lat", n_lat);
-    append_nc!(dset, "lon", lons, detect_attribute("lon"), ["lon"]; compress=compress);
-    append_nc!(dset, "lat", lats, detect_attribute("lat"), ["lat"]; compress=compress);
+    append_nc!(dset, "lon", lons, detect_attribute("lon"), ["lon"]; compress = compress);
+    append_nc!(dset, "lat", lats, detect_attribute("lat"), ["lat"]; compress = compress);
 
-    if N==2
-        append_nc!(dset, var_name, var_data, var_attribute, var_dims; compress=compress);
-    elseif N==3
+    if N == 2
+        append_nc!(dset, var_name, var_data, var_attribute, var_dims; compress = compress);
+    elseif N == 3
         ind = findfirst(isequal("ind"), var_dims);
         n_ind = (growable ? Inf : size(var_data, ind));
         inds  = collect(1:n_ind);
         add_nc_dim!(dset, "ind", n_ind);
-        append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress=compress);
-        append_nc!(dset, var_name, var_data, var_attribute, var_dims; compress=compress);
+        append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress = compress);
+        append_nc!(dset, var_name, var_data, var_attribute, var_dims; compress = compress);
     end;
 
     close(dset);
@@ -108,13 +108,12 @@ save_nc!(file::String,
 );
 
 save_nc!(file::String,
-         df::DataFrame,
-         var_names::Vector{String},
-         var_attributes::Union{Vector{Dict{String,Any}},Vector{OrderedDict{String,Any}}};
+         nt::NamedTuple,
+         var_attributes::UnionAttrVecTypes;
          compress::Int = 4,
          growable::Bool = false) = (
     @assert 0 <= compress <= 9 "Compression rate must be within 0 to 9";
-    @assert length(var_names) == length(var_attributes) "Variable name and attributes lengths must match!";
+    @assert length(nt) == length(var_attributes) "Variable name and attributes lengths must match!";
 
     # create the file
     dset = Dataset(file, "c");
@@ -125,14 +124,17 @@ save_nc!(file::String,
     end;
 
     # define dimension related variables
-    n_ind = (growable ? Inf : size(df)[1]);
-    inds  = collect(1:size(df)[1]);
+    n_ind = (growable ? Inf : length(nt[1]));
+    inds  = collect(eachindex(nt[1]));
 
     # save the variables
     add_nc_dim!(dset, "ind", n_ind);
-    append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress=compress);
-    for i in eachindex(var_names)
-        append_nc!(dset, var_names[i], df[:, var_names[i]], var_attributes[i], ["ind"]; compress = compress);
+    append_nc!(dset, "ind", inds, detect_attribute("ind"), ["ind"]; compress = compress);
+    for i in 1:length(nt)
+        var_name = keys(nt)[i];
+        var_data = nt[var_name];
+        var_attribute = var_attributes[i];
+        append_nc!(dset, var_name, var_data, var_attribute, ["ind"]; compress = compress);
     end;
 
     close(dset);
@@ -140,11 +142,17 @@ save_nc!(file::String,
     return nothing
 );
 
-save_nc!(file::String, df::DataFrame; compress::Int = 4, growable::Bool = false) = (
-    var_names = names(df);
-    var_attrs = [detect_attribute(vn; showwarning = false) for vn in var_names];
+save_nc!(file::String, nt::NamedTuple; args...) = save_nc!(file, nt, [detect_attribute(vn; showwarning = false) for vn in keys(nt)]; args...);
 
-    save_nc!(file, df, var_names, var_attrs; compress=compress, growable = growable);
+save_nc!(file::String, df::DataFrame; args...) = (
+    nt = NamedTuple{Tuple(Symbol.(names(df)))}(Tuple([df[:,k] for k in names(df)]));
+    var_attributes = [detect_attribute(vn; showwarning = false) for vn in names(df)];
 
-    return nothing
+    return save_nc!(file, nt, var_attributes; args...)
+);
+
+save_nc!(file::String, df::DataFrame, var_names::Vector{<:UnionNameTypes}, var_attributes::UnionAttrVecTypes; args...) = (
+    nt = NamedTuple{Tuple(Symbol.(var_names))}(Tuple([df[:,k] for k in var_names]));
+
+    return save_nc!(file, nt, var_attributes; args...)
 );

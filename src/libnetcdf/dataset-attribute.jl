@@ -1,6 +1,6 @@
 # julia implementation of libnetcdf functions
 """ Read attribute data from a netCDF dataset """
-function nc_get_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol})
+function nc_get_att(ncid::Integer, varid::Integer, name::UnionNameTypes)
     xtype,len = nc_inq_att(ncid, varid, name);
 
     if xtype == NC_CHAR
@@ -33,7 +33,7 @@ end;
 
 
 """ Inquire attribute information from a netCDF dataset """
-function nc_inq_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol})
+function nc_inq_att(ncid::Integer, varid::Integer, name::UnionNameTypes)
     xtypep = Ref(NC_TYPE(0));
     lenp = Ref(Csize_t(0));
     ccall_act = ccall((:nc_inq_att,NetCDF_jll.libnetcdf), Cint, (Cint,Cint,Cstring,Ptr{NC_TYPE},Ptr{Csize_t}), ncid, varid, name, xtypep, lenp);
@@ -58,7 +58,7 @@ end;
 function nc_put_att end;
 
 # Single string, char, number
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::AbstractString) = (
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::AbstractString) = (
     return if name == "_FillValue"
         nc_put_att_string(ncid, varid, "_FillValue", [data])
     else
@@ -67,46 +67,46 @@ nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, da
     end;
 );
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Vector{Char}) = nc_put_att(ncid, varid, name, join(data));
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Vector{Char}) = nc_put_att(ncid, varid, name, join(data));
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Char) = (
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Char) = (
     ccall_act = ccall((:nc_put_att,NetCDF_jll.libnetcdf), Cint, (Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}), ncid, varid, name, NC_TYPES[typeof(data)], 1, [UInt8(data)]);
 
     return check_status!(ccall_act)
 );
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Number) = (
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Number) = (
     ccall_act = ccall((:nc_put_att,NetCDF_jll.libnetcdf), Cint, (Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}), ncid, varid, name, NC_TYPES[typeof(data)], 1, [data]);
 
     return check_status!(ccall_act)
 );
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Int64) = nc_put_att(ncid, varid, name, Int32(data));
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Int64) = nc_put_att(ncid, varid, name, Int32(data));
 
 # Vector of strings
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, typeid::Integer, data::Vector) = (
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, typeid::Integer, data::Vector) = (
     ccall_act = ccall((:nc_put_att,NetCDF_jll.libnetcdf), Cint, (Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}), ncid, varid, name, typeid, length(data), data);
 
     return check_status!(ccall_act)
 );
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Vector{<:AbstractString}) = (
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Vector{<:AbstractString}) = (
     ccall_act = ccall((:nc_put_att,NetCDF_jll.libnetcdf), Cint, (Cint,Cint,Cstring,NC_TYPE,Csize_t,Ptr{Nothing}), ncid, varid, name, NC_TYPES[eltype(data)], length(data), pointer.(data));
 
     return check_status!(ccall_act)
 );
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Vector{T}) where {T} = nc_put_att(ncid, varid, name, NC_TYPES[T], data);
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Vector{T}) where {T} = nc_put_att(ncid, varid, name, NC_TYPES[T], data);
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Vector{Int64}) = nc_put_att(ncid, varid, name, Int32.(data))
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Vector{Int64}) = nc_put_att(ncid, varid, name, Int32.(data))
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::AbstractVector) = nc_put_att(ncid, varid, name, Vector(data));
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data::AbstractVector) = nc_put_att(ncid, varid, name, Vector(data));
 
-nc_put_att(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data) = error("attributes can only be scalars or vectors");
+nc_put_att(ncid::Integer, varid::Integer, name::UnionNameTypes, data) = error("attributes can only be scalars or vectors");
 
 
 """ Write string attribute data to a netCDF dataset (calling nc_put_att_string) """
-function nc_put_att_string(ncid::Integer, varid::Integer, name::Union{AbstractString,Symbol}, data::Vector{String})
+function nc_put_att_string(ncid::Integer, varid::Integer, name::UnionNameTypes, data::Vector{String})
     len = length(data);
     op = pointer(pointer.(data));
     ccall_act = ccall((:nc_put_att_string,NetCDF_jll.libnetcdf), Cint, (Cint,Cint,Cstring,Cint,Ptr{Cstring}), ncid, varid, name, len, op);

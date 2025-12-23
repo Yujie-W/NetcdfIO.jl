@@ -28,10 +28,6 @@ Pkg.add("NetcdfIO");
 ```
 
 
-## API
-See [`API`][ju-api] for more detailed information about how to use [`NetcdfIO.jl`][ju-url].
-
-
 ## Test local coverage
 ```
 using Pkg

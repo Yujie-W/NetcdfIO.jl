@@ -1,6 +1,6 @@
 # julia implementation of libnetcdf functions
 """ Inquire the group ncid of a netcdf dataset (nc_inq_grp_ncid) """
-function nc_inq_grp_ncid(ncid::Integer, grp_name::Union{AbstractString,Symbol})
+function nc_inq_grp_ncid(ncid::Integer, grp_name::UnionNameTypes)
     grp_ncid = Ref(Cint(0));
     ccall_act = ccall((:nc_inq_grp_ncid,NetCDF_jll.libnetcdf), Cint, (Cint,Cstring,Ptr{Cint}), ncid, grp_name, grp_ncid);
     check_status!(ccall_act);

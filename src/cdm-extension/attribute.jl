@@ -1,5 +1,5 @@
 # extensions to CommonDataModel for Attributes
-attrib(ds::Union{NCDataset,Variable}, name::Union{AbstractString,Symbol}) = nc_get_att(parent_ncid(ds), parent_varid(ds), name);
+attrib(ds::Union{NCDataset,Variable}, name::UnionNameTypes) = nc_get_att(parent_ncid(ds), parent_varid(ds), name);
 
 attribnames(ds::Union{NCDataset,Variable}) = (
     natts = nc_inq_varnatts(parent_ncid(ds), parent_varid(ds));
@@ -14,13 +14,13 @@ attribnames(ds::Union{NCDataset,Variable}) = (
 
 
 # extensions to Base functions for Attributes
-get(attrs::Attributes, name::Union{AbstractString,Symbol}, default) = haskey(attrs, name) ? attrs[name] : default;
+get(attrs::Attributes, name::UnionNameTypes, default) = haskey(attrs, name) ? attrs[name] : default;
 
-getindex(attrs::Attributes, name::Union{AbstractString,Symbol}) = nc_get_att(parent_ncid(attrs), parent_varid(attrs), name);
+getindex(attrs::Attributes, name::UnionNameTypes) = nc_get_att(parent_ncid(attrs), parent_varid(attrs), name);
 
-haskey(attrs::Attributes, name::Union{AbstractString,Symbol}) = name in keys(attrs);
+haskey(attrs::Attributes, name::UnionNameTypes) = name in keys(attrs);
 
-setindex!(attrs::Attributes, data, name::Union{AbstractString,Symbol}) = (
+setindex!(attrs::Attributes, data, name::UnionNameTypes) = (
     # make sure that the file is in define mode
     def_mode!(parent_dataset(attrs));
     nc_put_att(parent_ncid(attrs), parent_varid(attrs), name, data);

@@ -46,7 +46,7 @@ end;
 
 
 """ Inquire the variable ID of a netcdf dataset (nc_inq_varid) """
-function nc_inq_varid(ncid::Integer, name::Union{AbstractString,Symbol})
+function nc_inq_varid(ncid::Integer, name::UnionNameTypes)
     varidp = Ref(Cint(0));
     ccall_act = ccall((:nc_inq_varid,NetCDF_jll.libnetcdf), Cint, (Cint,Cstring,Ptr{Cint}), ncid, name, varidp);
 

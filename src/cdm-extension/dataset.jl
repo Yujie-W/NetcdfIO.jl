@@ -18,6 +18,6 @@ close(ds::NCDataset) = (
     return nothing
 );
 
-haskey(dset::NCDataset, name::Union{AbstractString,Symbol}) = name in keys(dset);
+haskey(dset::NCDataset, name::UnionNameTypes) = name in keys(dset);
 
 keys(dset::NCDataset) = String[nc_inq_varname(dset.ncid, varid) for varid in nc_inq_varids(dset.ncid)];

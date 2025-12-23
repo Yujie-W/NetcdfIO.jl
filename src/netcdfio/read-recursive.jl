@@ -1,13 +1,13 @@
 """
 
-    find_variable(ds::Dataset, var_name::String)
+    find_variable(ds::Dataset, var_name::UnionNameTypes)
 
 Return the path to dataset if it exists, given
 - `ds` NCDatasets.Dataset type dataset
 - `var_name` Variable to read
 
 """
-function find_variable(ds::Dataset, var_name::String)
+function find_variable(ds::Dataset, var_name::UnionNameTypes)
     # if var_name is in the current dataset, return it
     if var_name in keys(ds)
         return ds[var_name]

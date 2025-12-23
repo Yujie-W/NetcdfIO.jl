@@ -1,7 +1,7 @@
 """
 
-    grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)
-    grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)
+    grow_nc!(ds::Dataset, var_name::UnionNameTypes, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)
+    grow_nc!(file::String, var_name::UnionNameTypes, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool)
 
 Grow the netcdf dataset, given
 - `ds` A `NCDatasets.Dataset` type dataset
@@ -15,7 +15,7 @@ Note that if there are more variables to grow at the same time, set `pending` to
 """
 function grow_nc! end
 
-grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
+grow_nc!(ds::Dataset, var_name::UnionNameTypes, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
     # make sure the data to grow has -1 or the same dimensions as the target, e.g., a 3D dataset can grow with 2D or 3D input
     dim_ds = length(size(ds[var_name]));
     dim_in = length(size(in_data));
@@ -48,7 +48,7 @@ grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Integ
     return nothing
 );
 
-grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
+grow_nc!(file::String, var_name::UnionNameTypes, in_data::Union{AbstractFloat,Array,Integer,String}, pending::Bool) = (
     dset = Dataset(file, "a");
     grow_nc!(dset, var_name, in_data, pending);
     close(dset);
@@ -57,7 +57,7 @@ grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Inte
 );
 
 grow_nc!(ds::Dataset, df::DataFrame) = (
-    dim_ind = size_nc(ds, "ind");
+    dim_ind = read_dims(ds, "ind");
     grow_nc!(ds, "ind", collect(axes(df,1) .+ dim_ind[2][1]), true);
 
     for var in names(df)

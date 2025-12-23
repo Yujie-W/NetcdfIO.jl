@@ -2,8 +2,8 @@
 
     read_attributes(ds::Dataset) -> Dict{String, Any}
     read_attributes(file::String) -> Dict{String, Any}
-    read_attributes(ds::Dataset, var_name::String) -> Dict{String, Any}
-    read_attributes(file::String, var_name::String) -> Dict{String, Any}
+    read_attributes(ds::Dataset, var_name::UnionNameTypes) -> Dict{String, Any}
+    read_attributes(file::String, var_name::UnionNameTypes) -> Dict{String, Any}
 
 Return all the attributes of a NetCDF dataset or variable, given
 - `ds` NCDatasets.Dataset type dataset
@@ -23,7 +23,7 @@ read_attributes(file::String) = (
     return attrs
 );
 
-read_attributes(ds::Dataset, var_name::String) = (
+read_attributes(ds::Dataset, var_name::UnionNameTypes) = (
     fvar = find_variable(ds, var_name);
     if isnothing(fvar)
         @error "$(var_name) does not exist!";
@@ -32,7 +32,7 @@ read_attributes(ds::Dataset, var_name::String) = (
     return Dict{String, Any}(k => v for (k, v) in fvar.attrib)
 );
 
-read_attributes(file::String, var_name::String) = (
+read_attributes(file::String, var_name::UnionNameTypes) = (
     dset = Dataset(file, "r");
     attrs = read_attributes(dset, var_name);
     close(dset);

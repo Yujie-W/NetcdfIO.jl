@@ -1,6 +1,6 @@
 # julia implementation of libnetcdf functions
 """ Define the dimension with a netcdf dataset """
-function nc_def_dim(ncid::Integer, name::Union{AbstractString,Symbol}, len::Integer)
+function nc_def_dim(ncid::Integer, name::UnionNameTypes, len::Integer)
     idp = Ref(Cint(0));
     ccall_act = ccall((:nc_def_dim,NetCDF_jll.libnetcdf), Cint, (Cint,Cstring,Cint,Ptr{Cint}), ncid, name, len, idp);
     check_status!(ccall_act);
@@ -10,7 +10,7 @@ end
 
 
 """ Inquire the dimension ID of a netcdf dataset (nc_inq_dimid) """
-function nc_inq_dimid(ncid::Integer, name::Union{AbstractString,Symbol})
+function nc_inq_dimid(ncid::Integer, name::UnionNameTypes)
     dimidp = Ref(Cint(0));
     ccall_act = ccall((:nc_inq_dimid,NetCDF_jll.libnetcdf), Cint, (Cint,Cstring,Ptr{Cint}), ncid, name, dimidp);
     check_status!(ccall_act);
