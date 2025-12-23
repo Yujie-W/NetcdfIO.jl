@@ -5,13 +5,13 @@
                var_data::Array{T,N},
                var_attributes::UnionAttrTypes,
                dim_names::Vector{String};
-               compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}
+               deflatelevel::Union{Int,Nothing} = 4) where {T<:Union{AbstractFloat,Integer,String},N}
     append_nc!(file::String,
                var_name::UnionNameTypes,
                var_data::Array{T,N},
                var_attributes::UnionAttrTypes,
                dim_names::Vector{String};
-               compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N}
+               args...) where {T<:Union{AbstractFloat,Integer,String},N}
 
 Append data to existing netcdf dataset, given
 - `ds` A `NCDatasets.Dataset` type dataset
@@ -19,7 +19,7 @@ Append data to existing netcdf dataset, given
 - `var_data` New variable data to write, can be integer, float, and string with N dimens
 - `var_attributes` New variable attributes
 - `dim_names` Dimension names in the netcdf file
-- `compress` Compression level fro NetCDF, default is 4
+- `deflatelevel` Compression level fro NetCDF, default is 4
 - `file` Path of the netcdf dataset
 
 """
@@ -30,18 +30,18 @@ append_nc!(ds::Dataset,
            var_data::Array{T,N},
            var_attributes::UnionAttrTypes,
            dim_names::Vector{String};
-           compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
+           deflatelevel::Union{Int,Nothing} = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
     # only if variable does not exist create the variable
     @assert !(var_name in keys(ds)) "You can only add new variable to the dataset!";
     @assert length(dim_names) ==  N "Dimension must match!";
-    @assert 0 <= compress <= 9 "Compression rate must be within 0 to 9";
+    @assert isnothing(deflatelevel) || (0 <= deflatelevel <= 9) "Compression rate must be within 0 to 9";
 
     # if type of variable is string, set deflatelevel to 0
     if T == String
-        compress = 0;
+        deflatelevel = nothing;
     end;
 
-    ds_var = defVar(ds, var_name, T, var_attributes, dim_names; deflatelevel = compress);
+    ds_var = defVar(ds, var_name, T, var_attributes, dim_names; deflatelevel = deflatelevel);
     ds_var[axes(var_data)...] = var_data;
 
     return nothing
@@ -52,10 +52,10 @@ append_nc!(file::String,
            var_data::Array{T,N},
            var_attributes::UnionAttrTypes,
            dim_names::Vector{String};
-           compress::Int = 4) where {T<:Union{AbstractFloat,Integer,String},N} = (
-    dset = Dataset(file, "a");
-    append_nc!(dset, var_name, var_data, var_attributes, dim_names; compress = compress);
-    close(dset);
+           args...) where {T<:Union{AbstractFloat,Integer,String},N} = (
+    ds = Dataset(file, "a");
+    append_nc!(ds, var_name, var_data, var_attributes, dim_names; args...);
+    close(ds);
 
     return nothing
 );

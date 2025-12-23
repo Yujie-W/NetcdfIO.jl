@@ -16,9 +16,9 @@ function read_attributes end
 read_attributes(ds::Dataset) = return Dict{String, Any}(k => v for (k, v) in ds.attrib);
 
 read_attributes(file::String) = (
-    dset = Dataset(file, "r");
-    attrs = read_attributes(dset);
-    close(dset);
+    ds = Dataset(file, "r");
+    attrs = read_attributes(ds);
+    close(ds);
 
     return attrs
 );
@@ -33,9 +33,9 @@ read_attributes(ds::Dataset, var_name::UnionNameTypes) = (
 );
 
 read_attributes(file::String, var_name::UnionNameTypes) = (
-    dset = Dataset(file, "r");
-    attrs = read_attributes(dset, var_name);
-    close(dset);
+    ds = Dataset(file, "r");
+    attrs = read_attributes(ds, var_name);
+    close(ds);
 
     return attrs
 );

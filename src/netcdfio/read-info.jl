@@ -7,9 +7,9 @@ Return all the names of the dimensions, given
 
 """
 function read_dimnames(file::String)
-    dset = Dataset(file, "r");
-    dims = keys(dset.dim);
-    close(dset);
+    ds = Dataset(file, "r");
+    dims = keys(ds.dim);
+    close(ds);
 
     return dims
 end
@@ -41,9 +41,9 @@ read_varnames(ds::Dataset) = (
 );
 
 read_varnames(file::String) = (
-    dset = Dataset(file, "r");
-    vars = read_varnames(dset);
-    close(dset);
+    ds = Dataset(file, "r");
+    vars = read_varnames(ds);
+    close(ds);
 
     return vars
 );
@@ -73,9 +73,9 @@ read_dims(ds::Dataset, var_name::UnionNameTypes) = (
 );
 
 read_dims(file::String, var_name::UnionNameTypes) = (
-    dset = Dataset(file, "r");
-    (ndim, sizes) = read_dims(dset, var_name);
-    close(dset);
+    ds = Dataset(file, "r");
+    (ndim, sizes) = read_dims(ds, var_name);
+    close(ds);
 
     return ndim, sizes
 );

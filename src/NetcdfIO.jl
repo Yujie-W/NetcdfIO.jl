@@ -16,9 +16,9 @@ using OrderedCollections: OrderedDict
 const LIBNETCDF = deepcopy(NetCDF_jll.libnetcdf);
 
 # union types
-const UnionAttrTypes = Union{Dict{String,Any},OrderedDict{String,Any}};
-const UnionAttrVecTypes = Union{Vector{Dict{String,Any}},Vector{OrderedDict{String,Any}}};
-const UnionNameTypes = Union{AbstractString,Symbol};
+const UnionAttrTypes = Union{Dict{String,Any}, OrderedDict{String,Any}};
+const UnionAttrVecTypes = Union{Vector{Dict{String,Any}}, Vector{OrderedDict{String,Any}}};
+const UnionNameTypes = Union{AbstractString, Symbol};
 
 # libnetcdf functions and constants (local changes made from NCDataset.jl)
 include("libnetcdf/const.jl");

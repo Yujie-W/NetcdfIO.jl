@@ -48,7 +48,7 @@ Read the data at a grid, given
 - `T` Number type
 
 #
-    read_nc(file::String, selections::Vector{String} = read_varnames(file); transform::Bool = true)
+    read_nc(file::String, selections::Vector{<:UnionNameTypes} = read_varnames(file); transform::Bool = true)
 
 Read the selected variables from a netcdf file as a DataFrame, given
 - `file` Path of the netcdf dataset
@@ -88,9 +88,9 @@ read_nc(ds::Dataset, var_name::UnionNameTypes; transform::Bool = true) = (
 );
 
 read_nc(file::String, var_name::UnionNameTypes; transform::Bool = true) = (
-    dset = Dataset(file, "r");
-    dvar = read_nc(dset, var_name; transform = transform);
-    close(dset);
+    ds = Dataset(file, "r");
+    dvar = read_nc(ds, var_name; transform = transform);
+    close(ds);
 
     return dvar
 );
@@ -119,9 +119,9 @@ read_nc(ds::Dataset, var_name::UnionNameTypes, indz::Int; transform::Bool = true
 );
 
 read_nc(file::String, var_name::UnionNameTypes, indz::Int; transform::Bool = true) = (
-    dset = Dataset(file, "r");
-    dvar = read_nc(dset, var_name, indz; transform = transform);
-    close(dset);
+    ds = Dataset(file, "r");
+    dvar = read_nc(ds, var_name, indz; transform = transform);
+    close(ds);
 
     return dvar
 );
@@ -149,9 +149,9 @@ read_nc(ds::Dataset, var_name::UnionNameTypes, indx::Int, indy::Int; transform::
 );
 
 read_nc(file::String, var_name::UnionNameTypes, indx::Int, indy::Int; transform::Bool = true) = (
-    dset = Dataset(file, "r");
-    dvar = read_nc(dset, var_name, indx, indy; transform = transform);
-    close(dset);
+    ds = Dataset(file, "r");
+    dvar = read_nc(ds, var_name, indx, indy; transform = transform);
+    close(ds);
 
     return dvar
 );
@@ -174,9 +174,9 @@ read_nc(ds::Dataset, var_name::UnionNameTypes, indx::Int, indy::Int, indz::Int; 
 );
 
 read_nc(file::String, var_name::UnionNameTypes, indx::Int, indy::Int, indz::Int; transform::Bool = true) = (
-    dset = Dataset(file, "r");
-    dvar = read_nc(dset, var_name, indx, indy, indz; transform = transform);
-    close(dset);
+    ds = Dataset(file, "r");
+    dvar = read_nc(ds, var_name, indx, indy, indz; transform = transform);
+    close(ds);
 
     return dvar
 );
@@ -187,27 +187,27 @@ read_nc(T, file::String, var_name::UnionNameTypes, indx::Int, indy::Int, indz::I
 
 read_nc(file::String, selections::Vector{<:UnionNameTypes} = read_varnames(file); transform::Bool = true) = (
     # open the dataset and get the dimensions
-    dset = Dataset(file, "r");
-    dims = [read_dims(dset, var)[1] for var in selections];
-    lens = [read_dims(dset, var)[2][1] for var in selections];
+    ds = Dataset(file, "r");
+    dims = [read_dims(ds, var)[1] for var in selections];
+    lens = [read_dims(ds, var)[2][1] for var in selections];
     @assert all(dims .== 1) "All variables need to be 1D!";
     @assert all(lens .== lens[1]) "Dimensions of the variables need to be the same!";
     # read the data and close the dataset
-    df = DataFrame( [Pair(var, read_nc(dset, var; transform = transform)) for var in selections] );
-    close(dset);
+    df = DataFrame( [Pair(var, read_nc(ds, var; transform = transform)) for var in selections] );
+    close(ds);
 
     return df
 );
 
 read_nc(file::String, var_name::UnionNameTypes, dim_array::Vector; transform::Bool = true) = (
-    dset = Dataset(file, "r");
-    fvar = find_variable(dset, var_name);
+    ds = Dataset(file, "r");
+    fvar = find_variable(ds, var_name);
     if transform
         dvar = fvar[dim_array...];
     else
         dvar = fvar.var[dim_array...];
     end;
-    close(dset);
+    close(ds);
 
     if sum(ismissing.(dvar)) == 0
         return dvar
