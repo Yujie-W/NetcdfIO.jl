@@ -1,6 +1,6 @@
 # julia implementation of libnetcdf functions
 """ Define a variable in a netcdf dataset """
-function nc_def_var(ncid::Integer, name::Union{AbstractString,Symbol}, xtype::Integer, dimids::Vector{Cint})
+function nc_def_var(ncid::Integer, name::UnionNameTypes, xtype::Integer, dimids::Vector{Cint})
     varidp = Ref(Cint(0));
     ccall_act = ccall((:nc_def_var,NetCDF_jll.libnetcdf), Cint, (Cint,Cstring,NC_TYPE,Cint,Ptr{Cint},Ptr{Cint}), ncid, name, xtype, length(dimids), dimids, varidp);
     check_status!(ccall_act);

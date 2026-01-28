@@ -18,30 +18,30 @@ function create_nc! end
 
 create_nc!(file::String) = (
     # create a dataset using "c" mode
-    dset = Dataset(file, "c");
+    ds = Dataset(file, "c");
 
     # global title attribute
     for (attr,note) in ATTR_ABOUT
-        dset.attrib[attr] = note;
+        ds.attrib[attr] = note;
     end;
 
-    close(dset);
+    close(ds);
 
     return nothing
 );
 
 create_nc!(file::String, dim_names::Vector{String}, dim_sizes::Vector) = (
     # create a dataset using "c" mode
-    dset = Dataset(file, "c");
+    ds = Dataset(file, "c");
 
     # global title attribute
     for (attr,note) in ATTR_ABOUT
-        dset.attrib[attr] = note;
+        ds.attrib[attr] = note;
     end;
 
-    add_nc_dim!.([dset], dim_names, dim_sizes);
+    add_nc_dim!.([ds], dim_names, dim_sizes);
 
-    close(dset);
+    close(ds);
 
     return nothing
 );
@@ -83,9 +83,9 @@ add_nc_dim!(ds::Dataset, dim_name::String, dim_size::AbstractFloat) = (
 );
 
 add_nc_dim!(file::String, dim_name::String, dim_size::Union{AbstractFloat,Int}) = (
-    dset = Dataset(file, "a");
-    add_nc_dim!(dset, dim_name, dim_size);
-    close(dset);
+    ds = Dataset(file, "a");
+    add_nc_dim!(ds, dim_name, dim_size);
+    close(ds);
 
     return nothing
 );

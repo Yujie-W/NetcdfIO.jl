@@ -19,7 +19,7 @@ convert(::Type{Array{VariableLength{T},N}}, data::Array{Vector{T},N}) where {T,N
 
 # julia implementation of libnetcdf functions
 """ Define a variable-length type in a netcdf dataset (nc_def_vlen) """
-function nc_def_vlen(ncid::Integer, name::Union{AbstractString,Symbol}, base_typeid::Integer)
+function nc_def_vlen(ncid::Integer, name::UnionNameTypes, base_typeid::Integer)
     xtypep = Ref(NC_TYPE(0));
     ccall_act = ccall((:nc_def_vlen,NetCDF_jll.libnetcdf), Cint, (Cint,Cstring,NC_TYPE,Ptr{NC_TYPE}), ncid, name, base_typeid, xtypep);
     check_status!(ccall_act);

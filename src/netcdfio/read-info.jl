@@ -1,15 +1,15 @@
 """
 
-    dimname_nc(file::String)
+    read_dimnames(file::String)
 
 Return all the names of the dimensions, given
 - `file` Path of the netcdf dataset
 
 """
-function dimname_nc(file::String)
-    dset = Dataset(file, "r");
-    dims = keys(dset.dim);
-    close(dset);
+function read_dimnames(file::String)
+    ds = Dataset(file, "r");
+    dims = keys(ds.dim);
+    close(ds);
 
     return dims
 end
@@ -17,34 +17,33 @@ end
 
 """
 
-    varname_nc(ds::Dataset)
-    varname_nc(file::String)
+    read_varnames(ds::Dataset)
+    read_varnames(file::String)
 
 Return all the names of the variables (excluding the dimensions), given
 - `ds` NCDatasets.Dataset type dataset
 - `file` Path of the netcdf dataset
 
 """
-function varname_nc end
+function read_varnames end
 
-
-varname_nc(ds::Dataset) = (
+read_varnames(ds::Dataset) = (
     # read the variables from dataset directly
     vars = [keys(ds)...];
 
     # loop through the groups
     for grp in keys(ds.group)
-        grp_vars = varname_nc(ds.group[grp]);
+        grp_vars = read_varnames(ds.group[grp]);
         vars = [vars...; grp_vars...];
     end;
 
     return vars
 );
 
-varname_nc(file::String) = (
-    dset = Dataset(file, "r");
-    vars = varname_nc(dset);
-    close(dset);
+read_varnames(file::String) = (
+    ds = Dataset(file, "r");
+    vars = read_varnames(ds);
+    close(ds);
 
     return vars
 );
@@ -52,16 +51,16 @@ varname_nc(file::String) = (
 
 """
 
-    size_nc(file::String, var_name::String)
+    read_dims(file::String, var_name::UnionNameTypes)
 
 Return the dimensions and size of a NetCDF dataset, given
 - `file` Path of the netcdf dataset
 - `var_name` Variable name
 
 """
-function size_nc end
+function read_dims end
 
-size_nc(ds::Dataset, var_name::String) = (
+read_dims(ds::Dataset, var_name::UnionNameTypes) = (
     fvar = find_variable(ds, var_name);
     if isnothing(fvar)
         return error("$(var_name) does not exist in the given dataset!");
@@ -73,10 +72,10 @@ size_nc(ds::Dataset, var_name::String) = (
     return ndim, sizes
 );
 
-size_nc(file::String, var_name::String) = (
-    dset = Dataset(file, "r");
-    (ndim, sizes) = size_nc(dset, var_name);
-    close(dset);
+read_dims(file::String, var_name::UnionNameTypes) = (
+    ds = Dataset(file, "r");
+    (ndim, sizes) = read_dims(ds, var_name);
+    close(ds);
 
     return ndim, sizes
 );

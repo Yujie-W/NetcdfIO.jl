@@ -3,17 +3,17 @@ size(var::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(parent_ncid(var
 
 
 # extensions to CommonDataModel for Variables
-variable(dset::NCDataset, varid::Integer) = (
-    dimids = nc_inq_vardimid(dset.ncid, varid);
-    T = _jltype(dset.ncid, nc_inq_vartype(dset.ncid, varid));
+variable(ds::NCDataset, varid::Integer) = (
+    dimids = nc_inq_vardimid(ds.ncid, varid);
+    T = _jltype(ds.ncid, nc_inq_vartype(ds.ncid, varid));
     N = length(dimids);
-    TDS = typeof(dset);
+    TDS = typeof(ds);
 
     # reverse dimids to have the dimension order in Fortran style
-    return Variable{T,N,TDS}(dset, varid, (reverse(dimids)...,))
+    return Variable{T,N,TDS}(ds, varid, (reverse(dimids)...,))
 );
 
-variable(dset::NCDataset, varname::AbstractString) = variable(dset, nc_inq_varid(dset.ncid, varname));
+variable(ds::NCDataset, var_name::UnionNameTypes) = variable(ds, nc_inq_varid(ds.ncid, var_name));
 
 
 # Function to map NetCDF types to Julia types

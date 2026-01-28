@@ -13,9 +13,9 @@ julia> Pkg.add("NetcdfIO");
 
 ## Read the general information
 ```@docs
-dimname_nc
-varname_nc
-size_nc
+read_dimnames
+read_varnames
+read_dims
 read_attributes
 ```
 
